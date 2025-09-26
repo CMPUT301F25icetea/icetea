@@ -1,4 +1,6 @@
 package com.example.icetea;
 
-public class Shape {
+public abstract class Shape {
+    private int x;
+    private int y;
 }
