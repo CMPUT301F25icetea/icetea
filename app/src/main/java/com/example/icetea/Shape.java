@@ -3,5 +3,5 @@ package com.example.icetea;
 public abstract class Shape {
     private int x;
     private int y;
-    String color = "Black";
+    String color = "purple";
 }
