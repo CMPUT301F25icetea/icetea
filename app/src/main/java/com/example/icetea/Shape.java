@@ -1,5 +1,7 @@
 package com.example.icetea;
 
-public class Shape {
-    private String color = "green";
+public abstract class Shape {
+    private int x;
+    private int y;
+	String color = "Blurple";
 }
