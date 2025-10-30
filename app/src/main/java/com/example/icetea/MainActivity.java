@@ -8,6 +8,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.icetea.entrant.EntrantFragment;
 import com.example.icetea.organizer.OrganizerFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,10 +25,22 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .setReorderingAllowed(true)
-                    .replace(R.id.main, OrganizerFragment.class, null)
-                    .commit();
+            String userType = getIntent().getStringExtra("userType");
+            switch (userType) {
+                case "entrant":
+                    getSupportFragmentManager().beginTransaction()
+                            .setReorderingAllowed(true)
+                            .replace(R.id.main, EntrantFragment.class, null)
+                            .commit();
+                    break;
+                case "organizer":
+                    getSupportFragmentManager().beginTransaction()
+                            .setReorderingAllowed(true)
+                            .replace(R.id.main, OrganizerFragment.class, null)
+                            .commit();
+                    break;
+            }
+
         }
 
     }

@@ -24,18 +24,25 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
-        Button organizerButton = findViewById(R.id.button2);
+        Button entrantButton = findViewById(R.id.entrantButton);
+        Button organizerButton = findViewById(R.id.organizerButton);
 
+        entrantButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openMainActivity("entrant");
+            }
+        });
         organizerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openMainActivity();
+                openMainActivity("organizer");
             }
         });
     }
-    private void openMainActivity() {
+    private void openMainActivity(String userType) {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        //intent.putExtra("organizer", userType);
+        intent.putExtra("userType", userType);
         startActivity(intent);
         finish();
     }
