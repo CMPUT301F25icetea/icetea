@@ -1,6 +1,9 @@
 package com.example.icetea;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,5 +23,20 @@ public class LoginActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        Button organizerButton = findViewById(R.id.button2);
+
+        organizerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openMainActivity();
+            }
+        });
+    }
+    private void openMainActivity() {
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        //intent.putExtra("organizer", userType);
+        startActivity(intent);
+        finish();
     }
 }

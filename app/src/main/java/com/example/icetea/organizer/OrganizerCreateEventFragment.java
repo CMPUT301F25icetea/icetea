@@ -39,12 +39,12 @@ public class OrganizerCreateEventFragment extends Fragment {
      * @return A new instance of fragment OrganizerCreateEventFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static OrganizerCreateEventFragment newInstance(String param1, String param2) {
+    public static OrganizerCreateEventFragment newInstance() {
         OrganizerCreateEventFragment fragment = new OrganizerCreateEventFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
+        //Bundle args = new Bundle();
+        //args.putString(ARG_PARAM1, param1);
+        //args.putString(ARG_PARAM2, param2);
+        //fragment.setArguments(args);
         return fragment;
     }
 

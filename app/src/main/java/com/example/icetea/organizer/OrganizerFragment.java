@@ -1,12 +1,16 @@
-package com.example.icetea;
+package com.example.icetea.organizer;
 
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.example.icetea.R;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -54,11 +58,33 @@ public class OrganizerFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_organizer, container, false);
+
+        View view = inflater.inflate(R.layout.fragment_organizer, container, false);
+        BottomNavigationView bottomNav = view.findViewById(R.id.organizer_bottom_nav);
+        loadFragment(OrganizerHomeFragment.newInstance());
+
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) {
+                loadFragment(OrganizerHomeFragment.newInstance());
+                return true;
+            } else if (id == R.id.nav_create_event) {
+                loadFragment(OrganizerCreateEventFragment.newInstance());
+                return true;
+            } else if (id == R.id.nav_profile) {
+                loadFragment(OrganizerProfileFragment.newInstance());
+                return true;
+            }
+            return false;
+        });
+        return view;
+    }
+    private void loadFragment(Fragment fragment) {
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.organizer_fragment_container, fragment);
+        transaction.commit();
     }
 }
