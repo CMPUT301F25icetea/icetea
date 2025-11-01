@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "723821786219",
+    "project_id": "icetea-cmput301",
+    "storage_bucket": "icetea-cmput301.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:723821786219:android:7d259f6e3de616ed53ed2e",
+        "android_client_info": {
+          "package_name": "com.example.icetea"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcvNBVK8KUuAbFP78Wjn-mn8B9NSmH6BI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
