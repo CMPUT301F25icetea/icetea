@@ -1,13 +1,26 @@
+//
+//
+//
+// Will probably be able to share with organizer_profile, dont remake if thats already done, might delete this
+//
+//
+//
 package com.example.icetea.entrant;
 
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
+import com.example.icetea.EntryActivity;
+import com.example.icetea.FBAuthenticator;
 import com.example.icetea.R;
 
 /**
@@ -63,4 +76,19 @@ public class EntrantProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_entrant_profile, container, false);
     }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        //bad code, just making sure it works
+        Button myButton = view.findViewById(R.id.logoutButton);
+        myButton.setOnClickListener(v -> {
+            FBAuthenticator.logout();
+            Intent intent = new Intent(getActivity(), EntryActivity.class);
+            startActivity(intent);
+            getActivity().finish();
+        });
+    }
+
 }

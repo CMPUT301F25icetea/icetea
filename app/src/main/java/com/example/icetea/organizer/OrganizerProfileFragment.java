@@ -1,3 +1,11 @@
+//
+//
+//
+// Will probably be able to share with entrant_profile, dont remake if thats already done, might delete this
+//
+//
+//
+
 package com.example.icetea.organizer;
 
 import android.os.Bundle;

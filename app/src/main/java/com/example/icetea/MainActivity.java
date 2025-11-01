@@ -24,24 +24,24 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        if (savedInstanceState == null) {
-            String userType = getIntent().getStringExtra("userType");
-            switch (userType) {
-                case "entrant":
+//        if (savedInstanceState == null) {
+//            String userType = getIntent().getStringExtra("userType");
+//            switch (userType) {
+//                case "entrant":
                     getSupportFragmentManager().beginTransaction()
                             .setReorderingAllowed(true)
                             .replace(R.id.main, EntrantFragment.class, null)
                             .commit();
-                    break;
-                case "organizer":
-                    getSupportFragmentManager().beginTransaction()
-                            .setReorderingAllowed(true)
-                            .replace(R.id.main, OrganizerFragment.class, null)
-                            .commit();
-                    break;
-            }
-
-        }
+//                    break;
+//                case "organizer":
+//                    getSupportFragmentManager().beginTransaction()
+//                            .setReorderingAllowed(true)
+//                            .replace(R.id.main, OrganizerFragment.class, null)
+//                            .commit();
+//                    break;
+//            }
+//
+//        }
 
     }
 }
