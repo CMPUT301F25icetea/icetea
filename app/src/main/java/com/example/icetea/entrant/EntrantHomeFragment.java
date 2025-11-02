@@ -75,12 +75,21 @@ public class EntrantHomeFragment extends Fragment {
         // Load events from Firestore
         loadEventsFromFirestore();
 
-        // Add click listener
+        // Add click listener to navigate to event details
         listView.setOnItemClickListener((parent, view1, position, id) -> {
             Event selectedEvent = eventsList.get(position);
-            // Handle item click here
-            Toast.makeText(getContext(), "Selected: " + selectedEvent.getName(),
-                    Toast.LENGTH_SHORT).show();
+
+            // Create a bundle with the event ID
+            Bundle bundle = new Bundle();
+            bundle.putString("event_id", selectedEvent.getId());  // Match the ARG_EVENT_ID constant
+            // Navigate to UserEventDetailsFragment
+            UserEventDetailsFragment detailsFragment = new UserEventDetailsFragment();
+            detailsFragment.setArguments(bundle);
+
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.entrant_fragment_container, detailsFragment)
+                    .addToBackStack(null)
+                    .commit();
         });
 
         return view;
