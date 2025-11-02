@@ -14,14 +14,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.icetea.MainActivity;
+import com.example.icetea.util.Callback;
 import com.example.icetea.util.NavigationHelper;
 import com.example.icetea.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link LoginFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class LoginFragment extends Fragment {
     private LoginController controller;
 
@@ -69,15 +65,14 @@ public class LoginFragment extends Fragment {
                 return;
             }
 
-            controller.login(email, password, new LoginController.LoginCallback() {
+            controller.login(email, password, new Callback<Void>() {
                 @Override
-                public void onSuccess() {
+                public void onSuccess(Void result) {
                     NavigationHelper.openActivity(LoginFragment.this, MainActivity.class);
                 }
-
                 @Override
-                public void onFailure(String errorMessage) {
-                    Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
+                public void onFailure(Exception e) {
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         });

@@ -16,14 +16,10 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.example.icetea.MainActivity;
+import com.example.icetea.util.Callback;
 import com.example.icetea.util.NavigationHelper;
 import com.example.icetea.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link SignUpFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class SignUpFragment extends Fragment {
     private SignUpController controller;
 
@@ -78,16 +74,15 @@ public class SignUpFragment extends Fragment {
                 return;
             }
 
-            controller.signUp(email, password, role, new SignUpController.SignUpCallback() {
+            controller.signUp(email, password, role, new Callback<Void>() {
                 @Override
-                public void onSuccess() {
-                    //Toast.makeText(getContext(), "Signed up as " + role, Toast.LENGTH_SHORT).show();
+                public void onSuccess(Void result) {
                     NavigationHelper.openActivity(SignUpFragment.this, MainActivity.class);
                 }
 
                 @Override
-                public void onFailure(String errorMessage) {
-                    Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
+                public void onFailure(Exception e) {
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         });

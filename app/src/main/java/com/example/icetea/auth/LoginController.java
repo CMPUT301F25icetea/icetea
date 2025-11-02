@@ -3,12 +3,10 @@ package com.example.icetea.auth;
 import android.util.Log;
 import android.util.Patterns;
 
+import com.example.icetea.util.Callback;
+
 public class LoginController {
 
-    public interface LoginCallback {
-        void onSuccess();
-        void onFailure(String errorMessage);
-    }
     public String validateInput(String email, String password) {
 
         if (email.isEmpty() || password.isEmpty()) {
@@ -19,17 +17,12 @@ public class LoginController {
         return null;
     }
 
-    public void login(String email, String password, LoginCallback callback) {
+    public void login(String email, String password, Callback<Void> callback) {
         FBAuthenticator.loginUser(email, password, task -> {
             if (task.isSuccessful()) {
-                callback.onSuccess();
+                callback.onSuccess(null);
             } else {
-                String error = "Authentication failed";
-                if (task.getException() != null) {
-                    error = task.getException().getMessage();
-                    Log.e("LoginController", "Login failed", task.getException());
-                }
-                callback.onFailure(error);
+                callback.onFailure(new Exception(task.getException() != null ? task.getException().getMessage() : "Unknown Error : LoginController"));
             }
         });
     }

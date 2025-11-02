@@ -7,8 +7,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class UserDB {
 
-    private final CollectionReference usersCollection;
     private static UserDB instance;
+    private final CollectionReference usersCollection;
 
     private UserDB() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
