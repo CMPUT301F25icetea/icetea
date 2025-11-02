@@ -19,8 +19,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.example.icetea.EntryActivity;
-import com.example.icetea.FBAuthenticator;
+import com.example.icetea.auth.AuthActivity;
+import com.example.icetea.auth.FBAuthenticator;
 import com.example.icetea.R;
 
 /**
@@ -85,7 +85,7 @@ public class EntrantProfileFragment extends Fragment {
         Button myButton = view.findViewById(R.id.logoutButton);
         myButton.setOnClickListener(v -> {
             FBAuthenticator.logout();
-            Intent intent = new Intent(getActivity(), EntryActivity.class);
+            Intent intent = new Intent(getActivity(), AuthActivity.class);
             startActivity(intent);
             getActivity().finish();
         });
