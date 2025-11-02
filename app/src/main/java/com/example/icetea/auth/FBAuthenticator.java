@@ -1,4 +1,4 @@
-package com.example.icetea;
+package com.example.icetea.auth;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.AuthResult;
@@ -6,7 +6,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class FBAuthenticator {
-    private static FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private static final FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     public static void loginUser(String email, String password, OnCompleteListener<AuthResult> listener) {
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(listener);

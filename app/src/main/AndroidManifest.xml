@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Icetea">
         <activity
-            android:name=".EntryActivity"
+            android:name=".auth.AuthActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

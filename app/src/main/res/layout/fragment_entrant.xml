@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".entrant.EntrantFragment">
+    tools:context=".entrant.EntrantContainerFragment">
 
     <FrameLayout
         android:id="@+id/entrant_fragment_container"

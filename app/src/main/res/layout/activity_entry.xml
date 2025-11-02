@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:baselineAligned="false"
-    tools:context=".EntryActivity">
+    tools:context=".auth.AuthActivity">
 
     <FrameLayout
         android:id="@+id/entry_fragment_container"
