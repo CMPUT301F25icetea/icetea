@@ -2,6 +2,8 @@
     <string name="app_name">icetea</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- From main branch -->
     <string name="total_number_of_participant_to_be_admitted">Total Number of participant to be admitted:</string>
     <string name="event_details">EVENT DETAILS</string>
     <string name="loading">Loading...</string>
@@ -9,4 +11,12 @@
     <string name="lottery_selection_process">Lottery Selection Process</string>
     <string name="loading_lottery_details">Loading lottery details...</string>
     <string name="join_waitlist">JOIN WAITLIST</string>
+
+    <!-- From your stashed changes -->
+    <string name="opt_phone">[OPT] Phone</string>
+    <string name="email">Email</string>
+    <string name="last_name">Last Name</string>
+    <string name="first_name">First Name</string>
+    <string name="save_info">Save Info</string>
+    <string name="delete_profile">Delete Profile</string>
 </resources>
