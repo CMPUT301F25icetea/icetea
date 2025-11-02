@@ -2,8 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="backgroundColour">#7E7E7E</color>
+    <color name="backgroundColour">#8A8686</color>
     <color name="themeColour1">#F44336</color>
     <color name="themeColour2">#2196F3</color>
+    <color name="bodyText">#666666</color>
 
 </resources>
