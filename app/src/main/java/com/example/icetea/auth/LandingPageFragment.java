@@ -11,8 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.example.icetea.MainActivity;
 import com.example.icetea.util.NavigationHelper;
 import com.example.icetea.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LandingPageFragment extends Fragment {
 
@@ -38,6 +41,12 @@ public class LandingPageFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (FBAuthenticator.isLoggedIn()) {
+            NavigationHelper.openActivity(this, MainActivity.class);
+            return;
+        }
 
         Button loginButton = view.findViewById(R.id.buttonGoToLogin);
         Button signUpButton = view.findViewById(R.id.buttonGoToSignUp);

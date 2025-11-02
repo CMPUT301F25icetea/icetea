@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.icetea.auth.AuthActivity;
+import com.example.icetea.auth.FBAuthenticator;
 import com.example.icetea.R;
 import com.example.icetea.auth.FBAuthenticator;
 import com.google.firebase.auth.FirebaseAuth;

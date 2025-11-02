@@ -1,19 +1,12 @@
 package com.example.icetea.auth;
 
-import android.util.Log;
 import android.util.Patterns;
 
 import com.example.icetea.models.User;
 import com.example.icetea.models.UserDB;
+import com.example.icetea.util.Callback;
 
 public class SignUpController {
-
-    public interface SignUpCallback {
-        void onSuccess();
-
-        void onFailure(String errorMessage);
-    }
-
     public String validateInput(String email, String password, String role) {
         if (email.isEmpty() || password.isEmpty()) {
             return "Email/Password cannot be empty";
@@ -30,29 +23,21 @@ public class SignUpController {
         return null;
     }
 
-    public void signUp(String email, String password, String role, SignUpCallback callback) {
+    //nested callbacks, mayhaps will edit later
+    public void signUp(String email, String password, String role, Callback<Void> callback) {
         FBAuthenticator.signUpUser(email, password, task -> {
             if (task.isSuccessful()) {
-
                 String id = FBAuthenticator.getCurrentUser().getUid();
                 User newUser = new User(id, email, role);
                 UserDB.getInstance().saveUser(newUser, dbtask -> {
                     if (dbtask.isSuccessful()) {
-                        callback.onSuccess();
+                        callback.onSuccess(null);
                     } else {
-                        callback.onFailure("Passed authentication; Sign up failed from FBdb side");
+                        callback.onFailure(new Exception(dbtask.getException() != null ? dbtask.getException().getMessage() : "Unknown Error : SignUpController : DB FAIL"));
                     }
                 });
-
             } else {
-
-                String error = "Signup failed";
-                if (task.getException() != null) {
-                    error = task.getException().getMessage();
-                    Log.e("SignUpController", "Sign up failed from FBAuth side", task.getException());
-                }
-
-                callback.onFailure(error);
+                callback.onFailure(new Exception(task.getException() != null ? task.getException().getMessage() : "Unknown Error : SignUpController : Auth Fail"));
             }
         });
     }
