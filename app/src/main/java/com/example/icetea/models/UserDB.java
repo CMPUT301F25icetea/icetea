@@ -33,6 +33,4 @@ public class UserDB {
                 .get()
                 .addOnCompleteListener(listener);
     }
-
-
 }

@@ -1,28 +1,55 @@
 package com.example.icetea.event;
 
+import com.google.firebase.Timestamp;
 import androidx.annotation.NonNull;
 
-import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class Event {
 
-    private String id, name, description, organizerId, location;
-    Date startTime, endTime, registrationStartTime, registrationEndTime;
+    private String id;
+    private String name;
+    private String description;
+    private String organizerId;
+    private String location;
+    private Integer capacity;
 
-    List<String> waitingList;
+    private Timestamp startDate;
+    private Timestamp endDate;
+    private Timestamp registrationStartDate;
+    private Timestamp registrationEndDate;
 
-    boolean registrationOpen;
+    private List<String> waitingList;
+    private List<String> attendees;
+
+    private boolean registrationOpen;
+    private String posterUrl;
 
     public Event() {
-        //req
+        // Firestore requires empty constructor
     }
 
-    public Event(String id, String name, String description, String organizerId) {
+    public Event(String id, String organizerId, String name,
+                 String description, String location, Integer capacity,
+                 Timestamp startDate, Timestamp endDate,
+                 Timestamp registrationStartDate, Timestamp registrationEndDate,
+                 String posterUrl,
+                 List<String> waitingList, List<String> attendees) {
         this.id = id;
+        this.organizerId = organizerId;
         this.name = name;
         this.description = description;
-        this.organizerId = organizerId;
+        this.location = location;
+        this.capacity = capacity;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.registrationStartDate = registrationStartDate;
+        this.registrationEndDate = registrationEndDate;
+        this.posterUrl = posterUrl;
+        this.waitingList = waitingList;
+        this.attendees = attendees;
     }
 
     public String getId() {
@@ -57,6 +84,90 @@ public class Event {
         this.organizerId = organizerId;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
+    }
+
+    public Timestamp getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Timestamp startDate) {
+        this.startDate = startDate;
+    }
+
+    public Timestamp getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Timestamp endDate) {
+        this.endDate = endDate;
+    }
+
+    public Timestamp getRegistrationStartDate() {
+        return registrationStartDate;
+    }
+
+    public void setRegistrationStartDate(Timestamp registrationStartDate) {
+        this.registrationStartDate = registrationStartDate;
+    }
+
+    public Timestamp getRegistrationEndDate() {
+        return registrationEndDate;
+    }
+
+    public void setRegistrationEndDate(Timestamp registrationEndDate) {
+        this.registrationEndDate = registrationEndDate;
+    }
+
+    public List<String> getWaitingList() {
+        return waitingList;
+    }
+
+    public void setWaitingList(List<String> waitingList) {
+        this.waitingList = waitingList;
+    }
+
+    public List<String> getAttendees() {
+        return attendees;
+    }
+
+    public void setAttendees(List<String> attendees) {
+        this.attendees = attendees;
+    }
+
+    public boolean isRegistrationOpen() {
+        return registrationOpen;
+    }
+
+    public void setRegistrationOpen(boolean registrationOpen) {
+        this.registrationOpen = registrationOpen;
+    }
+
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+    public static String formatTimestampHumanReadable(Timestamp timestamp) {
+            if (timestamp == null) return "N/A";
+            return new SimpleDateFormat("MMMM d, yyyy", Locale.US).format(timestamp.toDate());
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -64,7 +175,12 @@ public class Event {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", organizerID='" + organizerId + '\'' +
+                ", organizerId='" + organizerId + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", registrationStartDate=" + registrationStartDate +
+                ", registrationEndDate=" + registrationEndDate +
+                ", capacity=" + capacity +
                 '}';
     }
 }

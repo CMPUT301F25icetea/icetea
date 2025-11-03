@@ -1,37 +1,46 @@
 package com.example.icetea.organizer;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CalendarView;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.icetea.R;
+import com.example.icetea.auth.FBAuthenticator;
 import com.example.icetea.event.Event;
 import com.example.icetea.event.EventController;
 import com.example.icetea.util.Callback;
+import com.google.firebase.Timestamp;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Locale;
 
 public class OrganizerCreateEventFragment extends Fragment {
 
     private EventController controller;
+    private EditText inputName, inputDescription, inputStartDate, inputEndDate,
+            inputRegistrationOpen, inputRegistrationEnd, inputCapacity, inputLocation;
 
-    public OrganizerCreateEventFragment() {
-        // Required empty public constructor
-    }
+    public OrganizerCreateEventFragment() { }
 
     public static OrganizerCreateEventFragment newInstance() {
         return new OrganizerCreateEventFragment();
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -45,36 +54,83 @@ public class OrganizerCreateEventFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         controller = new EventController();
-        Button createTestEvent = view.findViewById(R.id.buttonCreateEvent);
 
-        createTestEvent.setOnClickListener(v -> {
-            Event event = new Event("4ZrhNvOe3KtWTy1A4Sda", "newname", "to test", "testID");
-            controller.createEvent(event, new Callback<Void>() {
-                @Override
-                public void onSuccess(Void result) {
-                    Toast.makeText(getContext(), "Event created!", Toast.LENGTH_SHORT).show();
-                }
+        inputName = view.findViewById(R.id.createEventName);
+        inputDescription = view.findViewById(R.id.createEventDescription);
+        inputLocation = view.findViewById(R.id.createEventLocation);
+        inputCapacity = view.findViewById(R.id.createEventCapacity);
+        inputStartDate = view.findViewById(R.id.createEventStartDate);
+        inputEndDate = view.findViewById(R.id.createEventEndDate);
+        inputRegistrationOpen = view.findViewById(R.id.createEventRegistrationStartDate);
+        inputRegistrationEnd = view.findViewById(R.id.createEventRegistrationEndDate);
 
-                @Override
-                public void onFailure(Exception e) {
-                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-//            controller.getEventById("4ZrhNvOe3KtWTy1A4Sda", new Callback<Event>() {
-//                @Override
-//                public void onSuccess(Event result) {
-//                    Toast.makeText(getContext(), result.toString(), Toast.LENGTH_SHORT).show();
-//
-//                }
-//
-//                @Override
-//                public void onFailure(Exception e) {
-//                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-//
-//                }
-//            });
-        });
+        Button buttonCreate = view.findViewById(R.id.buttonCreateEvent);
 
+        inputStartDate.setOnClickListener(v -> {showDatePicker(inputStartDate);});
+        inputEndDate.setOnClickListener(v -> {showDatePicker(inputEndDate);});
+        inputRegistrationOpen.setOnClickListener(v -> {showDatePicker(inputRegistrationOpen);});
+        inputRegistrationEnd.setOnClickListener(v -> {showDatePicker(inputRegistrationEnd);});
+
+        buttonCreate.setOnClickListener(v -> createEvent());
     }
 
+    private void showDatePicker(EditText field) {
+        Calendar calendar = Calendar.getInstance();
+        DatePickerDialog picker = new DatePickerDialog(requireContext(),
+                (view, year, month, day) -> {
+                    calendar.set(year, month, day);
+                    field.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(calendar.getTime()));
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+        picker.getDatePicker().setMinDate(calendar.getTimeInMillis());
+        picker.show();
+    }
+
+
+    private void createEvent() {
+
+        Event newEvent;
+        try {
+            newEvent = controller.createEventFromInput(
+                    inputName.getText().toString(),
+                    inputDescription.getText().toString(),
+                    inputLocation.getText().toString(),
+                    inputCapacity.getText().toString(),
+                    inputStartDate.getText().toString(),
+                    inputEndDate.getText().toString(),
+                    inputRegistrationOpen.getText().toString(),
+                    inputRegistrationEnd.getText().toString()
+            );
+
+        } catch (IllegalArgumentException e) {
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        controller.createEvent(newEvent, new Callback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                Toast.makeText(getContext(), "Created event!", Toast.LENGTH_SHORT).show();
+                clearFields();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(getContext(), "Something went wrong creating event", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void clearFields() {
+        inputName.setText("");
+        inputDescription.setText("");
+        inputStartDate.setText("");
+        inputEndDate.setText("");
+        inputRegistrationOpen.setText("");
+        inputRegistrationEnd.setText("");
+        inputCapacity.setText("");
+        inputLocation.setText("");
+    }
 }

@@ -45,22 +45,22 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
         private final TextView nameText;
         private final TextView descriptionText;
-        private final TextView dateRangeText;
+        private final TextView startDateText;
         private final TextView registrationEndText;
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
             nameText = itemView.findViewById(R.id.eventName);
             descriptionText = itemView.findViewById(R.id.eventDescription);
-            dateRangeText = itemView.findViewById(R.id.eventStartEnd);
+            startDateText = itemView.findViewById(R.id.eventStart);
             registrationEndText = itemView.findViewById(R.id.eventRegistrationEnd);
         }
 
         public void bind(Event event, OnItemClickListener listener) {
             nameText.setText(event.getName());
             descriptionText.setText(event.getDescription());
-            dateRangeText.setText("start - end");//event.getStartDate() + " → " + event.getEndDate());
-            registrationEndText.setText("Register by: end date");// + event.getRegistrationEndDate());
+            startDateText.setText("Event starts on: " + Event.formatTimestampHumanReadable(event.getStartDate()));
+            registrationEndText.setText("Registration closes on: " +Event.formatTimestampHumanReadable(event.getStartDate()));
 
             itemView.setOnClickListener(v -> listener.onItemClick(event));
         }
