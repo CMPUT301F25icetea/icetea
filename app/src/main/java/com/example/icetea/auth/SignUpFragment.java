@@ -66,7 +66,7 @@ public class SignUpFragment extends Fragment {
 
             int selectedId = roleRadioGroup.getCheckedRadioButtonId();
             RadioButton selectedRadioButton = view.findViewById(selectedId);
-            String role = selectedRadioButton.getText().toString();
+            String role = selectedRadioButton.getText().toString().toLowerCase();
 
             String inputErrorMessage = controller.validateInput(email, password, role);
             if (inputErrorMessage != null) {

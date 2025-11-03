@@ -11,13 +11,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.icetea.auth.FBAuthenticator;
 import com.example.icetea.event.Event;
 import com.example.icetea.event.EventAdapter;
 import com.example.icetea.event.EventController;
 import com.example.icetea.R;
 import com.example.icetea.util.Callback;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +27,9 @@ import java.util.List;
 public class OrganizerHomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private EventAdapter adapter;
-    private List<Event> eventList = new ArrayList<>();
+    private final List<Event> eventList = new ArrayList<>();
     private EventController eventController;
+    TextView emptyMessage;
 
     public OrganizerHomeFragment() {
         // Required empty public constructor
@@ -58,27 +61,31 @@ public class OrganizerHomeFragment extends Fragment {
         eventController = new EventController();
 
         adapter = new EventAdapter(eventList, event -> {
-            // NavigationHelper.navigateToEventDetails(this, event);
+            Toast.makeText(getContext(), "*OPENS DETAILS*", Toast.LENGTH_SHORT).show();
         });
-        recyclerView.setAdapter(adapter);
-
-        loadEvents();
+        loadEvents(view);
     }
-    private void loadEvents() {
-
-        String organizerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private void loadEvents(View view) {
+        String organizerId = FBAuthenticator.getCurrentUserId();
 
         eventController.getEventsByOrganizerId(organizerId, new Callback<List<Event>>() {
             @Override
             public void onSuccess(List<Event> events) {
                 eventList.clear();
-                eventList.addAll(events);
-                adapter.notifyDataSetChanged();
+
+                if (events.isEmpty()) {
+                    emptyMessage = view.findViewById(R.id.emptyMessage);
+                    emptyMessage.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
+                } else {
+                    eventList.addAll(events);
+                }
+                recyclerView.setAdapter(adapter);
             }
 
             @Override
             public void onFailure(Exception e) {
-
+                Toast.makeText(getContext(), "Failed to load events: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

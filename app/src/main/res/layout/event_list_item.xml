@@ -37,10 +37,10 @@
 
 
         <TextView
-            android:id="@+id/eventStartEnd"
+            android:id="@+id/eventStart"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Jan 1, 2025 - Jan 5, 2025"
+            android:text="Event starts on: MONTH DAY, YEAR"
             android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -51,12 +51,12 @@
             android:id="@+id/eventRegistrationEnd"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Registration ends: Dec 28, 2024"
+            android:text="Registration closes on: MONTH DAY, YEAR"
             android:textSize="12sp"
             android:textColor="#FF4444"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/eventStartEnd"
+            app:layout_constraintTop_toBottomOf="@id/eventStart"
             android:layout_marginTop="4dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

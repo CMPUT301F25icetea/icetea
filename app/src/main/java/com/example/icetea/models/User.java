@@ -15,10 +15,6 @@ public class User {
         this.role = role;
     }
 
-    public void logout() {
-        FBAuthenticator.logout();
-    }
-
     public String getId() {
         return id;
     }

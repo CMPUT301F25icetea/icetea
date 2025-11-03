@@ -23,6 +23,8 @@ public class FBAuthenticator {
     public static FirebaseUser getCurrentUser() {
         return mAuth.getCurrentUser();
     }
+
+    public static String getCurrentUserId() {return getCurrentUser().getUid();}
     public static boolean isLoggedIn() {
         return FBAuthenticator.getCurrentUser() != null;
     }
