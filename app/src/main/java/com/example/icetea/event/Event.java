@@ -15,6 +15,7 @@ public class Event {
     private String organizerId;
     private String location;
     private Integer capacity;
+    private Integer maxWaitlistSize;
 
     private Timestamp startDate;
     private Timestamp endDate;
@@ -32,7 +33,7 @@ public class Event {
     }
 
     public Event(String id, String organizerId, String name,
-                 String description, String location, Integer capacity,
+                 String description, String location, Integer capacity, Integer maxWaitlistSize,
                  Timestamp startDate, Timestamp endDate,
                  Timestamp registrationStartDate, Timestamp registrationEndDate,
                  String posterUrl,
@@ -43,6 +44,7 @@ public class Event {
         this.description = description;
         this.location = location;
         this.capacity = capacity;
+        this.maxWaitlistSize = maxWaitlistSize;
         this.startDate = startDate;
         this.endDate = endDate;
         this.registrationStartDate = registrationStartDate;
@@ -99,6 +101,11 @@ public class Event {
     public void setCapacity(Integer capacity) {
         this.capacity = capacity;
     }
+
+    public Integer getMaxWaitlistSize() { return maxWaitlistSize;}
+
+    public void setMaxWaitlistSize(Integer maxWaitlistSize)
+    {this.maxWaitlistSize = maxWaitlistSize;}
 
     public Timestamp getStartDate() {
         return startDate;
@@ -181,6 +188,7 @@ public class Event {
                 ", registrationStartDate=" + registrationStartDate +
                 ", registrationEndDate=" + registrationEndDate +
                 ", capacity=" + capacity +
+                ", maxWaitlistSize=" + maxWaitlistSize +
                 '}';
     }
 }

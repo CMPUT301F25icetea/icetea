@@ -114,6 +114,7 @@ public class EventController {
                                       String description,
                                       String location,
                                       String capacityStr,
+                                      String waitlistMaxStr,
                                       String startDateStr,
                                       String endDateStr,
                                       String regStartStr,
@@ -125,6 +126,15 @@ public class EventController {
                 capacity = Integer.parseInt(capacityStr);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("Capacity must be a number");
+            }
+        }
+
+        Integer maxWaitlistSize = null;
+        if (waitlistMaxStr != null && !waitlistMaxStr.isEmpty()) {
+            try {
+                maxWaitlistSize = Integer.parseInt(waitlistMaxStr);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Max size must be a number");
             }
         }
 
@@ -147,6 +157,7 @@ public class EventController {
                 description,
                 location,
                 capacity,
+                maxWaitlistSize,
                 startDate,
                 endDate,
                 regStart,
