@@ -7,6 +7,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -117,6 +118,7 @@ public class WaitlistDB {
                 });
     }
 
+
     /**
      * Get waitlist entry for a specific user-event pair
      *
@@ -191,6 +193,25 @@ public class WaitlistDB {
     }
 
     // ==================== Helper ====================
+    /**
+     *  When the organizer set the capacity limit after the limit has been reached, remove entrants
+     *  based on most recent registration date
+     */
+    public void trimWaitlist(String eventId, int newLimit){
+        waitlistCollection.whereEqualTo("eventId", eventId)
+                .orderBy("joinedAt", Query.Direction.DESCENDING).get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.size() > newLimit) {
+                        int overLimit = snapshot.size() - newLimit;
+                        for (int i = 0; i < overLimit; i++) {
+                            DocumentSnapshot doc = snapshot.getDocuments().get(i);
+                            doc.getReference().delete();
+                        }
+                        eventsCollection.document(eventId)
+                                .update("waitlistCount", newLimit);
+                    }
+                });
+    }
 
     /**
      * Marks a user as selected in the waitlist and optionally updates event stats
