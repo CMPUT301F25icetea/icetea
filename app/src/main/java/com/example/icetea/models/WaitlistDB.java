@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -35,43 +36,62 @@ public class WaitlistDB {
     // ==================== CRUD Operations ====================
 
     /**
-     * Add user to waitlist for an event
+     * Add user to waitlist for an event, check if waitlist capacity is full
      *
      * @param eventId  Event ID
      * @param userId   User ID
      * @param listener Completion listener
      */
     public void addToWaitlist(String eventId, String userId, OnCompleteListener<Void> listener) {
-        // get event document
-        eventsCollection.document(eventId).get().addOnSuccessListener(eventSnap -> {
-            if (!eventSnap.exists()) {
-                listener.onComplete(null);
-                return;
-            }
-
-            Long currentCount = eventSnap.getLong("waitlistCount");
-            Long capacity = eventSnap.getLong("capacity");
-
-            Long count = (currentCount != null) ? currentCount : 0;
-            Long cap = (capacity != null) ? capacity : 0;
-
-
-        String documentId = Waitlist.createDocumentId(eventId, userId);
-        Waitlist waitlist = new Waitlist(eventId, userId);
-
-        waitlistCollection.document(documentId)
-                .set(waitlist)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        // Increment waitlist count in the event
-                        eventsCollection.document(eventId)
-                                .update("waitlistCount", FieldValue.increment(1))
-                                .addOnCompleteListener(listener);
-                    } else {
-                        listener.onComplete(task);
+        // Get event document
+        eventsCollection.document(eventId).get()
+                .addOnSuccessListener(eventSnap -> {
+                    if (!eventSnap.exists()) {
+                        listener.onComplete(null);
+                        return;
                     }
+
+                    Long currentCount = eventSnap.getLong("waitlistCount");
+                    Long capacity = eventSnap.getLong("capacity");
+
+                    long count = (currentCount != null) ? currentCount : 0;
+                    long cap = (capacity != null) ? capacity : 0;
+
+                    if (cap > 0 && count >= cap) {
+                        // Waiting list is full
+                        System.out.println("Waiting list is full for event: " + eventId);
+                        listener.onComplete(null);
+                        return;
+                    }
+
+                    String documentId = Waitlist.createDocumentId(eventId, userId);
+                    Waitlist waitlist = new Waitlist(eventId, userId);
+
+                    waitlistCollection.document(documentId)
+                            .set(waitlist)
+                            .addOnSuccessListener(aVoid -> {
+                                eventsCollection.document(eventId)
+                                        .update("waitlistCount", FieldValue.increment(1))
+                                        .addOnSuccessListener(unused -> {
+                                            System.out.println("User added to waitlist successfully!");
+                                            listener.onComplete(null);
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            System.out.println("Failed to update waitlist count: " + e.getMessage());
+                                            listener.onComplete(null);
+                                        });
+                            })
+                            .addOnFailureListener(e -> {
+                                System.out.println("Failed to add user to waitlist: " + e.getMessage());
+                                listener.onComplete(null);
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    System.out.println("Error loading event: " + e.getMessage());
+                    listener.onComplete(null);
                 });
     }
+
 
     /**
      * Remove a user from the waitlist
