@@ -18,6 +18,8 @@ public class Waitlist {
     public static final String STATUS_WAITING = "waiting";
     public static final String STATUS_SELECTED = "selected";
     public static final String STATUS_CANCELLED = "cancelled";
+    public static final String STATUS_ACCEPTED = "accepted";
+    public static final String STATUS_DECLINED = "declined";
 
     private String eventId;
     private String userId;
@@ -200,6 +202,28 @@ public class Waitlist {
     }
 
     /**
+     * Check if user accepted
+     * @return true if status is "accepted"
+     */
+    public boolean isAccepted() {return STATUS_ACCEPTED.equals(status);}
+
+    /**
+     * Check if user declined
+     * @return true if the status if "declined"
+     */
+    public boolean isDeclined() {return STATUS_DECLINED.equals(status);}
+
+    /**
+     * Mark this entry as accepted
+     */
+    public void markAsAccepted() {this.status = STATUS_ACCEPTED;}
+
+    /**
+     * Mark this entry as declined
+     */
+    public void markAsDeclined() {this.status = STATUS_DECLINED;}
+
+    /**
      * Validate waitlist data
      * @return Error message if invalid, null if valid
      */
@@ -215,11 +239,14 @@ public class Waitlist {
         }
         if (!STATUS_WAITING.equals(status) &&
                 !STATUS_SELECTED.equals(status) &&
-                !STATUS_CANCELLED.equals(status)) {
+                !STATUS_CANCELLED.equals(status) &&
+                !STATUS_ACCEPTED.equals(status) &&
+                !STATUS_DECLINED.equals(status)) {
             return "Invalid status value";
         }
         return null; // Valid
     }
+
 
     // ==================== Object Methods ====================
 

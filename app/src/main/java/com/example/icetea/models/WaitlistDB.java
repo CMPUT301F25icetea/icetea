@@ -192,6 +192,20 @@ public class WaitlistDB {
                 .addOnCompleteListener(listener);
     }
 
+    /**
+     * Get the final list of entrants who enrolled (accepted) for the event
+     *
+     * @param eventId Event ID
+     * @param listener Completion listener for query results
+     */
+    public void getFinalEntrants(String eventId, OnCompleteListener<com.google.firebase.firestore.QuerySnapshot> listener) {
+        waitlistCollection
+                .whereEqualTo("eventId", eventId)
+                .whereEqualTo("status", Waitlist.STATUS_ACCEPTED)
+                .get()
+                .addOnCompleteListener(listener);
+    }
+
     // ==================== Helper ====================
     /**
      *  When the organizer set the capacity limit after the limit has been reached, remove entrants
