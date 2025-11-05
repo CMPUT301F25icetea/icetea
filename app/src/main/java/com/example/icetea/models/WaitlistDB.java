@@ -3,9 +3,7 @@ package com.example.icetea.models;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -44,6 +42,20 @@ public class WaitlistDB {
      * @param listener Completion listener
      */
     public void addToWaitlist(String eventId, String userId, OnCompleteListener<Void> listener) {
+        // get event document
+        eventsCollection.document(eventId).get().addOnSuccessListener(eventSnap -> {
+            if (!eventSnap.exists()) {
+                listener.onComplete(null);
+                return;
+            }
+
+            Long currentCount = eventSnap.getLong("waitlistCount");
+            Long capacity = eventSnap.getLong("capacity");
+
+            Long count = (currentCount != null) ? currentCount : 0;
+            Long cap = (capacity != null) ? capacity : 0;
+
+
         String documentId = Waitlist.createDocumentId(eventId, userId);
         Waitlist waitlist = new Waitlist(eventId, userId);
 
