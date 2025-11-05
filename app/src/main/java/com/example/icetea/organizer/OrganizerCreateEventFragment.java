@@ -35,7 +35,7 @@ public class OrganizerCreateEventFragment extends Fragment {
 
     private EventController controller;
     private EditText inputName, inputDescription, inputStartDate, inputEndDate,
-            inputRegistrationOpen, inputRegistrationEnd, inputCapacity, inputMaxWaitlistSize, inputLocation;
+            inputRegistrationOpen, inputRegistrationEnd, inputCapacity, inputLocation;
 
     public OrganizerCreateEventFragment() { }
 
@@ -59,7 +59,6 @@ public class OrganizerCreateEventFragment extends Fragment {
         inputDescription = view.findViewById(R.id.createEventDescription);
         inputLocation = view.findViewById(R.id.createEventLocation);
         inputCapacity = view.findViewById(R.id.createEventCapacity);
-        inputMaxWaitlistSize = view.findViewById(R.id.createEventMaxWaitlistSize);
         inputStartDate = view.findViewById(R.id.createEventStartDate);
         inputEndDate = view.findViewById(R.id.createEventEndDate);
         inputRegistrationOpen = view.findViewById(R.id.createEventRegistrationStartDate);
@@ -99,7 +98,6 @@ public class OrganizerCreateEventFragment extends Fragment {
                     inputDescription.getText().toString(),
                     inputLocation.getText().toString(),
                     inputCapacity.getText().toString(),
-                    inputMaxWaitlistSize.getText().toString(),
                     inputStartDate.getText().toString(),
                     inputEndDate.getText().toString(),
                     inputRegistrationOpen.getText().toString(),
@@ -133,7 +131,6 @@ public class OrganizerCreateEventFragment extends Fragment {
         inputRegistrationOpen.setText("");
         inputRegistrationEnd.setText("");
         inputCapacity.setText("");
-        inputMaxWaitlistSize.setText("");
         inputLocation.setText("");
     }
 }
