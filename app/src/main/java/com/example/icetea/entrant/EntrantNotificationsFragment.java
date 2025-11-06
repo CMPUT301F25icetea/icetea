@@ -64,9 +64,11 @@ public class EntrantNotificationsFragment extends Fragment {
 
         NotificationDB.getInstance().getNotificationsForUser(userId, task -> {
             progressBar.setVisibility(View.GONE);
+
             if (task.isSuccessful()) {
                 notifications.clear();
                 for (QueryDocumentSnapshot doc : task.getResult()) {
+                    Log.d("FirestoreDebug", "Doc found: " + doc.getData());
                     Notification notif = doc.toObject(Notification.class);
                     notif.setId(doc.getId());
                     notifications.add(notif);
@@ -77,6 +79,8 @@ public class EntrantNotificationsFragment extends Fragment {
                     Toast.makeText(getContext(), "No notifications yet", Toast.LENGTH_SHORT).show();
                 }
             } else {
+                Exception e = task.getException();
+                Log.e("FirestoreDebug", "Error loading notifications", e);
                 Toast.makeText(getContext(), "Failed to load notifications", Toast.LENGTH_SHORT).show();
             }
         });
