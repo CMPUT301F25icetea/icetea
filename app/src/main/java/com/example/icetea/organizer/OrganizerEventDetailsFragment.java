@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.icetea.R;
 
@@ -21,7 +22,6 @@ public class OrganizerEventDetailsFragment extends Fragment {
     private String eventId;
 
     public OrganizerEventDetailsFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -52,6 +52,37 @@ public class OrganizerEventDetailsFragment extends Fragment {
             dateRangeText.setText("Event: " + formatDate(start) + " → " + formatDate(end));
             regRangeText.setText("Registration: " + formatDate(regOpen) + " → " + formatDate(regClose));
         }
+
+        finalEntrantsButton.setOnClickListener(v -> {
+            if (eventId == null) {
+                Toast.makeText(getContext(), "Event ID not found.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            com.example.icetea.models.WaitlistDB.getInstance()
+                    .getFinalEntrants(eventId, task -> {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            if (task.getResult().isEmpty()) {
+                                Toast.makeText(getContext(), "No final entrants yet.", Toast.LENGTH_SHORT).show();
+                            } else {
+                                OrganizerFinalEntrantsFragment fragment = new OrganizerFinalEntrantsFragment();
+
+                                Bundle bundle = new Bundle();
+                                bundle.putString("eventId", eventId);
+                                bundle.putString("name", nameText.getText().toString());
+                                fragment.setArguments(bundle);
+
+                                getParentFragmentManager()
+                                        .beginTransaction()
+                                        .replace(R.id.organizer_fragment_container, fragment)
+                                        .addToBackStack(null)
+                                        .commit();
+                            }
+                        } else {
+                            Toast.makeText(getContext(), "Failed to load entrants.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        });
+
         return view;
     }
 

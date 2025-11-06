@@ -32,7 +32,6 @@ public class OrganizerHomeFragment extends Fragment {
     TextView emptyMessage;
 
     public OrganizerHomeFragment() {
-        // Required empty public constructor
     }
 
     public static OrganizerHomeFragment newInstance() {
