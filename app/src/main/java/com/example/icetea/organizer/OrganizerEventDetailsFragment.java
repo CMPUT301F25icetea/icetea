@@ -1,15 +1,20 @@
 package com.example.icetea.organizer;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
+
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.icetea.R;
+import com.example.icetea.models.OrganizerDrawManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,7 +23,7 @@ import java.util.Locale;
 public class OrganizerEventDetailsFragment extends Fragment {
 
     private TextView nameText, descText, locationText, dateRangeText, regRangeText, capacityText;
-    private Button finalEntrantsButton;
+    private Button finalEntrantsButton, drawAttendeesButton;
     private String eventId;
 
     public OrganizerEventDetailsFragment() {
@@ -35,6 +40,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         regRangeText = view.findViewById(R.id.eventRegText);
         capacityText = view.findViewById(R.id.eventCapacityText);
         finalEntrantsButton = view.findViewById(R.id.buttonFinalEntrants);
+        drawAttendeesButton = view.findViewById(R.id.buttonDrawAttendees);
 
         Bundle args = getArguments();
         if (args != null) {
@@ -81,6 +87,49 @@ public class OrganizerEventDetailsFragment extends Fragment {
                             Toast.makeText(getContext(), "Failed to load entrants.", Toast.LENGTH_SHORT).show();
                         }
                     });
+        });
+
+        drawAttendeesButton.setOnClickListener(v -> {
+            if (eventId == null) {
+                Toast.makeText(getContext(), "Event ID not found.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle("Draw Attendees");
+
+            final EditText input = new EditText(requireContext());
+            input.setInputType(InputType.TYPE_CLASS_NUMBER);
+            input.setHint("Enter the number of attendees to draw");
+            builder.setView(input);
+
+            builder.setPositiveButton("Draw", (dialog, which) -> {
+                String text = input.getText().toString().trim();
+                if (text.isEmpty()) {
+                    Toast.makeText(getContext(), "Please enter a number.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                int drawCount;
+                try {
+                    drawCount = Integer.parseInt(text);
+                } catch (NumberFormatException e) {
+                    Toast.makeText(getContext(), "Invalid number entered.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (drawCount <= 0) {
+                    Toast.makeText(getContext(), "Enter a positive number.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                OrganizerDrawManager drawManager = new OrganizerDrawManager();
+                drawManager.drawEntrants(eventId, drawCount);
+                Toast.makeText(getContext(), "Drawing " + drawCount + " attendees...", Toast.LENGTH_SHORT).show();
+            });
+            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+            builder.show();
+
         });
 
         return view;
