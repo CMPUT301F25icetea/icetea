@@ -42,7 +42,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.tvMessage.setText(notification.getMessage());
 
         // Format timestamp to readable string
-        String time = DateFormat.format("MMM dd, yyyy hh:mm a", new Date(notification.getTimestamp())).toString();
+        String time = DateFormat.format("MMM dd, yyyy hh:mm a", new Date(notification.getTimestampMillis())).toString();
+
         holder.tvTimestamp.setText(time);
 
         // Set icon and text color based on type

@@ -1,21 +1,23 @@
 package com.example.icetea.entrant;
 
+import com.google.firebase.Timestamp;
+
 public class Notification {
     private String id;
-    private String userId;
+    private String userID; // ✅ matches Firestore field exactly
     private String eventId;
     private String eventName;
-    private String type;  // "won", "replacement", "lost"
+    private String type;   // "won", "replacement", "lost"
     private String message;
-    private long timestamp;
+    private Timestamp timestamp; // ✅ Firestore Timestamp object
 
     public Notification() {
         // Required for Firestore
     }
 
-    public Notification(String id, String userId, String eventId, String eventName, String type, String message, long timestamp) {
+    public Notification(String id, String userID, String eventId, String eventName, String type, String message, Timestamp timestamp) {
         this.id = id;
-        this.userId = userId;
+        this.userID = userID;
         this.eventId = eventId;
         this.eventName = eventName;
         this.type = type;
@@ -27,8 +29,8 @@ public class Notification {
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
+    public String getUserID() { return userID; }
+    public void setUserID(String userID) { this.userID = userID; }
 
     public String getEventId() { return eventId; }
     public void setEventId(String eventId) { this.eventId = eventId; }
@@ -42,6 +44,11 @@ public class Notification {
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
 
-    public long getTimestamp() { return timestamp; }
-    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+    public Timestamp getTimestamp() { return timestamp; }
+    public void setTimestamp(Timestamp timestamp) { this.timestamp = timestamp; }
+
+    // Helper to get timestamp as long for adapter
+    public long getTimestampMillis() {
+        return timestamp != null ? timestamp.toDate().getTime() : 0;
+    }
 }

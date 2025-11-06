@@ -1,20 +1,23 @@
 package com.example.icetea.entrant;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.DocumentSnapshot;
 
+/**
+ * Handles all Firestore operations for Notifications
+ */
 public class NotificationDB {
-
     private static NotificationDB instance;
-    private final CollectionReference notificationsCollection;
+    private final CollectionReference notificationCollection;
 
     private NotificationDB() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        notificationsCollection = db.collection("Notification");
+        // ✅ Make sure this matches your Firestore collection name exactly
+        notificationCollection = db.collection("Notification");
     }
 
     public static NotificationDB getInstance() {
@@ -24,34 +27,25 @@ public class NotificationDB {
         return instance;
     }
 
+    /**
+     * Gets notifications for a specific user, ordered by timestamp descending.
+     */
     public void getNotificationsForUser(String userId, OnCompleteListener<QuerySnapshot> listener) {
-        notificationsCollection
-                .whereEqualTo("userID", userId)  // ✅ Matches your Firestore field exactly
+        notificationCollection
+                // ✅ Match field name in Firestore: "userID"
+                .whereEqualTo("userId", userId)
+                // Order by timestamp (latest first)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnCompleteListener(listener);
     }
 
-    public void getNotification(String notificationId, OnCompleteListener<DocumentSnapshot> listener) {
-        notificationsCollection.document(notificationId)
-                .get()
-                .addOnCompleteListener(listener);
-    }
-
-    public void saveNotification(Notification notification, OnCompleteListener<Void> listener) {
-        String id = notification.getId();
-        if (id == null || id.isEmpty()) {
-            id = notificationsCollection.document().getId();
-            notification.setId(id);
-        }
-        notificationsCollection.document(id)
+    /**
+     * Adds a new notification document to Firestore.
+     */
+    public void addNotification(Notification notification, OnCompleteListener<Void> listener) {
+        notificationCollection.document()
                 .set(notification)
-                .addOnCompleteListener(listener);
-    }
-
-    public void deleteNotification(String id, OnCompleteListener<Void> listener) {
-        notificationsCollection.document(id)
-                .delete()
                 .addOnCompleteListener(listener);
     }
 }
