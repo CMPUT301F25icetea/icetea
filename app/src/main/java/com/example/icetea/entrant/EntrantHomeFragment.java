@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ public class EntrantHomeFragment extends Fragment {
     private String mParam2;
 
     private ListView listView;
+    private Button notificationButton;  // *** ADD THIS ***
     private ArrayAdapter<String> adapter;
     private ArrayList<String> eventNamesList;
     private ArrayList<Event> eventsList;
@@ -62,6 +64,16 @@ public class EntrantHomeFragment extends Fragment {
 
         // Initialize ListView
         listView = view.findViewById(R.id.List);
+        notificationButton = view.findViewById(R.id.Notification);  // *** ADD THIS ***
+
+        // *** ADD THIS: Notification button click ***
+        notificationButton.setOnClickListener(v -> {
+            EntrantNotificationsFragment fragment = new EntrantNotificationsFragment();
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.entrant_fragment_container, fragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
 
         // Initialize lists
         eventNamesList = new ArrayList<>();
