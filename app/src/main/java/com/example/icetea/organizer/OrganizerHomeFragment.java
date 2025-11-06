@@ -60,9 +60,8 @@ public class OrganizerHomeFragment extends Fragment {
 
         eventController = new EventController();
 
-        adapter = new EventAdapter(eventList, event -> {
-            recyclerView.setAdapter(adapter);
-        });
+        adapter = new EventAdapter(eventList, event -> openEventDetails(event));
+        recyclerView.setAdapter(adapter);
         loadEvents(view);
     }
     private void loadEvents(View view) {
@@ -98,7 +97,7 @@ public class OrganizerHomeFragment extends Fragment {
         args.putString("name", event.getName());
         args.putString("description", event.getDescription());
         args.putString("location", event.getLocation());
-        args.putInt("capacity", event.getCapacity());
+        args.putInt("capacity", event.getCapacity() != null ? event.getCapacity() : 0);
 
         if (event.getStartDate() != null) {
             args.putLong("startDate", event.getStartDate().toDate().getTime());
@@ -115,7 +114,7 @@ public class OrganizerHomeFragment extends Fragment {
 
         fragment.setArguments(args);
 
-        requireActivity().getSupportFragmentManager()
+        getParentFragmentManager()
                 .beginTransaction()
                 .replace(R.id.organizer_fragment_container, fragment)
                 .addToBackStack(null)
