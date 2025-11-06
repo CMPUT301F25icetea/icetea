@@ -32,7 +32,6 @@ public class OrganizerHomeFragment extends Fragment {
     TextView emptyMessage;
 
     public OrganizerHomeFragment() {
-        // Required empty public constructor
     }
 
     public static OrganizerHomeFragment newInstance() {
@@ -60,9 +59,8 @@ public class OrganizerHomeFragment extends Fragment {
 
         eventController = new EventController();
 
-        adapter = new EventAdapter(eventList, event -> {
-            Toast.makeText(getContext(), "*OPENS DETAILS*", Toast.LENGTH_SHORT).show();
-        });
+        adapter = new EventAdapter(eventList, event -> openEventDetails(event));
+        recyclerView.setAdapter(adapter);
         loadEvents(view);
     }
     private void loadEvents(View view) {
@@ -88,5 +86,37 @@ public class OrganizerHomeFragment extends Fragment {
                 Toast.makeText(getContext(), "Failed to load events: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void openEventDetails(Event event) {
+        OrganizerEventDetailsFragment fragment = new OrganizerEventDetailsFragment();
+
+        Bundle args  = new Bundle();
+        args.putString("eventId", event.getId());
+        args.putString("name", event.getName());
+        args.putString("description", event.getDescription());
+        args.putString("location", event.getLocation());
+        args.putInt("capacity", event.getCapacity() != null ? event.getCapacity() : 0);
+
+        if (event.getStartDate() != null) {
+            args.putLong("startDate", event.getStartDate().toDate().getTime());
+        }
+        if (event.getEndDate() != null) {
+            args.putLong("endDate", event.getEndDate().toDate().getTime());
+        }
+        if (event.getRegistrationStartDate() != null) {
+            args.putLong("regOpen", event.getRegistrationStartDate().toDate().getTime());
+        }
+        if (event.getRegistrationEndDate() != null) {
+            args.putLong("regClose", event.getRegistrationEndDate().toDate().getTime());
+        }
+
+        fragment.setArguments(args);
+
+        getParentFragmentManager()
+                .beginTransaction()
+                .replace(R.id.organizer_fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 }
