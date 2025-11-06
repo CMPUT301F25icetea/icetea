@@ -1,4 +1,4 @@
-package com.example.icetea.models;
+package com.example.icetea.organizer;
 
 import androidx.annotation.NonNull;
 

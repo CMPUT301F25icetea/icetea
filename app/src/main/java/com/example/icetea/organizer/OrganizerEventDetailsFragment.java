@@ -14,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.icetea.R;
-import com.example.icetea.models.OrganizerDrawManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -126,6 +125,19 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 OrganizerDrawManager drawManager = new OrganizerDrawManager();
                 drawManager.drawEntrants(eventId, drawCount);
                 Toast.makeText(getContext(), "Drawing " + drawCount + " attendees...", Toast.LENGTH_SHORT).show();
+
+                OrganizerEntrantWinnersFragment fragment = new OrganizerEntrantWinnersFragment();
+
+                Bundle bundle = new Bundle();
+                bundle.putString("eventId", eventId);
+                fragment.setArguments(bundle);
+
+                getParentFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.organizer_fragment_container, fragment)
+                        .addToBackStack(null)
+                        .commit();
+
             });
             builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
             builder.show();
