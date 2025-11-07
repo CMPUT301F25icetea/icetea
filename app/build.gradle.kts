@@ -57,4 +57,13 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.google.zxing:core:3.5.2")
+    // Unit test
+    testImplementation("junit:junit:4.13.2")
+// Mockito (including inline to mock static methods)
+    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation("org.mockito:mockito-inline:5.5.0")
+// Robolectric
+    testImplementation("org.robolectric:robolectric:4.10.3")
+// AndroidX test core (for ApplicationProvider if needed)
+    testImplementation("androidx.test:core:1.5.0")
 }
