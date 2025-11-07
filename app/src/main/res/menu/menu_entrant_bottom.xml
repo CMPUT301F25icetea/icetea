@@ -2,17 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_entrant_home"
-        android:title="Home"/>
+        android:title="Home"
+        android:icon="@drawable/home_icon"/>
     <item
         android:id="@+id/nav_entrant_history"
-        android:title="History" />
+        android:title="History"
+        android:icon="@drawable/history_icon"/>
     <item
         android:id="@+id/nav_entrant_scanner"
-        android:title="Scanner" />
+        android:title="Scanner"
+        android:icon="@drawable/scanner_icon"/>
     <item
         android:id="@+id/nav_entrant_profile"
-        android:title="Profile" />
+        android:title="Profile"
+        android:icon="@drawable/profile_icon"/>
     <item
         android:id="@+id/nav_entrant_settings"
-        android:title="Settings" />
+        android:title="Settings"
+        android:icon="@drawable/settings_icon"/>
 </menu>

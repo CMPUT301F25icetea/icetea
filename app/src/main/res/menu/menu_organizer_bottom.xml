@@ -2,11 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_organizer_home"
-        android:title="Home"/>
+        android:title="Home"
+        android:icon="@drawable/home_icon"/>
+
     <item
         android:id="@+id/nav_organizer_create_event"
-        android:title="Create" />
+        android:title="Create"
+        android:icon="@drawable/create_icon"/>
+
     <item
         android:id="@+id/nav_organizer_profile"
-        android:title="Profile" />
+        android:title="Profile"
+        android:icon="@drawable/profile_icon"/>
+
 </menu>

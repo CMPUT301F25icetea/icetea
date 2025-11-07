@@ -16,7 +16,14 @@ public class FBAuthenticator {
     public static void signUpUser(String email, String password, OnCompleteListener<AuthResult> listener) {
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(listener);
     }
+    public static void updateUser(String email, OnCompleteListener<Void> listener) {
+        //firebase recommends verifyBeforeUpdateEmail - sends a verification email
+        getCurrentUser().verifyBeforeUpdateEmail(email).addOnCompleteListener(listener);
+    }
 
+    public static void deleteUser(OnCompleteListener<Void> listener) {
+        getCurrentUser().delete().addOnCompleteListener(listener);
+    }
     public static void logout() {
         mAuth.signOut();
     }

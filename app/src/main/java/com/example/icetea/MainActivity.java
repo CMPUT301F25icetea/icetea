@@ -16,6 +16,7 @@ import com.example.icetea.entrant.EntrantContainerFragment;
 import com.example.icetea.models.User;
 import com.example.icetea.models.UserDB;
 import com.example.icetea.organizer.OrganizerContainerFragment;
+import com.example.icetea.util.Callback;
 import com.example.icetea.util.NavigationHelper;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -33,33 +34,30 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        UserDB.getInstance().getUser(FBAuthenticator.getCurrentUserId(), task -> {
-            if (task.isSuccessful()) {
-
-                DocumentSnapshot document = task.getResult();
-                if (document != null && document.exists()) {
-                    String role = document.getString("role");
-
-                    assert role != null;
-
-                    if (role.equals("entrant")) {
-                        NavigationHelper.replaceFragment(
-                                getSupportFragmentManager(),
-                                R.id.main,
-                                EntrantContainerFragment.newInstance(),
-                                false);
-                    } else if (role.equals("organizer")) {
-
-                        NavigationHelper.replaceFragment(
-                                getSupportFragmentManager(),
-                                R.id.main,
-                                OrganizerContainerFragment.newInstance(),
-                                false);
-                    }
-
+        UserDB.getInstance().getUserTopRole(FBAuthenticator.getCurrentUserId(), new Callback<String>() {
+            @Override
+            public void onSuccess(String role) {
+                if ("entrant".equals(role)) {
+                    NavigationHelper.replaceFragment(
+                            getSupportFragmentManager(),
+                            R.id.main,
+                            EntrantContainerFragment.newInstance(),
+                            false
+                    );
+                } else if ("organizer".equals(role)) {
+                    NavigationHelper.replaceFragment(
+                            getSupportFragmentManager(),
+                            R.id.main,
+                            OrganizerContainerFragment.newInstance(),
+                            false
+                    );
                 } else {
-                    Toast.makeText(this, "No logged in user found", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Error retrieving role: " + role, Toast.LENGTH_SHORT).show();
                 }
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(MainActivity.this, "Failed to get user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

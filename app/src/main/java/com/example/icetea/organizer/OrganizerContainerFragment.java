@@ -8,7 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.icetea.entrant.ProfileFragment;
+import com.example.icetea.common.ProfileFragment;
 import com.example.icetea.util.NavigationHelper;
 import com.example.icetea.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
