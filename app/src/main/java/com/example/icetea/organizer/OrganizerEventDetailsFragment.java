@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.LinearLayout;
 
+import com.example.icetea.util.NavigationHelper;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -65,7 +66,6 @@ public class OrganizerEventDetailsFragment extends Fragment {
         finalEntrantsButton = view.findViewById(R.id.buttonFinalEntrants);
         drawAttendeesButton = view.findViewById(R.id.buttonDrawAttendees);
         waitingListButton = view.findViewById(R.id.buttonWaitingList);
-        waitingListContainer = view.findViewById(R.id.waitingListContainer);
 
         qrImageView = view.findViewById(R.id.qrImageView);
 
@@ -86,7 +86,6 @@ public class OrganizerEventDetailsFragment extends Fragment {
             dateRangeText.setText("Event: " + formatDate(start) + " → " + formatDate(end));
             regRangeText.setText("Registration: " + formatDate(regOpen) + " → " + formatDate(regClose));
         }
-
 
         QRCode.generateQRCode(eventId, qrImageView);
 
@@ -185,122 +184,12 @@ public class OrganizerEventDetailsFragment extends Fragment {
             });
             builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
             builder.show();
-
-            waitingListButton.setOnClickListener(btn -> {
-                if (waitingListContainer.getVisibility() == View.GONE) {
-                    waitingListContainer.setVisibility(View.VISIBLE);
-                } else {
-                    waitingListContainer.setVisibility(View.GONE);
-                }
-            });
-
-
         });
 
+        waitingListButton.setOnClickListener(btn -> {
+            NavigationHelper.replaceFragment(getParentFragmentManager(), R.id.organizer_fragment_container, OrganizerWaitingListFragment.newInstance(eventId), true);
+        });
         return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        startWaitlistListener();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (waitlistRegistration != null) {
-            waitlistRegistration.remove();
-            waitlistRegistration = null;
-        }
-    }
-
-    // Listen to waitlist entries for this event
-    private void startWaitlistListener() {
-        if (eventId == null) return;
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        // stop any old listener first
-        if (waitlistRegistration != null) {
-            waitlistRegistration.remove();
-        }
-
-        waitlistRegistration = db.collection("waitlist")
-                .whereEqualTo("eventId", eventId)
-                .orderBy("joinedAt")
-                .addSnapshotListener((snap, e) -> {
-                    if (e != null || snap == null) return;
-
-                    waitingListContainer.removeAllViews();
-
-                    if (snap.isEmpty()) {
-                        addTextRow("No entrants on the waiting list yet.");
-                        return;
-                    }
-
-                    for (QueryDocumentSnapshot doc : snap) {
-                        String userId = doc.getString("userId");
-                        Long joinedAt = doc.getLong("joinedAt");
-                        addWaitlistRow(userId, joinedAt);
-                    }
-                });
-    }
-
-
-    private void addTextRow(String text) {
-        TextView tv = new TextView(requireContext());
-        tv.setText(text);
-        waitingListContainer.addView(tv);
-    }
-
-    private void addWaitlistRow(String userId, Long joinedAt) {
-        LinearLayout row = new LinearLayout(requireContext());
-        row.setOrientation(LinearLayout.VERTICAL);
-        row.setPadding(8, 8, 8, 8);
-
-        TextView nameView = new TextView(requireContext());
-        nameView.setText("Loading name...");
-        nameView.setTypeface(null, android.graphics.Typeface.BOLD);
-
-        TextView timeView = new TextView(requireContext());
-        String timeText = (joinedAt != null)
-                ? "Joined: " + formatDateTime(joinedAt)
-                : "Joined: N/A";
-        timeView.setText(timeText);
-
-        TextView locationView = new TextView(requireContext());
-
-        row.addView(nameView);
-        row.addView(timeView);
-        row.addView(locationView);
-
-        waitingListContainer.addView(row);
-
-        if (userId == null) {
-            nameView.setText("Unknown user");
-            return;
-        }
-
-        FirebaseFirestore.getInstance()
-                .collection("users")
-                .document(userId)
-                .get()
-                .addOnSuccessListener(doc -> {
-                    if (!doc.exists()) {
-                        nameView.setText("Unknown user");
-                        return;
-                    }
-
-                    String name = doc.getString("name");
-                    String location = doc.getString("location");
-
-                    if (name == null || name.isEmpty()) name = "Unknown user";
-                    nameView.setText(name);
-                    if (location != null && !location.isEmpty())
-                        locationView.setText(location);
-                })
-                .addOnFailureListener(e -> nameView.setText("Unknown user"));
     }
 
     private String formatDateTime(long millis) {
