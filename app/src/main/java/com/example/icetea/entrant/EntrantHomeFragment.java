@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.icetea.R;
+import com.example.icetea.models.Event; // ✅ connected to shared model
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -36,7 +37,6 @@ public class EntrantHomeFragment extends Fragment {
     private FirebaseFirestore db;
 
     public EntrantHomeFragment() {
-        // Required empty public constructor
     }
 
     public static EntrantHomeFragment newInstance() {
@@ -63,7 +63,6 @@ public class EntrantHomeFragment extends Fragment {
         listView = view.findViewById(R.id.List);
         notificationButton = view.findViewById(R.id.Notification);
 
-        // Handle Notification button click
         notificationButton.setOnClickListener(v -> {
             EntrantNotificationsFragment fragment = new EntrantNotificationsFragment();
             getParentFragmentManager().beginTransaction()
@@ -72,7 +71,6 @@ public class EntrantHomeFragment extends Fragment {
                     .commit();
         });
 
-        // Initialize lists
         eventNamesList = new ArrayList<>();
         eventsList = new ArrayList<>();
 
@@ -82,7 +80,6 @@ public class EntrantHomeFragment extends Fragment {
 
         loadEventsFromFirestore();
 
-        // Open event details when clicked
         listView.setOnItemClickListener((parent, view1, position, id) -> {
             Event selectedEvent = eventsList.get(position);
 
@@ -103,7 +100,7 @@ public class EntrantHomeFragment extends Fragment {
 
     private void loadEventsFromFirestore() {
         db.collection("events")
-                .get() // 🔹 removed .whereEqualTo("isActive", true)
+                .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         eventNamesList.clear();
@@ -135,4 +132,3 @@ public class EntrantHomeFragment extends Fragment {
                 });
     }
 }
-
