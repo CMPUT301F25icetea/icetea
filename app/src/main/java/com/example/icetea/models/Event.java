@@ -11,7 +11,8 @@ import java.util.Locale;
  * - id: String (auto-generated unique identifier)
  * - name: String (event name)
  * - description: String (event description)
- * - totalParticipants: int (max number of participants)
+ * - capacity: int (maximum number of participants)
+ * - totalParticipants: int (max number of participants) - DEPRECATED, use capacity
  * - waitlistCount: int (current number in waitlist)
  * - lotteryProcess: String (lottery selection description)
  * - organizerId: String (creator's user ID)
@@ -19,32 +20,19 @@ import java.util.Locale;
  * - isActive: boolean (event status)
  */
 public class Event {
-
-    // ==================== Fields ====================
-
-    /** The unique identifier for the event (matches Firestore document ID). */
     private String id;
-    /** The public name of the event. */
     private String name;
-    /** A detailed description of the event. */
     private String description;
-    /** The maximum number of participants allowed in the event. */
     private int totalParticipants;
-    /** The current number of users on the waitlist. */
+    private Integer capacity;  // ADDED: Firestore uses 'capacity' field
     private int waitlistCount;
-    /** A text description of how participants will be selected. */
     private String lotteryProcess;
-    /** The user ID (UID) of the event's creator/organizer. */
     private String organizerId;
 
-    /** The timestamp when the event was created in the database. */
     // 🔥 FIX: Type changed from 'long' to 'Date'
     private Date createdAt;
 
-    /** Flag indicating if the event is currently active or closed. */
     private boolean isActive;
-
-    // ==================== Constructors ====================
 
     /**
      * Required empty constructor for Firestore deserialization
@@ -69,6 +57,7 @@ public class Event {
         this.name = name;
         this.description = description;
         this.totalParticipants = totalParticipants;
+        this.capacity = totalParticipants;  // ADDED: Set capacity same as totalParticipants
         this.waitlistCount = 0;
         this.lotteryProcess = lotteryProcess;
         this.organizerId = organizerId;
@@ -81,130 +70,85 @@ public class Event {
 
     // ==================== Getters and Setters ====================
 
-    /**
-     * @return The unique event ID.
-     */
     public String getId() {
         return id;
     }
 
-    /**
-     * @param id The unique event ID (typically set by Firestore).
-     */
     public void setId(String id) {
         this.id = id;
     }
 
-    /**
-     * @return The public name of the event.
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * @param name The public name of the event.
-     */
     public void setName(String name) {
         this.name = name;
     }
 
-    /**
-     * @return The detailed description of the event.
-     */
     public String getDescription() {
         return description;
     }
 
-    /**
-     * @param description The detailed description of the event.
-     */
     public void setDescription(String description) {
         this.description = description;
     }
 
-    /**
-     * @return The maximum number of participants allowed.
-     */
     public int getTotalParticipants() {
         return totalParticipants;
     }
 
-    /**
-     * @param totalParticipants The maximum number of participants allowed.
-     */
     public void setTotalParticipants(int totalParticipants) {
         this.totalParticipants = totalParticipants;
     }
 
-    /**
-     * @return The current number of users on the waitlist.
-     */
+    // ADDED: Capacity getter and setter
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
+    }
+
     public int getWaitlistCount() {
         return waitlistCount;
     }
 
-    /**
-     * @param waitlistCount The current number of users on the waitlist.
-     */
     public void setWaitlistCount(int waitlistCount) {
         this.waitlistCount = waitlistCount;
     }
 
-    /**
-     * @return The text description of the lottery process.
-     */
     public String getLotteryProcess() {
         return lotteryProcess;
     }
 
-    /**
-     * @param lotteryProcess The text description of the lottery process.
-     */
     public void setLotteryProcess(String lotteryProcess) {
         this.lotteryProcess = lotteryProcess;
     }
 
-    /**
-     * @return The user ID of the event organizer.
-     */
     public String getOrganizerId() {
         return organizerId;
     }
 
-    /**
-     * @param organizerId The user ID of the event organizer.
-     */
     public void setOrganizerId(String organizerId) {
         this.organizerId = organizerId;
     }
 
-    /**
-     * @return The creation timestamp of the event.
-     */
     // 🔥 FIX: Getter updated to return Date
     public Date getCreatedAt() {
         return createdAt;
     }
 
-    /**
-     * @param createdAt The creation timestamp of the event.
-     */
     // 🔥 FIX: Setter updated to accept Date
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
-    /**
-     * @return True if the event is active, false otherwise.
-     */
     public boolean isActive() {
         return isActive;
     }
 
-    /**
-     * @param active Set to true to make the event active, false to close it.
-     */
     public void setActive(boolean active) {
         isActive = active;
     }
@@ -240,7 +184,9 @@ public class Event {
      * @return true if waitlist count equals or exceeds total participants
      */
     public boolean isWaitlistFull() {
-        return waitlistCount >= totalParticipants;
+        // UPDATED: Use capacity if available, otherwise fall back to totalParticipants
+        int maxCapacity = (capacity > 0) ? capacity : totalParticipants;
+        return waitlistCount >= maxCapacity;
     }
 
     /**
@@ -248,7 +194,9 @@ public class Event {
      * @return Number of remaining spots (0 if full or negative if over capacity)
      */
     public int getRemainingSpots() {
-        return totalParticipants - waitlistCount;
+        // UPDATED: Use capacity if available, otherwise fall back to totalParticipants
+        int maxCapacity = (capacity > 0) ? capacity : totalParticipants;
+        return maxCapacity - waitlistCount;
     }
 
     /**
@@ -256,8 +204,10 @@ public class Event {
      * @return Percentage (0-100) of how full the waitlist is
      */
     public int getWaitlistFillPercentage() {
-        if (totalParticipants == 0) return 0;
-        return (int) ((waitlistCount * 100.0) / totalParticipants);
+        // UPDATED: Use capacity if available, otherwise fall back to totalParticipants
+        int maxCapacity = (capacity > 0) ? capacity : totalParticipants;
+        if (maxCapacity == 0) return 0;
+        return (int) ((waitlistCount * 100.0) / maxCapacity);
     }
 
     /**
@@ -279,8 +229,10 @@ public class Event {
         if (description == null || description.trim().isEmpty()) {
             return "Event description is required";
         }
-        if (totalParticipants <= 0) {
-            return "Total participants must be greater than 0";
+        // UPDATED: Check capacity first, then totalParticipants
+        int maxCapacity = (capacity > 0) ? capacity : totalParticipants;
+        if (maxCapacity <= 0) {
+            return "Event capacity must be greater than 0";
         }
         if (lotteryProcess == null || lotteryProcess.trim().isEmpty()) {
             return "Lottery process description is required";
@@ -293,16 +245,12 @@ public class Event {
 
     // ==================== Object Methods ====================
 
-    /**
-     * Provides a concise string representation of the event, useful for logging.
-     *
-     * @return A string summary of the event.
-     */
     @Override
     public String toString() {
         return "Event{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
+                ", capacity=" + capacity +
                 ", totalParticipants=" + totalParticipants +
                 ", waitlistCount=" + waitlistCount +
                 ", isActive=" + isActive +
@@ -310,29 +258,18 @@ public class Event {
                 '}';
     }
 
-    /**
-     * Compares this event to another object for equality.
-     * Two events are considered equal if their {@link #id} fields are non-null and identical.
-     *
-     * @param o The object to compare with.
-     * @return True if the objects are the same event (based on ID), false otherwise.
-     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Event event = (Event) o;
-        // Two events are equal if their IDs are non-null and equal
         return id != null && id.equals(event.id);
     }
 
-    /**
-     * Generates a hash code for the event, based primarily on its unique {@link #id}.
-     *
-     * @return The hash code, or 0 if the id is null.
-     */
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
     }
+
+
 }

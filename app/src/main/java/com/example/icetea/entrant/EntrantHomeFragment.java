@@ -29,7 +29,7 @@ public class EntrantHomeFragment extends Fragment {
     private String mParam2;
 
     private ListView listView;
-    private Button notificationButton;  // *** ADD THIS ***
+    private Button notificationButton;
     private ArrayAdapter<String> adapter;
     private ArrayList<String> eventNamesList;
     private ArrayList<Event> eventsList;
@@ -40,8 +40,7 @@ public class EntrantHomeFragment extends Fragment {
     }
 
     public static EntrantHomeFragment newInstance() {
-        EntrantHomeFragment fragment = new EntrantHomeFragment();
-        return fragment;
+        return new EntrantHomeFragment();
     }
 
     @Override
@@ -52,21 +51,19 @@ public class EntrantHomeFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        // Initialize Firestore
         db = FirebaseFirestore.getInstance();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
         View view = inflater.inflate(R.layout.fragment_entrant_home, container, false);
 
-        // Initialize ListView
         listView = view.findViewById(R.id.List);
-        notificationButton = view.findViewById(R.id.Notification);  // *** ADD THIS ***
+        notificationButton = view.findViewById(R.id.Notification);
 
-        // *** ADD THIS: Notification button click ***
+        // Handle Notification button click
         notificationButton.setOnClickListener(v -> {
             EntrantNotificationsFragment fragment = new EntrantNotificationsFragment();
             getParentFragmentManager().beginTransaction()
@@ -79,22 +76,19 @@ public class EntrantHomeFragment extends Fragment {
         eventNamesList = new ArrayList<>();
         eventsList = new ArrayList<>();
 
-        // Create adapter and set it to ListView
         adapter = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_list_item_1, eventNamesList);
         listView.setAdapter(adapter);
 
-        // Load events from Firestore
         loadEventsFromFirestore();
 
-        // Add click listener to navigate to event details
+        // Open event details when clicked
         listView.setOnItemClickListener((parent, view1, position, id) -> {
             Event selectedEvent = eventsList.get(position);
 
-            // Create a bundle with the event ID
             Bundle bundle = new Bundle();
-            bundle.putString("event_id", selectedEvent.getId());  // Match the ARG_EVENT_ID constant
-            // Navigate to UserEventDetailsFragment
+            bundle.putString("event_id", selectedEvent.getId());
+
             UserEventDetailsFragment detailsFragment = new UserEventDetailsFragment();
             detailsFragment.setArguments(bundle);
 
@@ -109,8 +103,7 @@ public class EntrantHomeFragment extends Fragment {
 
     private void loadEventsFromFirestore() {
         db.collection("events")
-                .whereEqualTo("isActive", true)  // Optional: only get active events
-                .get()
+                .get() // 🔹 removed .whereEqualTo("isActive", true)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         eventNamesList.clear();
@@ -121,23 +114,25 @@ public class EntrantHomeFragment extends Fragment {
                             event.setId(document.getId());
 
                             eventsList.add(event);
-                            // Display event name and description in the list
-                            eventNamesList.add(event.getName() + "\n" + event.getDescription());
+
+                            String name = event.getName() != null ? event.getName() : "Unnamed Event";
+                            String description = event.getDescription() != null ? event.getDescription() : "No description";
+
+                            eventNamesList.add(name + "\n" + description);
                         }
 
                         adapter.notifyDataSetChanged();
 
                         if (eventsList.isEmpty()) {
-                            Toast.makeText(getContext(), "No events found",
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "No events found", Toast.LENGTH_SHORT).show();
                         }
 
                         Log.d(TAG, "Events loaded: " + eventsList.size());
                     } else {
                         Log.e(TAG, "Error getting events: ", task.getException());
-                        Toast.makeText(getContext(), "Error loading events",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Error loading events", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 }
+
