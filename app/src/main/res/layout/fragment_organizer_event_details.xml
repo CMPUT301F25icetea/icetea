@@ -59,6 +59,20 @@
             android:textSize="15sp"
             android:layout_marginBottom="16dp" />
 
+        <ImageView
+            android:id="@+id/qrImageView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="qr image"/>
+
+        <TextView
+            android:id="@+id/qrImageText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Tap image to download QR code"/>
+
+
         <Button
             android:id="@+id/buttonFinalEntrants"
             android:layout_width="match_parent"
