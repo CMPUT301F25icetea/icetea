@@ -1,21 +1,33 @@
 package com.example.icetea.organizer;
 
 import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.icetea.R;
 import com.example.icetea.models.WaitlistDB;
+import com.example.icetea.util.Callback;
+import com.example.icetea.util.QRCode;
 
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -24,6 +36,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
     private TextView nameText, descText, locationText, dateRangeText, regRangeText, capacityText;
     private Button finalEntrantsButton, drawAttendeesButton;
+    private ImageView qrImageView;
     private String eventId, eventName;
 
     public OrganizerEventDetailsFragment() {
@@ -41,6 +54,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         capacityText = view.findViewById(R.id.eventCapacityText);
         finalEntrantsButton = view.findViewById(R.id.buttonFinalEntrants);
         drawAttendeesButton = view.findViewById(R.id.buttonDrawAttendees);
+        qrImageView = view.findViewById(R.id.qrImageView);
 
         Bundle args = getArguments();
         if (args != null) {
@@ -60,6 +74,23 @@ public class OrganizerEventDetailsFragment extends Fragment {
             regRangeText.setText("Registration: " + formatDate(regOpen) + " → " + formatDate(regClose));
         }
 
+
+        QRCode.generateQRCode(eventId, qrImageView);
+
+        qrImageView.setOnClickListener(v -> {QRCode.downloadQrCode(getContext(), qrImageView, new Callback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                Toast.makeText(getContext(), "QR code saved to photos!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+
+            }
+        });
+        });
+
         finalEntrantsButton.setOnClickListener(v -> {
             if (eventId == null) {
                 Toast.makeText(getContext(), "Event ID not found.", Toast.LENGTH_SHORT).show();
@@ -72,7 +103,6 @@ public class OrganizerEventDetailsFragment extends Fragment {
                                 Toast.makeText(getContext(), "No final entrants yet.", Toast.LENGTH_SHORT).show();
                             } else {
                                 OrganizerFinalEntrantsFragment fragment = new OrganizerFinalEntrantsFragment();
-
                                 Bundle bundle = new Bundle();
                                 bundle.putString("eventId", eventId);
                                 bundle.putString("name", nameText.getText().toString());
@@ -139,7 +169,6 @@ public class OrganizerEventDetailsFragment extends Fragment {
                         .replace(R.id.organizer_fragment_container, fragment)
                         .addToBackStack(null)
                         .commit();
-
             });
             builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
             builder.show();
