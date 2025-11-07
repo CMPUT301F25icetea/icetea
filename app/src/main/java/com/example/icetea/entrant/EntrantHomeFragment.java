@@ -20,29 +20,73 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 
+/**
+ * Fragment that serves as the home screen for entrants in the application.
+ * Displays a list of available events retrieved from Firestore and provides
+ * navigation to event details and notifications.
+ *
+ * <p>This fragment shows all events in a ListView where each item displays
+ * the event name and description. Users can tap on an event to view its details
+ * or access the notifications screen via a dedicated button.</p>
+ */
 public class EntrantHomeFragment extends Fragment {
 
+    /** Tag for logging purposes */
     private static final String TAG = "EntrantHomeFragment";
+
+    /** Argument key for first parameter (currently unused) */
     private static final String ARG_PARAM1 = "param1";
+
+    /** Argument key for second parameter (currently unused) */
     private static final String ARG_PARAM2 = "param2";
 
+    /** First parameter value (currently unused) */
     private String mParam1;
+
+    /** Second parameter value (currently unused) */
     private String mParam2;
 
-    private ListView listView;
-    private Button notificationButton;
-    private ArrayAdapter<String> adapter;
-    private ArrayList<String> eventNamesList;
-    private ArrayList<Event> eventsList;
-    private FirebaseFirestore db;
+    /** ListView displaying the list of events */
+    public ListView listView;
 
+    /** Button for navigating to the notifications screen */
+    public Button notificationButton;
+
+    /** Adapter for displaying event names in the ListView */
+    public ArrayAdapter<String> adapter;
+
+    /** List of formatted event names and descriptions for display */
+    public ArrayList<String> eventNamesList;
+
+    /** List of Event objects corresponding to the displayed items */
+    public ArrayList<Event> eventsList;
+
+    /** Firestore database instance for retrieving events */
+    public FirebaseFirestore db;
+
+    /**
+     * Required empty public constructor for fragment instantiation.
+     * Use {@link #newInstance()} to create instances of this fragment.
+     */
     public EntrantHomeFragment() {
     }
 
+    /**
+     * Factory method to create a new instance of this fragment.
+     * This is the preferred way to create instances of this fragment.
+     *
+     * @return a new instance of EntrantHomeFragment
+     */
     public static EntrantHomeFragment newInstance() {
         return new EntrantHomeFragment();
     }
 
+    /**
+     * Called when the fragment is first created. Retrieves any arguments passed
+     * to the fragment and initializes the Firestore database instance.
+     *
+     * @param savedInstanceState the saved state of the fragment, if any
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +98,19 @@ public class EntrantHomeFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
     }
 
+    /**
+     * Creates and returns the view hierarchy associated with the fragment.
+     * Initializes the ListView and notification button, sets up their listeners,
+     * and loads the events from Firestore.
+     *
+     * <p>The ListView allows users to tap on events to view details, while the
+     * notification button navigates to the notifications screen.</p>
+     *
+     * @param inflater the LayoutInflater object to inflate views
+     * @param container the parent view that the fragment's UI should be attached to
+     * @param savedInstanceState the saved state of the fragment, if any
+     * @return the root View of the fragment's layout
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -98,7 +155,19 @@ public class EntrantHomeFragment extends Fragment {
         return view;
     }
 
-    private void loadEventsFromFirestore() {
+    /**
+     * Loads all events from the Firestore "events" collection and populates
+     * the ListView with the results. Each event is converted to an Event object
+     * and its name and description are formatted for display.
+     *
+     * <p>If no events are found, a toast message is displayed to inform the user.
+     * Any errors during the loading process are logged and shown via toast messages.</p>
+     *
+     * <p>The method clears existing data before loading to ensure the list reflects
+     * the current state of the database. After successful loading, the adapter is
+     * notified to refresh the display.</p>
+     */
+    public void loadEventsFromFirestore() {
         db.collection("events")
                 .get()
                 .addOnCompleteListener(task -> {
