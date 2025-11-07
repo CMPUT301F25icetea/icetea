@@ -27,6 +27,31 @@ public class OrganizerDrawManager {
         drawLogCollection = db.collection("drawLogs");
     }
 
+    //test purpose
+    public static String getNotificationType(int index, int drawSize) {
+        if (drawSize <= 0) {
+            throw new IllegalArgumentException("drawSize must be positive");
+        }
+        return (index < drawSize) ? "won" : "lost";
+    }
+
+    // test purpose
+    public static List<String> selectWinners(List<String> waitlistUserIds, int drawSize) {
+        if (waitlistUserIds == null || waitlistUserIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        if (drawSize <= 0) {
+            throw new IllegalArgumentException("drawSize must be positive");
+        }
+
+        List<String> shuffled = new ArrayList<>(waitlistUserIds);
+        Collections.shuffle(shuffled);
+
+        int actualDrawSize = Math.min(drawSize, shuffled.size());
+        return shuffled.subList(0, actualDrawSize);
+    }
+
+
     public void drawEntrants(String eventId, String eventName, int drawSize) {
         waitlistCollection.whereEqualTo("eventId", eventId)
                 .whereEqualTo("status", "waiting")
@@ -57,13 +82,13 @@ public class OrganizerDrawManager {
                                     waitlistCollection.document(doc.getId())
                                             .update("status", "invited",
                                                     "invitedAt", Timestamp.now());
-                                    sendNotificationAndEmail(userId, eventId, eventName, "won",
+                                    sendNotification(userId, eventId, eventName, "won",
                                             "You won the draw for" + eventName);
                                 } else {
                                     loser.add(userId);
                                     waitlistCollection.document(doc.getId())
                                             .update("status", "loss");
-                                    sendNotificationAndEmail(userId, eventId, eventName, "lost",
+                                    sendNotification(userId, eventId, eventName, "lost",
                                             "Thank you for participating, you were not selected");
                                 }
                             }
@@ -88,8 +113,8 @@ public class OrganizerDrawManager {
                 });
     }
 
-    private void sendNotificationAndEmail(String userId, String eventId, String eventName,
-                                          String type, String message) {
+    protected void sendNotification(String userId, String eventId, String eventName,
+                                  String type, String message) {
 
         OrganizerNotificationManager notificationManager = new OrganizerNotificationManager();
         notificationManager.sendNotification(userId, eventId, eventName, type, message);
