@@ -135,7 +135,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     /**
      * Handles accepting an invitation.
-     * Updates both notification status and waitlist status to "accepted".
      *
      * @param notification the notification to accept
      * @param holder the ViewHolder for UI updates
@@ -145,27 +144,21 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.btnAccept.setEnabled(false);
         holder.btnDecline.setEnabled(false);
 
-        NotificationDB.getInstance().updateNotificationStatus(
-                notification.getId(),
-                notification.getEventId(),
-                notification.getUserId(),
-                "accepted",
-                task -> {
-                    if (task.isSuccessful()) {
-                        notification.setStatus("accepted");
-                        notifyItemChanged(notifications.indexOf(notification));
-                        Toast.makeText(context, "Invitation accepted! You're registered for the event.", Toast.LENGTH_SHORT).show();
-                    } else {
-                        holder.btnAccept.setEnabled(true);
-                        holder.btnDecline.setEnabled(true);
-                        Toast.makeText(context, "Failed to accept invitation", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        NotificationDB.getInstance().updateNotificationStatus(notification.getId(), "accepted", task -> {
+            if (task.isSuccessful()) {
+                notification.setStatus("accepted");
+                notifyItemChanged(notifications.indexOf(notification));
+                Toast.makeText(context, "Invitation accepted!", Toast.LENGTH_SHORT).show();
+            } else {
+                holder.btnAccept.setEnabled(true);
+                holder.btnDecline.setEnabled(true);
+                Toast.makeText(context, "Failed to accept invitation", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
      * Handles declining an invitation.
-     * Updates both notification status and waitlist status to "declined".
      *
      * @param notification the notification to decline
      * @param holder the ViewHolder for UI updates
@@ -175,22 +168,17 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.btnAccept.setEnabled(false);
         holder.btnDecline.setEnabled(false);
 
-        NotificationDB.getInstance().updateNotificationStatus(
-                notification.getId(),
-                notification.getEventId(),
-                notification.getUserId(),
-                "declined",
-                task -> {
-                    if (task.isSuccessful()) {
-                        notification.setStatus("declined");
-                        notifyItemChanged(notifications.indexOf(notification));
-                        Toast.makeText(context, "Invitation declined", Toast.LENGTH_SHORT).show();
-                    } else {
-                        holder.btnAccept.setEnabled(true);
-                        holder.btnDecline.setEnabled(true);
-                        Toast.makeText(context, "Failed to decline invitation", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        NotificationDB.getInstance().updateNotificationStatus(notification.getId(), "declined", task -> {
+            if (task.isSuccessful()) {
+                notification.setStatus("declined");
+                notifyItemChanged(notifications.indexOf(notification));
+                Toast.makeText(context, "Invitation declined", Toast.LENGTH_SHORT).show();
+            } else {
+                holder.btnAccept.setEnabled(true);
+                holder.btnDecline.setEnabled(true);
+                Toast.makeText(context, "Failed to decline invitation", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
