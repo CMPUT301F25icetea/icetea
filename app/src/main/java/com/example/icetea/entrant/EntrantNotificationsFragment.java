@@ -21,6 +21,16 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 
+/**
+ * Fragment for displaying a list of notifications to an entrant user.
+ *
+ * This fragment loads notifications from Firestore for the currently logged-in user
+ * and displays them in a RecyclerView using the NotificationAdapter. It handles
+ * user authentication checks, progress indication, and error handling.
+ *
+ * @author IceTea
+ * @version 1.0
+ */
 public class EntrantNotificationsFragment extends Fragment {
 
     private RecyclerView recyclerNotifications;
@@ -29,10 +39,24 @@ public class EntrantNotificationsFragment extends Fragment {
     private ArrayList<Notification> notifications;
     private FirebaseFirestore db;
 
+    /**
+     * Default constructor required for Fragment instantiation.
+     */
     public EntrantNotificationsFragment() {
         // Required empty constructor
     }
 
+    /**
+     * Creates and returns the root view for this fragment.
+     *
+     * Initializes the RecyclerView, adapter, and progress bar, then calls
+     * loadNotifications() to fetch data from Firestore.
+     *
+     * @param inflater the LayoutInflater used to inflate views
+     * @param container the parent ViewGroup
+     * @param savedInstanceState the Bundle containing saved state (if any)
+     * @return the root view of the fragment
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_entrant_notifications, container, false);
@@ -52,6 +76,14 @@ public class EntrantNotificationsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Loads notifications from Firestore for the currently logged-in user.
+     *
+     * This method checks if the user is logged in before attempting to fetch data.
+     * A progress bar is shown while loading. On success, notifications are added to
+     * the adapter and the list is refreshed. On failure, an error message is logged
+     * and displayed to the user.
+     */
     private void loadNotifications() {
         if (!FBAuthenticator.isLoggedIn()) {
             Toast.makeText(getContext(), "Please log in first", Toast.LENGTH_SHORT).show();
