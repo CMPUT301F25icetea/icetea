@@ -13,10 +13,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.icetea.R;
 import com.example.icetea.auth.AuthActivity;
 import com.example.icetea.auth.FBAuthenticator;
-import com.example.icetea.R;
-import com.example.icetea.auth.FBAuthenticator;
+import com.example.icetea.organizer.OrganizerContainerFragment;
+import com.example.icetea.util.NavigationHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -25,22 +26,20 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EntrantProfileFragment extends Fragment {
+public class ProfileFragment extends Fragment {
 
-    private EditText firstNameEditText, lastNameEditText, emailEditText, phoneEditText;
-    private Button saveButton, deleteButton;
+    private EditText firstNameInput, lastNameInput, emailInput, phoneInput;
     private ImageView profileImage;
 
     private FirebaseFirestore firestore;
-    private FirebaseUser currentUser;
     private DocumentReference profileRef;
 
-    public EntrantProfileFragment() {
+    public ProfileFragment() {
         // Required empty public constructor
     }
 
-    public static EntrantProfileFragment newInstance() {
-        return new EntrantProfileFragment();
+    public static ProfileFragment newInstance() {
+        return new ProfileFragment();
     }
 
     @Override
@@ -48,8 +47,8 @@ public class EntrantProfileFragment extends Fragment {
         super.onCreate(savedInstanceState);
         firestore = FirebaseFirestore.getInstance();
 
-        // Get current Firebase user
-        currentUser = FBAuthenticator.getCurrentUser();
+//         Get current Firebase user
+        FirebaseUser currentUser = FBAuthenticator.getCurrentUser();
         if (currentUser == null) {
             currentUser = FirebaseAuth.getInstance().getCurrentUser();
         }
@@ -62,39 +61,58 @@ public class EntrantProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_entrant_profile, container, false);
+        return inflater.inflate(R.layout.fragment_profile, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        firstNameEditText = view.findViewById(R.id.Firstname);
-        lastNameEditText = view.findViewById(R.id.Lastname);
-        emailEditText = view.findViewById(R.id.email);
-        phoneEditText = view.findViewById(R.id.Phone);
-        saveButton = view.findViewById(R.id.button);
-        deleteButton = view.findViewById(R.id.button2);
+        firstNameInput = view.findViewById(R.id.inputFirstName);
+        lastNameInput = view.findViewById(R.id.inputLastName);
+        emailInput = view.findViewById(R.id.inputEmail);
+        phoneInput = view.findViewById(R.id.inputPhone);
+        Button updateButton = view.findViewById(R.id.buttonUpdateInfo);
+        Button deleteButton = view.findViewById(R.id.buttonDeleteProfile);
+        Button logoutButton = view.findViewById(R.id.buttonLogout);
+        Button swapRoleButton = view.findViewById(R.id.buttonSwapRole);
 
-        if (currentUser == null) {
+        if (FBAuthenticator.getCurrentUser() == null) {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
             return;
         }
 
         loadProfile();
 
-        saveButton.setOnClickListener(v -> saveProfile());
+        updateButton.setOnClickListener(v -> saveProfile());
         deleteButton.setOnClickListener(v -> deleteProfile());
+        logoutButton.setOnClickListener(v -> logoutUser());
+        swapRoleButton.setOnClickListener(v -> swapRole());
+    }
+
+    private void logoutUser() {
+        FBAuthenticator.logout();
+        NavigationHelper.openActivity(this, AuthActivity.class);
+    }
+    private void swapRole() {
+
+        if (getId() == R.id.entrant_fragment_container) {
+            NavigationHelper.replaceFragment(requireActivity().getSupportFragmentManager(), R.id.main, OrganizerContainerFragment.newInstance(), false);
+
+        } else if (getId() == R.id.organizer_fragment_container) {
+            NavigationHelper.replaceFragment(requireActivity().getSupportFragmentManager(), R.id.main, EntrantContainerFragment.newInstance(), false);
+
+        }
     }
 
     private void loadProfile() {
         profileRef.get()
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
-                        firstNameEditText.setText(document.getString("firstName"));
-                        lastNameEditText.setText(document.getString("lastName"));
-                        emailEditText.setText(document.getString("email"));
-                        phoneEditText.setText(document.getString("phone"));
+                        firstNameInput.setText(document.getString("firstName"));
+                        lastNameInput.setText(document.getString("lastName"));
+                        emailInput.setText(document.getString("email"));
+                        phoneInput.setText(document.getString("phone"));
                     }
                 })
                 .addOnFailureListener(e ->
@@ -103,10 +121,10 @@ public class EntrantProfileFragment extends Fragment {
     }
 
     private void saveProfile() {
-        String first = firstNameEditText.getText().toString().trim();
-        String last = lastNameEditText.getText().toString().trim();
-        String email = emailEditText.getText().toString().trim();
-        String phone = phoneEditText.getText().toString().trim();
+        String first = firstNameInput.getText().toString().trim();
+        String last = lastNameInput.getText().toString().trim();
+        String email = emailInput.getText().toString().trim();
+        String phone = phoneInput.getText().toString().trim();
 
         if (first.isEmpty() || last.isEmpty()) {
             Toast.makeText(requireContext(), "Please fill out all required fields", Toast.LENGTH_SHORT).show();
@@ -140,10 +158,10 @@ public class EntrantProfileFragment extends Fragment {
 
         profileRef.update(updates)
                 .addOnSuccessListener(unused -> {
-                    firstNameEditText.setText("");
-                    lastNameEditText.setText("");
-                    emailEditText.setText("");
-                    phoneEditText.setText("");
+                    firstNameInput.setText("");
+                    lastNameInput.setText("");
+                    emailInput.setText("");
+                    phoneInput.setText("");
                     Toast.makeText(requireContext(), "Profile info cleared", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e ->

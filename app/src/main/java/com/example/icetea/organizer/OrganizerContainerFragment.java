@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.icetea.entrant.ProfileFragment;
 import com.example.icetea.util.NavigationHelper;
 import com.example.icetea.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -45,7 +46,7 @@ public class OrganizerContainerFragment extends Fragment {
                 NavigationHelper.replaceFragment(getChildFragmentManager(), R.id.organizer_fragment_container, OrganizerCreateEventFragment.newInstance(), false);
                 return true;
             } else if (id == R.id.nav_organizer_profile) {
-                NavigationHelper.replaceFragment(getChildFragmentManager(), R.id.organizer_fragment_container, OrganizerProfileFragment.newInstance(), false);
+                NavigationHelper.replaceFragment(getChildFragmentManager(), R.id.organizer_fragment_container, ProfileFragment.newInstance(), false);
                 return true;
             }
             return false;

@@ -17,7 +17,6 @@
     <string name="email">Email</string>
     <string name="last_name">Last Name</string>
     <string name="first_name">First Name</string>
-    <string name="save_info">Save Info</string>
     <string name="delete_profile">Delete Profile</string>
 
     <string name="notification_event_name">Event Name</string>
