@@ -51,20 +51,19 @@ public class OrganizerDrawManager {
                             for (int i = 0; i < actualDrawSize; i++) {
                                 DocumentSnapshot doc = waitlistDocs.get(i);
                                 String userId = doc.getString("userId");
-                                String email = doc.getString("email");
 
                                 if (i < actualDrawSize) {
                                     selectedUserIds.add(userId);
                                     waitlistCollection.document(doc.getId())
                                             .update("status", "invited",
                                                     "invitedAt", Timestamp.now());
-                                    sendNotificationAndEmail(userId, email, eventId, eventName, "won",
+                                    sendNotificationAndEmail(userId, eventId, eventName, "won",
                                             "You won the draw for" + eventName);
                                 } else {
                                     loser.add(userId);
                                     waitlistCollection.document(doc.getId())
                                             .update("status", "loss");
-                                    sendNotificationAndEmail(userId, email, eventId, eventName, "lost",
+                                    sendNotificationAndEmail(userId, eventId, eventName, "lost",
                                             "Thank you for participating, you were not selected");
                                 }
                             }
@@ -82,8 +81,6 @@ public class OrganizerDrawManager {
                                     .addOnFailureListener(e ->
                                             System.err.println("Error logging draw: " + e.getMessage()));
 
-
-
                         } else {
                             System.err.println("Error getting waitlist: " + task.getException());
                         }
@@ -91,27 +88,11 @@ public class OrganizerDrawManager {
                 });
     }
 
-    private void sendNotificationAndEmail(String userId, String email,
-                                          String eventId, String eventName,
+    private void sendNotificationAndEmail(String userId, String eventId, String eventName,
                                           String type, String message) {
 
         OrganizerNotificationManager notificationManager = new OrganizerNotificationManager();
         notificationManager.sendNotification(userId, eventId, eventName, type, message);
-
-        //ChatGPT, prompt "How do you send email notification through firebase"
-        if (email != null && !email.isEmpty()) {
-            FirebaseFirestore.getInstance().collection("notifications")
-                    .add(new HashMap<String, Object>() {{
-                        put("userId", userId);
-                        put("email", email);
-                        put("subject", type.equals("won")
-                                ? "You’ve won the draw for " + eventName + "!"
-                                : "Draw results for " + eventName);
-                        put("message", message);
-                        put("type", type);
-                        put("timestamp", Timestamp.now());
-                    }});
-        }
     }
 
 }
