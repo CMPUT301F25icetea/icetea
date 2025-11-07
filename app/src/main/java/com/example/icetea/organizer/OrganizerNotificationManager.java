@@ -11,13 +11,13 @@ public class OrganizerNotificationManager {
     private final CollectionReference notifCollection;
 
     public OrganizerNotificationManager() {
-        notifCollection = FirebaseFirestore.getInstance().collection("notifications");
+            notifCollection = FirebaseFirestore.getInstance().collection("Notification");
     }
 
-    public void sendNotification(String userID, String eventId, String eventName,
+    public void sendNotification(String userId, String eventId, String eventName,
                                  String type, String message) {
         Map<String, Object> notifData = new HashMap<>();
-        notifData.put("userID", userID);
+        notifData.put("userId", userId);
         notifData.put("eventId", eventId);
         notifData.put("eventName", eventName);
         notifData.put("type", type);
@@ -26,7 +26,7 @@ public class OrganizerNotificationManager {
 
         notifCollection.add(notifData)
                 .addOnSuccessListener(ref ->
-                        System.out.println("Notification sent to " + userID))
+                        System.out.println("Notification sent to " + userId))
                 .addOnFailureListener(e ->
                         System.err.println("Failed to send notification: " + e.getMessage()));
     }

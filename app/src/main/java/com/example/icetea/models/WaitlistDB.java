@@ -78,8 +78,7 @@ public class WaitlistDB {
                     long count = (currentCount != null) ? currentCount : 0;
                     long cap = (capacity != null) ? capacity : 0;
 
-                    if (cap > 0 && count >= cap) {
-                        // Waiting list is full
+                    if (!canAddToWaitlist(capacity, currentCount)) {
                         System.out.println("Waiting list is full for event: " + eventId);
                         listener.onComplete(null); // Notify listener of "failure" (full)
                         return;
@@ -235,6 +234,11 @@ public class WaitlistDB {
     }
 
     // ==================== Helper ====================
+    public static boolean canAddToWaitlist(Long capacity, Long currentCount) {
+        long cap = (capacity != null) ? capacity : 0;
+        long count = (currentCount != null) ? currentCount : 0;
+        return !(cap > 0 && count >= cap);
+    }
 
     /**
      * Trims the waitlist if a new, smaller capacity is set by the organizer.
