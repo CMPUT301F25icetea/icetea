@@ -3,54 +3,104 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="16dp"
-    android:gravity="center_vertical"
     android:background="?attr/selectableItemBackground">
 
-    <!-- Notification Icon -->
-    <ImageView
-        android:id="@+id/iv_notification_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="12dp"
-        android:contentDescription="@string/app_name"
-        app:tint="@android:color/black"
-        android:src="@drawable/ic_info" />
-
-    <!-- Text Container -->
+    <!-- Top Row: Icon and Text -->
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tv_notification_event_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/notification_event_name"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="4dp" />
+        <!-- Notification Icon -->
+        <ImageView
+            android:id="@+id/iv_notification_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="@string/app_name"
+            app:tint="@android:color/black"
+            android:src="@drawable/ic_info" />
 
-        <TextView
-            android:id="@+id/tv_notification_message"
-            android:layout_width="match_parent"
+        <!-- Text Container -->
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/notification_message"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="4dp" />
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tv_notification_timestamp"
-            android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tv_notification_event_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/notification_event_name"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tv_notification_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/notification_message"
+                android:textSize="14sp"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tv_notification_timestamp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/notification_timestamp"
+                android:textSize="12sp"
+                android:textColor="@android:color/darker_gray" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Status Text (shown when already responded) -->
+    <TextView
+        android:id="@+id/tv_notification_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:text="✓ Accepted" />
+
+    <!-- Action Buttons (shown for pending "won" notifications) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btn_decline"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/notification_timestamp"
-            android:textSize="12sp"
-            android:textColor="@android:color/darker_gray" />
+            android:layout_marginEnd="8dp"
+            android:text="Decline"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:visibility="gone"
+            style="@style/Widget.MaterialComponents.Button" />
+
+        <Button
+            android:id="@+id/btn_accept"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Accept"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/holo_green_dark"
+            android:visibility="gone"
+            style="@style/Widget.MaterialComponents.Button" />
+
     </LinearLayout>
 
 </LinearLayout>
