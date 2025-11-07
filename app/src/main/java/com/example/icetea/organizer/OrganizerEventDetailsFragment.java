@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.example.icetea.R;
 import com.example.icetea.models.WaitlistDB;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -58,6 +59,10 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
             dateRangeText.setText("Event: " + formatDate(start) + " → " + formatDate(end));
             regRangeText.setText("Registration: " + formatDate(regOpen) + " → " + formatDate(regClose));
+        }
+
+        if (eventId != null) {
+            checkIfDrawAlreadyDone();
         }
 
         finalEntrantsButton.setOnClickListener(v -> {
@@ -125,7 +130,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 }
 
                 OrganizerDrawManager drawManager = new OrganizerDrawManager();
-                drawManager.drawEntrants(eventId, eventName, drawCount);
+                drawManager.drawEntrants(requireContext(), eventId, eventName, drawCount);
                 Toast.makeText(getContext(), "Drawing " + drawCount + " attendees...", Toast.LENGTH_SHORT).show();
 
                 OrganizerEntrantWinnersFragment fragment = new OrganizerEntrantWinnersFragment();
@@ -149,6 +154,22 @@ public class OrganizerEventDetailsFragment extends Fragment {
         return view;
     }
 
+    private void checkIfDrawAlreadyDone() {
+        FirebaseFirestore.getInstance()
+                .collection("waitlist")
+                .whereEqualTo("eventId", eventId)
+                .whereEqualTo("status", "invited")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (!snapshot.isEmpty()) {
+                        drawAttendeesButton.setEnabled(false);
+                        drawAttendeesButton.setText("Draw Already Done");
+                        drawAttendeesButton.setAlpha(0.6f);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Error checking draw status.", Toast.LENGTH_SHORT).show());
+    }
     private String formatDate(long millis) {
         if (millis == 0) return "N/A";
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());

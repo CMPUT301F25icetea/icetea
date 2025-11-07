@@ -4,7 +4,7 @@ import com.google.firebase.Timestamp;
 
 public class Notification {
     private String id;
-    private String userID; // ✅ matches Firestore field exactly
+    private String userId; // ✅ matches Firestore field exactly
     private String eventId;
     private String eventName;
     private String type;   // "won", "replacement", "lost"
@@ -15,9 +15,9 @@ public class Notification {
         // Required for Firestore
     }
 
-    public Notification(String id, String userID, String eventId, String eventName, String type, String message, Timestamp timestamp) {
+    public Notification(String id, String userId, String eventId, String eventName, String type, String message, Timestamp timestamp) {
         this.id = id;
-        this.userID = userID;
+        this.userId = userId;
         this.eventId = eventId;
         this.eventName = eventName;
         this.type = type;
@@ -29,8 +29,8 @@ public class Notification {
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
-    public String getUserID() { return userID; }
-    public void setUserID(String userID) { this.userID = userID; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
     public String getEventId() { return eventId; }
     public void setEventId(String eventId) { this.eventId = eventId; }

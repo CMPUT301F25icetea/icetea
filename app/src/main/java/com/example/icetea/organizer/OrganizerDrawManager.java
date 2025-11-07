@@ -1,5 +1,8 @@
 package com.example.icetea.organizer;
 
+import android.content.Context;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -27,98 +30,106 @@ public class OrganizerDrawManager {
         drawLogCollection = db.collection("drawLogs");
     }
 
-    //test purpose
     public static String getNotificationType(int index, int drawSize) {
-        if (drawSize <= 0) {
-            throw new IllegalArgumentException("drawSize must be positive");
-        }
+        if (drawSize <= 0) throw new IllegalArgumentException("drawSize must be positive");
         return (index < drawSize) ? "won" : "lost";
     }
 
-    // test purpose
     public static List<String> selectWinners(List<String> waitlistUserIds, int drawSize) {
-        if (waitlistUserIds == null || waitlistUserIds.isEmpty()) {
-            return new ArrayList<>();
-        }
-        if (drawSize <= 0) {
-            throw new IllegalArgumentException("drawSize must be positive");
-        }
+        if (waitlistUserIds == null || waitlistUserIds.isEmpty()) return new ArrayList<>();
+        if (drawSize <= 0) throw new IllegalArgumentException("drawSize must be positive");
 
         List<String> shuffled = new ArrayList<>(waitlistUserIds);
         Collections.shuffle(shuffled);
 
         int actualDrawSize = Math.min(drawSize, shuffled.size());
-        return shuffled.subList(0, actualDrawSize);
+        return new ArrayList<>(shuffled.subList(0, actualDrawSize));
     }
 
+    public static List<String> getFinalEntrants(List<String> waitlistUserIds, int drawSize) {
+        if (waitlistUserIds == null || waitlistUserIds.isEmpty()) return new ArrayList<>();
+        if (drawSize <= 0) throw new IllegalArgumentException("drawSize must be positive");
 
-    public void drawEntrants(String eventId, String eventName, int drawSize) {
+        List<String> shuffled = new ArrayList<>(waitlistUserIds);
+        Collections.shuffle(shuffled);
+
+        int actualDrawSize = Math.min(drawSize, shuffled.size());
+        return new ArrayList<>(shuffled.subList(0, actualDrawSize));
+    }
+
+    public void drawEntrants(Context context, String eventId, String eventName, int drawSize) {
         waitlistCollection.whereEqualTo("eventId", eventId)
-                .whereEqualTo("status", "waiting")
+                .whereEqualTo("status", "invited")
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            List<DocumentSnapshot> waitlistDocs = task.getResult().getDocuments();
-
-                            if (waitlistDocs.isEmpty()) {
-                                System.out.println("No entrants on waitlist.");
-                                return;
-                            }
-
-                            Collections.shuffle(waitlistDocs);
-
-                            int actualDrawSize = Math.min(drawSize, waitlistDocs.size());
-                            List<String> selectedUserIds = new ArrayList<>();
-                            List<String> loser = new ArrayList<>();
-
-                            for (int i = 0; i < actualDrawSize; i++) {
-                                DocumentSnapshot doc = waitlistDocs.get(i);
-                                String userId = doc.getString("userId");
-
-                                if (i < actualDrawSize) {
-                                    selectedUserIds.add(userId);
-                                    waitlistCollection.document(doc.getId())
-                                            .update("status", "invited",
-                                                    "invitedAt", Timestamp.now());
-                                    sendNotification(userId, eventId, eventName, "won",
-                                            "You won the draw for" + eventName);
-                                } else {
-                                    loser.add(userId);
-                                    waitlistCollection.document(doc.getId())
-                                            .update("status", "loss");
-                                    sendNotification(userId, eventId, eventName, "lost",
-                                            "Thank you for participating, you were not selected");
-                                }
-                            }
-
-                            Map<String, Object> log = new HashMap<>();
-                            log.put("eventId", eventId);
-                            log.put("eventName", eventName);
-                            log.put("drawnUsers", selectedUserIds);
-                            log.put("drawSize", actualDrawSize);
-                            log.put("drawTime", Timestamp.now());
-
-                            drawLogCollection.add(log)
-                                    .addOnSuccessListener(ref ->
-                                            System.out.println("Draw logged successfully."))
-                                    .addOnFailureListener(e ->
-                                            System.err.println("Error logging draw: " + e.getMessage()));
-
-                        } else {
-                            System.err.println("Error getting waitlist: " + task.getException());
-                        }
+                .addOnSuccessListener(existingWinners -> {
+                    if (!existingWinners.isEmpty()) {
+                        Toast.makeText(context, "You have already drawn winners for this event.", Toast.LENGTH_SHORT).show();
+                        return;
                     }
-                });
+
+                    waitlistCollection.whereEqualTo("eventId", eventId)
+                            .whereEqualTo("status", "waiting")
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        List<DocumentSnapshot> waitlistDocs = task.getResult().getDocuments();
+                                        if (waitlistDocs.isEmpty()) {
+                                            Toast.makeText(context, "No entrants on waitlist.", Toast.LENGTH_SHORT).show();
+                                            return;
+                                        }
+
+                                        Collections.shuffle(waitlistDocs);
+                                        int actualDrawSize = Math.min(drawSize, waitlistDocs.size());
+                                        List<String> selectedUserIds = new ArrayList<>();
+                                        List<String> loserIds = new ArrayList<>();
+
+                                        for (int i = 0; i < waitlistDocs.size(); i++) {
+                                            DocumentSnapshot doc = waitlistDocs.get(i);
+                                            String userId = doc.getString("userId");
+                                            String resultType = getNotificationType(i, actualDrawSize);
+
+                                            if ("won".equals(resultType)) {
+                                                selectedUserIds.add(userId);
+                                                waitlistCollection.document(doc.getId())
+                                                        .update("status", "invited",
+                                                                "invitedAt", Timestamp.now());
+                                                sendNotification(userId, eventId, eventName, "won",
+                                                        "🎉 You won the draw for " + eventName + "!");
+                                            } else {
+                                                loserIds.add(userId);
+                                                waitlistCollection.document(doc.getId())
+                                                        .update("status", "loss");
+                                            }
+                                        }
+
+                                        Map<String, Object> log = new HashMap<>();
+                                        log.put("eventId", eventId);
+                                        log.put("eventName", eventName);
+                                        log.put("drawnUsers", selectedUserIds);
+                                        log.put("drawSize", actualDrawSize);
+                                        log.put("drawTime", Timestamp.now());
+
+                                        drawLogCollection.add(log)
+                                                .addOnSuccessListener(ref ->
+                                                        Toast.makeText(context, "Draw completed successfully!", Toast.LENGTH_SHORT).show())
+                                                .addOnFailureListener(e ->
+                                                        Toast.makeText(context, "Error logging draw.", Toast.LENGTH_SHORT).show());
+                                    } else {
+                                        Toast.makeText(context, "Error retrieving waitlist.", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(context, "Error checking existing winners.", Toast.LENGTH_SHORT).show());
     }
 
     protected void sendNotification(String userId, String eventId, String eventName,
-                                  String type, String message) {
-
+                                    String type, String message) {
         OrganizerNotificationManager notificationManager = new OrganizerNotificationManager();
         notificationManager.sendNotification(userId, eventId, eventName, type, message);
     }
-
 }
 
