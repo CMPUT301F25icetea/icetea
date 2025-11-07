@@ -1,5 +1,6 @@
 package com.example.icetea.entrant;
 
+import com.example.icetea.models.WaitlistDB;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
@@ -17,7 +18,7 @@ import java.util.Map;
  * for all Firestore operations related to notifications. It handles querying
  * notifications for specific users and adding new notifications to the database.
  *
- * @author IceTea
+ * @author Avyaan
  * @version 1.0
  */
 public class NotificationDB {
@@ -82,17 +83,37 @@ public class NotificationDB {
 
     /**
      * Updates the status of a notification (accept/decline).
+     * This also updates the corresponding waitlist status in the waitlist collection.
      *
      * @param notificationId the Firestore document ID of the notification
+     * @param eventId the ID of the event (needed to update waitlist)
+     * @param userId the ID of the user (needed to update waitlist)
      * @param status the new status: "accepted" or "declined"
      * @param listener the OnCompleteListener callback that handles the operation result
      */
-    public void updateNotificationStatus(String notificationId, String status, OnCompleteListener<Void> listener) {
+    public void updateNotificationStatus(String notificationId, String eventId, String userId,
+                                         String status, OnCompleteListener<Void> listener) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", status);
 
+        // Step 1: Update notification status
         notificationCollection.document(notificationId)
                 .update(updates)
-                .addOnCompleteListener(listener);
+                .addOnSuccessListener(aVoid -> {
+                    // Step 2: Update waitlist status
+                    WaitlistDB.getInstance().updateWaitlistStatus(eventId, userId, status, task -> {
+                        if (task.isSuccessful()) {
+                            System.out.println("✅ Both notification and waitlist status updated to: " + status);
+                            listener.onComplete(task);
+                        } else {
+                            System.err.println("❌ Failed to update waitlist status: " + task.getException());
+                            listener.onComplete(task);
+                        }
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    System.err.println("❌ Failed to update notification status: " + e.getMessage());
+                    listener.onComplete(null);
+                });
     }
 }
