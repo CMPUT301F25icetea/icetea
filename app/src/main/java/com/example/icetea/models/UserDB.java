@@ -1,5 +1,7 @@
 package com.example.icetea.models;
 
+import android.telecom.Call;
+
 import com.example.icetea.util.Callback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -61,6 +63,22 @@ public class UserDB {
             } else {
                 callback.onFailure(task.getException());
             }
+        });
+    }
+
+    public void getUserEmail(String id, Callback<String> callback) {
+        getUser(id, task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document != null && document.exists()) {
+                    String email = document.getString("email");
+                    callback.onSuccess(email);
+                } else {
+                    callback.onFailure(new Exception("User not found"));
+                }
+            } else {
+            callback.onFailure(task.getException());
+        }
         });
     }
 }
