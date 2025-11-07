@@ -46,19 +46,32 @@ public class OrganizerDrawManager {
 
                             int actualDrawSize = Math.min(drawSize, waitlistDocs.size());
                             List<String> selectedUserIds = new ArrayList<>();
+                            List<String> loser = new ArrayList<>();
 
                             for (int i = 0; i < actualDrawSize; i++) {
                                 DocumentSnapshot doc = waitlistDocs.get(i);
                                 String userId = doc.getString("userId");
-                                selectedUserIds.add(userId);
+                                String email = doc.getString("email");
 
-                                waitlistCollection.document(doc.getId())
-                                        .update("status", "invited",
-                                                "invitedAt", Timestamp.now());
+                                if (i < actualDrawSize) {
+                                    selectedUserIds.add(userId);
+                                    waitlistCollection.document(doc.getId())
+                                            .update("status", "invited",
+                                                    "invitedAt", Timestamp.now());
+                                    sendNotificationAndEmail(userId, email, eventId, eventName, "won",
+                                            "You won the draw for" + eventName);
+                                } else {
+                                    loser.add(userId);
+                                    waitlistCollection.document(doc.getId())
+                                            .update("status", "loss");
+                                    sendNotificationAndEmail(userId, email, eventId, eventName, "lost",
+                                            "Thank you for participating, you were not selected");
+                                }
                             }
 
                             Map<String, Object> log = new HashMap<>();
                             log.put("eventId", eventId);
+                            log.put("eventName", eventName);
                             log.put("drawnUsers", selectedUserIds);
                             log.put("drawSize", actualDrawSize);
                             log.put("drawTime", Timestamp.now());
@@ -69,7 +82,7 @@ public class OrganizerDrawManager {
                                     .addOnFailureListener(e ->
                                             System.err.println("Error logging draw: " + e.getMessage()));
 
-                            notifySelectedEntrants(selectedUserIds, eventId, eventName);
+
 
                         } else {
                             System.err.println("Error getting waitlist: " + task.getException());
@@ -78,17 +91,28 @@ public class OrganizerDrawManager {
                 });
     }
 
-    private void notifySelectedEntrants(List<String> userIds, String eventId, String eventName) {
+    private void sendNotificationAndEmail(String userId, String email,
+                                          String eventId, String eventName,
+                                          String type, String message) {
+
         OrganizerNotificationManager notificationManager = new OrganizerNotificationManager();
-        for (String userId : userIds) {
-            notificationManager.sendNotification(
-                    userId,
-                    eventId,
-                    eventName,
-                    "won",
-                    "You’ve won the draw for " + eventName + "!"
-            );
+        notificationManager.sendNotification(userId, eventId, eventName, type, message);
+
+        //ChatGPT, prompt "How do you send email notification through firebase"
+        if (email != null && !email.isEmpty()) {
+            FirebaseFirestore.getInstance().collection("notifications")
+                    .add(new HashMap<String, Object>() {{
+                        put("userId", userId);
+                        put("email", email);
+                        put("subject", type.equals("won")
+                                ? "You’ve won the draw for " + eventName + "!"
+                                : "Draw results for " + eventName);
+                        put("message", message);
+                        put("type", type);
+                        put("timestamp", Timestamp.now());
+                    }});
         }
     }
+
 }
 
