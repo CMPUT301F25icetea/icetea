@@ -27,7 +27,7 @@ public class OrganizerDrawManager {
         drawLogCollection = db.collection("drawLogs");
     }
 
-    public void drawEntrants(String eventId, int drawSize) {
+    public void drawEntrants(String eventId, String eventName, int drawSize) {
         waitlistCollection.whereEqualTo("eventId", eventId)
                 .whereEqualTo("status", "waiting")
                 .get()
@@ -69,7 +69,7 @@ public class OrganizerDrawManager {
                                     .addOnFailureListener(e ->
                                             System.err.println("Error logging draw: " + e.getMessage()));
 
-                            notifySelectedEntrants(selectedUserIds, eventId);
+                            notifySelectedEntrants(selectedUserIds, eventId, eventName);
 
                         } else {
                             System.err.println("Error getting waitlist: " + task.getException());
@@ -78,10 +78,16 @@ public class OrganizerDrawManager {
                 });
     }
 
-    private void notifySelectedEntrants(List<String> userIds, String eventId) {
-        // TODO: Connect to app's notification logic
+    private void notifySelectedEntrants(List<String> userIds, String eventId, String eventName) {
+        OrganizerNotificationManager notificationManager = new OrganizerNotificationManager();
         for (String userId : userIds) {
-            System.out.println("Notify user " + userId + " for event " + eventId);
+            notificationManager.sendNotification(
+                    userId,
+                    eventId,
+                    eventName,
+                    "won",
+                    "You’ve won the draw for " + eventName + "!"
+            );
         }
     }
 }

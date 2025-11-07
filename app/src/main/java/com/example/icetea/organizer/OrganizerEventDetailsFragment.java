@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.icetea.R;
+import com.example.icetea.models.WaitlistDB;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,7 +24,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
     private TextView nameText, descText, locationText, dateRangeText, regRangeText, capacityText;
     private Button finalEntrantsButton, drawAttendeesButton;
-    private String eventId;
+    private String eventId, eventName;
 
     public OrganizerEventDetailsFragment() {
     }
@@ -44,6 +45,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             eventId = args.getString("eventId");
+            eventName = args.getString("name", "Unknown Event");
             nameText.setText(args.getString("name", "Unnamed Event"));
             descText.setText(args.getString("description", "No description provided"));
             locationText.setText(args.getString("location", "No location provided"));
@@ -63,7 +65,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 Toast.makeText(getContext(), "Event ID not found.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            com.example.icetea.models.WaitlistDB.getInstance()
+            WaitlistDB.getInstance()
                     .getFinalEntrants(eventId, task -> {
                         if (task.isSuccessful() && task.getResult() != null) {
                             if (task.getResult().isEmpty()) {
@@ -123,7 +125,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 }
 
                 OrganizerDrawManager drawManager = new OrganizerDrawManager();
-                drawManager.drawEntrants(eventId, drawCount);
+                drawManager.drawEntrants(eventId, eventName, drawCount);
                 Toast.makeText(getContext(), "Drawing " + drawCount + " attendees...", Toast.LENGTH_SHORT).show();
 
                 OrganizerEntrantWinnersFragment fragment = new OrganizerEntrantWinnersFragment();
