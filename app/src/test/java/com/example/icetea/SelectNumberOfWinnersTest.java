@@ -14,7 +14,7 @@ import com.example.icetea.organizer.OrganizerDrawManager;
 public class SelectNumberOfWinnersTest {
     @Test
     public void testSelectsCorrectNumberOfWinners() {
-        List<String> waitlist = Arrays.asList("U1", "U2", "U3", "U4", "U5");
+        List<String> waitlist = Arrays.asList("user1", "user2", "user3", "user4", "U5");
         List<String> selected = OrganizerDrawManager.selectWinners(waitlist, 3);
         assertEquals(3, selected.size());
 
@@ -27,7 +27,7 @@ public class SelectNumberOfWinnersTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidDrawSizeThrowsException() {
-        List<String> waitlist = Arrays.asList("U1", "U2");
+        List<String> waitlist = Arrays.asList("user1", "user2");
         OrganizerDrawManager.selectWinners(waitlist, 0);
     }
 
@@ -40,7 +40,7 @@ public class SelectNumberOfWinnersTest {
 
     @Test
     public void testSelectedWinnersHaveNoDuplicates() {
-        List<String> waitlist = Arrays.asList("U1", "U2", "U3", "U4", "U5");
+        List<String> waitlist = Arrays.asList("user1", "user2", "user3", "user4", "user5");
         List<String> selected = OrganizerDrawManager.selectWinners(waitlist, 4);
 
         Set<String> unique = new HashSet<>(selected);

@@ -14,21 +14,21 @@ import com.example.icetea.organizer.OrganizerDrawManager;
 public class OrganizerFinalEntrantsTest {
     @Test
     public void testFinalEntrantsCountMatchesDrawSize() {
-        List<String> waitlist = Arrays.asList("U1", "U2", "U3", "U4", "U5");
+        List<String> waitlist = Arrays.asList("user1", "user2", "user3", "user4", "user5");
         List<String> finalEntrants = OrganizerDrawManager.getFinalEntrants(waitlist, 3);
         assertEquals(3, finalEntrants.size());
     }
 
     @Test
     public void testFinalEntrantsSubsetOfWaitlist() {
-        List<String> waitlist = Arrays.asList("U1", "U2", "U3", "U4", "U5");
+        List<String> waitlist = Arrays.asList("user1", "user2", "user3", "U4", "U5");
         List<String> finalEntrants = OrganizerDrawManager.getFinalEntrants(waitlist, 3);
         assertTrue(waitlist.containsAll(finalEntrants));
     }
 
     @Test
     public void testNoDuplicateEntrantsInFinalList() {
-        List<String> waitlist = Arrays.asList("U1", "U2", "U3", "U4", "U5");
+        List<String> waitlist = Arrays.asList("user1", "user2", "user3", "user4", "user5");
         List<String> finalEntrants = OrganizerDrawManager.getFinalEntrants(waitlist, 4);
         Set<String> unique = new HashSet<>(finalEntrants);
         assertEquals(unique.size(), finalEntrants.size());
