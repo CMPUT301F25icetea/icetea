@@ -24,16 +24,36 @@ import com.example.icetea.util.Callback;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment that displays the home screen for organizers.
+ * Shows a list of events created by the currently logged-in organizer.
+ */
 public class OrganizerHomeFragment extends Fragment {
+
+    /** RecyclerView displaying the organizer's events. */
     private RecyclerView recyclerView;
+
+    /** Adapter for the RecyclerView. */
     private EventAdapter adapter;
+
+    /** List of events for the organizer. */
     private final List<Event> eventList = new ArrayList<>();
+
+    /** Controller handling event-related operations. */
     private EventController eventController;
+
+    /** TextView shown when there are no events. */
     TextView emptyMessage;
 
+    /** Default constructor. Required empty constructor for fragments. */
     public OrganizerHomeFragment() {
     }
 
+    /**
+     * Creates a new instance of OrganizerHomeFragment.
+     *
+     * @return a new OrganizerHomeFragment
+     */
     public static OrganizerHomeFragment newInstance() {
         return new OrganizerHomeFragment();
     }
@@ -46,7 +66,6 @@ public class OrganizerHomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         return inflater.inflate(R.layout.fragment_organizer_home, container, false);
     }
 
@@ -63,6 +82,13 @@ public class OrganizerHomeFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         loadEvents(view);
     }
+
+    /**
+     * Loads events created by the currently logged-in organizer.
+     * Updates the UI depending on whether events are found.
+     *
+     * @param view The root view of the fragment.
+     */
     private void loadEvents(View view) {
         String organizerId = FBAuthenticator.getCurrentUserId();
 
@@ -88,6 +114,12 @@ public class OrganizerHomeFragment extends Fragment {
         });
     }
 
+    /**
+     * Opens the details fragment for a selected event.
+     * Passes event information via a Bundle to the OrganizerEventDetailsFragment.
+     *
+     * @param event The selected event to view details of.
+     */
     private void openEventDetails(Event event) {
         OrganizerEventDetailsFragment fragment = new OrganizerEventDetailsFragment();
 

@@ -14,14 +14,27 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Controller class for handling Event-related operations such as creation,
+ * retrieval, update, and deletion.
+ */
 public class EventController {
 
     private final EventDB eventDB;
 
+    /**
+     * Constructs an EventController and initializes the EventDB instance.
+     */
     public EventController() {
         eventDB = EventDB.getInstance();
     }
 
+    /**
+     * Saves a new event in the database.
+     *
+     * @param event The Event to create
+     * @param callback Callback to handle success or failure
+     */
     public void createEvent(Event event, Callback<Void> callback) {
         eventDB.saveEvent(event, task -> {
             if (task.isSuccessful()) {
@@ -32,6 +45,12 @@ public class EventController {
         });
     }
 
+    /**
+     * Retrieves an event by its ID.
+     *
+     * @param eventId The ID of the event
+     * @param callback Callback to return the Event or an error
+     */
     public void getEventById(String eventId, Callback<Event> callback) {
         eventDB.getEvent(eventId, task -> {
             if (task.isSuccessful()) {
@@ -48,6 +67,13 @@ public class EventController {
             }
         });
     }
+
+    /**
+     * Retrieves all events organized by a specific organizer.
+     *
+     * @param organizerId The ID of the organizer
+     * @param callback Callback to return the list of events or an error
+     */
     public void getEventsByOrganizerId(String organizerId, Callback<List<Event>> callback) {
         eventDB.getEventsByOrganizerId(organizerId, task -> {
             if (task.isSuccessful()) {
@@ -66,6 +92,12 @@ public class EventController {
         });
     }
 
+    /**
+     * Updates an existing event in the database.
+     *
+     * @param event The Event to update
+     * @param callback Callback to handle success or failure
+     */
     public void updateEvent(Event event, Callback<Void> callback) {
         eventDB.saveEvent(event, task -> {
             if (task.isSuccessful()) {
@@ -76,6 +108,12 @@ public class EventController {
         });
     }
 
+    /**
+     * Deletes an event from the database.
+     *
+     * @param event The Event to delete
+     * @param callback Callback to handle success or failure
+     */
     public void deleteEvent(Event event, Callback<Void> callback) {
         eventDB.deleteEvent(event, task -> {
             if (task.isSuccessful()) {
@@ -87,6 +125,16 @@ public class EventController {
         });
     }
 
+    /**
+     * Validates input fields for creating or updating an event.
+     *
+     * @param name Event name
+     * @param description Event description
+     * @param location Event location
+     * @param startDate Event start date
+     * @param endRegistration Registration end date
+     * @return Error message if invalid, null if valid
+     */
     public String validateInput(String name, String description, String location, Timestamp startDate, Timestamp endRegistration) {
 
         if (name == null || name.trim().isEmpty()) {
@@ -110,6 +158,20 @@ public class EventController {
         return null;
     }
 
+    /**
+     * Constructs an Event object from input strings.
+     *
+     * @param name Event name
+     * @param description Event description
+     * @param location Event location
+     * @param capacityStr Event capacity as string
+     * @param startDateStr Event start date as string (yyyy-MM-dd)
+     * @param endDateStr Event end date as string (yyyy-MM-dd)
+     * @param regStartStr Registration start date as string (yyyy-MM-dd)
+     * @param regEndStr Registration end date as string (yyyy-MM-dd)
+     * @return Event object
+     * @throws IllegalArgumentException If any input is invalid
+     */
     public Event createEventFromInput(String name,
                                       String description,
                                       String location,
@@ -157,6 +219,12 @@ public class EventController {
         );
     }
 
+    /**
+     * Parses a date string in yyyy-MM-dd format to a Firebase Timestamp.
+     *
+     * @param dateStr Date string
+     * @return Timestamp or null if parsing fails
+     */
     private Timestamp parseDateToTimestamp(String dateStr) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.CANADA);
         try {

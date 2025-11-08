@@ -26,16 +26,30 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * Fragment representing the user's profile page.
+ *
+ * Allows the user to view and update profile information, delete their account,
+ * log out, and swap roles (entrant/organizer).
+ */
 public class ProfileFragment extends Fragment {
 
     private EditText firstNameInput, lastNameInput, emailInput, phoneInput;
     private ImageView profileImage;
     private ProfileController controller;
 
+    /**
+     * Default constructor for the fragment.
+     */
     public ProfileFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Factory method to create a new instance of this fragment.
+     *
+     * @return A new instance of ProfileFragment.
+     */
     public static ProfileFragment newInstance() {
         return new ProfileFragment();
     }
@@ -48,6 +62,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_profile, container, false);
     }
 
@@ -57,6 +72,7 @@ public class ProfileFragment extends Fragment {
 
         controller = new ProfileController();
 
+        // Initialize UI components
         firstNameInput = view.findViewById(R.id.inputFirstName);
         lastNameInput = view.findViewById(R.id.inputLastName);
         emailInput = view.findViewById(R.id.inputEmail);
@@ -66,11 +82,13 @@ public class ProfileFragment extends Fragment {
         Button logoutButton = view.findViewById(R.id.buttonLogout);
         Button swapRoleButton = view.findViewById(R.id.buttonSwapRole);
 
+        // Ensure user is logged in
         if (FBAuthenticator.getCurrentUser() == null) {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Determine user role and configure role swap button
         UserDB.getInstance().getUserTopRole(FBAuthenticator.getCurrentUserId(), new Callback<String>() {
             @Override
             public void onSuccess(String role) {
@@ -79,10 +97,9 @@ public class ProfileFragment extends Fragment {
                 } else if ("organizer".equals(role)) {
                     swapRoleButton.setVisibility(View.VISIBLE);
                     swapRoleButton.setOnClickListener(v -> {
-                        //TODO: once admins are added, add them here
+                        // Swap between organizer and entrant views
                         if (getId() == R.id.entrant_fragment_container) {
                             NavigationHelper.replaceFragment(requireActivity().getSupportFragmentManager(), R.id.main, OrganizerContainerFragment.newInstance(), false);
-
                         } else if (getId() == R.id.organizer_fragment_container) {
                             NavigationHelper.replaceFragment(requireActivity().getSupportFragmentManager(), R.id.main, EntrantContainerFragment.newInstance(), false);
                         }
@@ -98,6 +115,7 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        // Load profile data into input fields
         controller.loadProfile(firstNameInput, lastNameInput, emailInput, phoneInput, new Callback<Void>() {
             @Override
             public void onSuccess(Void result) {
@@ -109,6 +127,7 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        // Handle profile update button click
         updateButton.setOnClickListener(v -> controller.updateProfile(firstNameInput, lastNameInput, emailInput, phoneInput, new Callback<Void>() {
             @Override
             public void onSuccess(Void result) {
@@ -121,11 +140,12 @@ public class ProfileFragment extends Fragment {
             }
         }));
 
+        // Handle delete profile button click
         deleteButton.setOnClickListener(v -> controller.deleteProfile(new Callback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 NavigationHelper.openActivity(ProfileFragment.this, AuthActivity.class);
-                // calling delete auto logs out fb authenticator
+                // deleting automatically logs out via FBAuthenticator
             }
 
             @Override
@@ -134,6 +154,7 @@ public class ProfileFragment extends Fragment {
             }
         }));
 
+        // Handle logout button click
         logoutButton.setOnClickListener(v -> {
             controller.logoutUser();
             NavigationHelper.openActivity(this, AuthActivity.class);

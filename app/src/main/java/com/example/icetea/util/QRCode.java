@@ -8,9 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.telecom.Call;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
@@ -19,8 +17,17 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.io.OutputStream;
 
+/**
+ * Utility class for generating and saving QR codes.
+ */
 public class QRCode {
 
+    /**
+     * Generates a QR code from the given text and sets it to an ImageView.
+     *
+     * @param qrText      The text to encode into the QR code.
+     * @param qrImageView The ImageView to display the generated QR code.
+     */
     public static void generateQRCode(String qrText, ImageView qrImageView) {
         QRCodeWriter writer = new QRCodeWriter();
         try {
@@ -41,6 +48,13 @@ public class QRCode {
         }
     }
 
+    /**
+     * Saves the QR code displayed in an ImageView to the device's Pictures/EventQRCodes folder.
+     *
+     * @param context     The context used to access the ContentResolver.
+     * @param qrImageView The ImageView containing the QR code bitmap.
+     * @param callback    Callback to notify success or failure of the save operation.
+     */
     public static void downloadQrCode(Context context, ImageView qrImageView, Callback<Void> callback) {
 
         BitmapDrawable drawable = (BitmapDrawable) qrImageView.getDrawable();

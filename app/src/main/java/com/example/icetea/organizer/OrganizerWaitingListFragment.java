@@ -30,18 +30,61 @@ import com.example.icetea.util.Callback;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment for organizers to manage the waiting list for a specific event.
+ * Allows selection of users, sending notifications, and filtering by status.
+ */
 public class OrganizerWaitingListFragment extends Fragment {
-    private RecyclerView recyclerView;
-    private WaitingListAdapter adapter;
-    private WaitingListController controller;
-    private OrganizerNotificationManager notificationController;
-    private final List<WaitingListEntry> waitingList = new ArrayList<>();
-    Button selectAll, selectCancelled, sendNotification;
-    TextView emptyMessage;
-    EditText notificationMessageInput;
-    private static final String ARG_EVENT_ID = "eventId", ARG_EVENT_NAME = "eventName";
-    private String eventId, eventName;
 
+    /** RecyclerView displaying the waiting list. */
+    private RecyclerView recyclerView;
+
+    /** Adapter for the waiting list RecyclerView. */
+    private WaitingListAdapter adapter;
+
+    /** Controller for managing waiting list operations. */
+    private WaitingListController controller;
+
+    /** Controller for sending notifications to users. */
+    private OrganizerNotificationManager notificationController;
+
+    /** List of waiting list entries for the event. */
+    private final List<WaitingListEntry> waitingList = new ArrayList<>();
+
+    /** Button to select all users in the waiting list. */
+    Button selectAll;
+
+    /** Button to select only cancelled users. */
+    Button selectCancelled;
+
+    /** Button to send notification to selected users. */
+    Button sendNotification;
+
+    /** TextView shown when the waiting list is empty. */
+    TextView emptyMessage;
+
+    /** Input field for notification message. */
+    EditText notificationMessageInput;
+
+    /** Argument key for event ID. */
+    private static final String ARG_EVENT_ID = "eventId";
+
+    /** Argument key for event name. */
+    private static final String ARG_EVENT_NAME = "eventName";
+
+    /** ID of the event associated with this waiting list. */
+    private String eventId;
+
+    /** Name of the event associated with this waiting list. */
+    private String eventName;
+
+    /**
+     * Creates a new instance of OrganizerWaitingListFragment with event information.
+     *
+     * @param eventId   The ID of the event.
+     * @param eventName The name of the event.
+     * @return A new instance of OrganizerWaitingListFragment.
+     */
     public static OrganizerWaitingListFragment newInstance(String eventId, String eventName) {
         OrganizerWaitingListFragment fragment = new OrganizerWaitingListFragment();
         Bundle args = new Bundle();
@@ -51,8 +94,8 @@ public class OrganizerWaitingListFragment extends Fragment {
         return fragment;
     }
 
+    /** Required empty public constructor. */
     public OrganizerWaitingListFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -101,6 +144,7 @@ public class OrganizerWaitingListFragment extends Fragment {
                 recyclerView.setAdapter(adapter);
             }
         });
+
         sendNotification.setOnClickListener(v -> {
             String message = notificationMessageInput.getText().toString().trim();
             for (WaitingListEntry entry : adapter.getSelectedItems()) {
@@ -108,12 +152,15 @@ public class OrganizerWaitingListFragment extends Fragment {
             }
             notificationMessageInput.setText("");
             Toast.makeText(getContext(), "Sent notification!", Toast.LENGTH_SHORT).show();
-
         });
-
-
     }
 
+    /**
+     * Loads the waiting list for the event and updates the UI.
+     * Shows an empty message if there are no entries.
+     *
+     * @param view The root view of the fragment.
+     */
     private void loadWaitingList(View view) {
         controller.getWaitingList(eventId, new Callback<>() {
             @Override
@@ -135,5 +182,4 @@ public class OrganizerWaitingListFragment extends Fragment {
             }
         });
     }
-
 }

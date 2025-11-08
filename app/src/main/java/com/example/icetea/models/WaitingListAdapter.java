@@ -16,10 +16,19 @@ import com.example.icetea.R;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Adapter for displaying a waiting list of users for an event in a RecyclerView.
+ * Handles selection of users via checkboxes and revoking invitations for invited users.
+ */
 public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.WaitingListViewHolder> {
 
     private final List<WaitingListEntry> itemList;
 
+    /**
+     * Constructs a WaitingListAdapter with a given list of entries.
+     *
+     * @param itemList List of WaitingListEntry items to display
+     */
     public WaitingListAdapter(List<WaitingListEntry> itemList) {
         this.itemList = itemList;
     }
@@ -36,18 +45,22 @@ public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.
     public void onBindViewHolder(@NonNull WaitingListViewHolder holder, int position) {
         WaitingListEntry item = itemList.get(position);
 
+        // Bind user info to UI elements
         holder.userEmail.setText(item.getEmail());
         holder.userStatus.setText(item.getStatus());
         holder.userJoinTime.setText(item.getJoinTime());
 
-        holder.selectUserCheckBox.setOnCheckedChangeListener(null); //necessary
+        // Setup checkbox state and listener
+        holder.selectUserCheckBox.setOnCheckedChangeListener(null); // Reset listener to avoid unwanted triggers
         holder.selectUserCheckBox.setChecked(item.isSelected());
-        holder.selectUserCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            item.setSelected(isChecked);
-        });
+        holder.selectUserCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> item.setSelected(isChecked));
+
+        // Only show cancel button for invited users
         if (!item.getStatus().equals("invited")) {
             holder.cancelEntrant.setVisibility(View.GONE);
         }
+
+        // Handle cancel button click
         holder.cancelEntrant.setOnClickListener(v -> {
             WaitlistDB.getInstance().updateWaitlistStatus(item.getEventId(), item.getUserId(), "cancelled", task -> {
                 if (task.isSuccessful()) {
@@ -69,6 +82,11 @@ public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.
         return itemList.size();
     }
 
+    /**
+     * Returns the list of currently selected items from the adapter.
+     *
+     * @return List of selected WaitingListEntry items
+     */
     public List<WaitingListEntry> getSelectedItems() {
         List<WaitingListEntry> selected = new ArrayList<>();
         for (WaitingListEntry item : itemList) {
@@ -79,6 +97,10 @@ public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.
         return selected;
     }
 
+    /**
+     * ViewHolder for displaying a single waiting list entry.
+     * Contains TextViews for user email, status, join time, a CheckBox for selection, and a cancel button.
+     */
     public static class WaitingListViewHolder extends RecyclerView.ViewHolder {
         TextView userEmail, userStatus, userJoinTime;
         CheckBox selectUserCheckBox;

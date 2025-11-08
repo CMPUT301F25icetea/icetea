@@ -13,14 +13,29 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.List;
 
+/**
+ * RecyclerView Adapter for displaying a list of winners in the organizer's view.
+ * Each item shows the winner's user ID and status.
+ */
 public class OrganizerWinnerAdapter extends RecyclerView.Adapter<OrganizerWinnerAdapter.ViewHolder> {
 
+    /** List of DocumentSnapshot objects representing the winners. */
     private List<DocumentSnapshot> winnersList;
 
+    /**
+     * Constructs the adapter with the initial list of winners.
+     *
+     * @param winnersList List of winners as DocumentSnapshots.
+     */
     public OrganizerWinnerAdapter(List<DocumentSnapshot> winnersList) {
         this.winnersList = winnersList;
     }
 
+    /**
+     * Updates the adapter's data with a new list of winners.
+     *
+     * @param newData The new list of winners.
+     */
     public void setData(List<DocumentSnapshot> newData) {
         this.winnersList = newData;
         notifyDataSetChanged();
@@ -48,8 +63,23 @@ public class OrganizerWinnerAdapter extends RecyclerView.Adapter<OrganizerWinner
         return winnersList.size();
     }
 
+    /**
+     * ViewHolder class for a single winner item in the RecyclerView.
+     * Holds references to the TextViews for user ID and status.
+     */
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView userIdText, statusText;
+
+        /** TextView displaying the winner's user ID. */
+        TextView userIdText;
+
+        /** TextView displaying the winner's status. */
+        TextView statusText;
+
+        /**
+         * Constructs a ViewHolder and binds the TextView references.
+         *
+         * @param itemView The root view of the item layout.
+         */
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             userIdText = itemView.findViewById(R.id.textUserId);
@@ -57,4 +87,3 @@ public class OrganizerWinnerAdapter extends RecyclerView.Adapter<OrganizerWinner
         }
     }
 }
-
