@@ -19,7 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-
+//Part of this code was implemented by using GenAI mainly for understanding some implementation process and doing it
 /**
  * Fragment that serves as the home screen for entrants in the application.
  * Displays a list of available events retrieved from Firestore and provides
