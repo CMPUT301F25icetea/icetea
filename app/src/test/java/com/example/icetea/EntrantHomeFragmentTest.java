@@ -38,7 +38,7 @@ import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.List;
-
+//Part of this code was implemented by using GenAI mainly for understanding some implementation process and doing it
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
 public class EntrantHomeFragmentTest {
