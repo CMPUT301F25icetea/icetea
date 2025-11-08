@@ -38,6 +38,7 @@ public class WaitingListController {
                     public void onSuccess(String email) {
                         WaitingListEntry entry = new WaitingListEntry();
                         entry.setUserId(userId);
+                        entry.setEventId(eventId);
                         entry.setEmail(email != null ? email : "error fetching email");
                         entry.setStatus(doc.getString("status"));
                         entry.setSelected(false);
