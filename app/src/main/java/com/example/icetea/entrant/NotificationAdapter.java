@@ -21,13 +21,12 @@ import java.util.Date;
 
 /**
  * Adapter for displaying a list of notifications in a RecyclerView.
- *
  * This adapter binds Notification objects to their respective views, formatting
  * the timestamp and applying visual styling (icons and colors) based on the
  * notification type ("won", "lost", or "replacement"). For "won" notifications
- * that are pending, it displays Accept and Decline buttons.
- *
- * @author IceTea
+ * that are pending, it displays Accept and Decline buttons THAT CAN BE CLICKED AND THE STATUS WOULD BE
+ *UPDATED IN NOTIFICATION COLLECTION IN FIRESTORE DB
+ * @author avyaan
  * @version 1.0
  */
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {

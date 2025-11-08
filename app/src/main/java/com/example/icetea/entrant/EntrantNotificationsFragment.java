@@ -21,24 +21,23 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-
+//HELP WAS TAKEN FROM LLM'S FOR LOGIC IN NOTIFICATIONFRAGMENT, ADAPTER AND TEST CASES
 /**
  * Fragment for displaying a list of notifications to an entrant user.
- *
  * This fragment loads notifications from Firestore for the currently logged-in user
  * and displays them in a RecyclerView using the NotificationAdapter. It handles
  * user authentication checks, progress indication, and error handling.
  *
- * @author IceTea
+ * @author avyaan
  * @version 1.0
  */
 public class EntrantNotificationsFragment extends Fragment {
 
-    private RecyclerView recyclerNotifications;
-    private ProgressBar progressBar;
-    private NotificationAdapter adapter;
-    private ArrayList<Notification> notifications;
-    private FirebaseFirestore db;
+    public RecyclerView recyclerNotifications;
+    public ProgressBar progressBar;
+    public NotificationAdapter adapter;
+    public ArrayList<Notification> notifications;
+    public FirebaseFirestore db;
 
     /**
      * Default constructor required for Fragment instantiation.
@@ -79,13 +78,12 @@ public class EntrantNotificationsFragment extends Fragment {
 
     /**
      * Loads notifications from Firestore for the currently logged-in user.
-     *
      * This method checks if the user is logged in before attempting to fetch data.
      * A progress bar is shown while loading. On success, notifications are added to
      * the adapter and the list is refreshed. On failure, an error message is logged
      * and displayed to the user.
      */
-    private void loadNotifications() {
+    public void loadNotifications() {
         if (!FBAuthenticator.isLoggedIn()) {
             Toast.makeText(getContext(), "Please log in first", Toast.LENGTH_SHORT).show();
             return;
