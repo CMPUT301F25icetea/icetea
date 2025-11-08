@@ -19,7 +19,7 @@ import com.example.icetea.auth.FBAuthenticator;
 import com.example.icetea.models.Event;
 import com.example.icetea.models.EventDB;
 import com.google.firebase.firestore.DocumentSnapshot;
-
+//Part of this code was implemented by using GenAI mainly for understanding some implementation process and doing it
 /**
  * Fragment that displays detailed information about an event and allows entrants
  * to manage their waitlist status. Shows event capacity, current waitlist count,
