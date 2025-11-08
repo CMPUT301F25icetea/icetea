@@ -2,10 +2,7 @@ package com.example.icetea.models;
 
 import com.example.icetea.util.Callback;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-
-import org.w3c.dom.Document;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,6 +37,7 @@ public class WaitingListController {
                     @Override
                     public void onSuccess(String email) {
                         WaitingListEntry entry = new WaitingListEntry();
+                        entry.setUserId(userId);
                         entry.setEmail(email != null ? email : "error fetching email");
                         entry.setStatus(doc.getString("status"));
                         entry.setSelected(false);

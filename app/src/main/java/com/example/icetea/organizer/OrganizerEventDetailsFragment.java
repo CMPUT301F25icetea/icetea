@@ -191,7 +191,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         });
 
         waitingListButton.setOnClickListener(btn -> {
-            NavigationHelper.replaceFragment(getParentFragmentManager(), R.id.organizer_fragment_container, OrganizerWaitingListFragment.newInstance(eventId), true);
+            NavigationHelper.replaceFragment(getParentFragmentManager(), R.id.organizer_fragment_container, OrganizerWaitingListFragment.newInstance(eventId, eventName), true);
         });
         return view;
     }

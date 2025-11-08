@@ -13,7 +13,7 @@ public class OrganizerNotificationManager {
     public OrganizerNotificationManager() {
             notifCollection = FirebaseFirestore.getInstance().collection("Notification");
     }
-
+    //TODO: ADD CALLBACK
     public void sendNotification(String userId, String eventId, String eventName,
                                  String type, String message) {
         Map<String, Object> notifData = new HashMap<>();

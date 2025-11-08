@@ -1,12 +1,14 @@
 package com.example.icetea.models;
 
 public class WaitingListEntry {
+    private String userId;
     private String email;
     private String status;
     private String joinTime;
     private boolean isSelected;
 
-    public WaitingListEntry(String email, String status, String joinTime, boolean isSelected) {
+    public WaitingListEntry(String userId, String email, String status, String joinTime, boolean isSelected) {
+        this.userId = userId;
         this.email = email;
         this.status = status;
         this.joinTime = joinTime;
@@ -15,6 +17,14 @@ public class WaitingListEntry {
 
     public WaitingListEntry() {
 
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getEmail() {

@@ -1,5 +1,6 @@
 package com.example.icetea.organizer;
 
+import android.app.NotificationManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,15 +34,19 @@ public class OrganizerWaitingListFragment extends Fragment {
     private RecyclerView recyclerView;
     private WaitingListAdapter adapter;
     private WaitingListController controller;
+    private OrganizerNotificationManager notificationController;
     private final List<WaitingListEntry> waitingList = new ArrayList<>();
+    Button selectAll, selectCancelled, sendNotification;
     TextView emptyMessage;
-    private static final String ARG_EVENT_ID = "eventId";
-    private String eventId;
+    EditText notificationMessageInput;
+    private static final String ARG_EVENT_ID = "eventId", ARG_EVENT_NAME = "eventName";
+    private String eventId, eventName;
 
-    public static OrganizerWaitingListFragment newInstance(String eventId) {
+    public static OrganizerWaitingListFragment newInstance(String eventId, String eventName) {
         OrganizerWaitingListFragment fragment = new OrganizerWaitingListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_EVENT_ID, eventId);
+        args.putString(ARG_EVENT_NAME, eventName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -67,22 +74,48 @@ public class OrganizerWaitingListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         controller = new WaitingListController();
+        notificationController = new OrganizerNotificationManager();
+
+        selectAll = view.findViewById(R.id.buttonSelectAll);
+        selectCancelled = view.findViewById(R.id.buttonSelectCancelled);
+        sendNotification = view.findViewById(R.id.buttonSendNotification);
+
+        notificationMessageInput = view.findViewById(R.id.inputNotificationMessage);
 
         recyclerView = view.findViewById(R.id.organizerWaitingList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        //waitingList.add(new WaitingListEntry("user1@example.com", "Pending", "2025-11-07 10:00", false));
-        //waitingList.add(new WaitingListEntry("user2@example.com", "Pending", "2025-11-07 11:00", false));
-
         loadWaitingList(view);
-
         adapter = new WaitingListAdapter(waitingList);
         recyclerView.setAdapter(adapter);
 
+        selectAll.setOnClickListener(v -> {
+            for (WaitingListEntry entry : waitingList) {
+                entry.setSelected(true);
+                recyclerView.setAdapter(adapter);
+            }
+        });
+
+        selectCancelled.setOnClickListener(v -> {
+            for (WaitingListEntry entry : waitingList) {
+                entry.setSelected(entry.getStatus().equals("cancelled"));
+                recyclerView.setAdapter(adapter);
+            }
+        });
+        sendNotification.setOnClickListener(v -> {
+            String message = notificationMessageInput.getText().toString().trim();
+            for (WaitingListEntry entry : adapter.getSelectedItems()) {
+                notificationController.sendNotification(entry.getUserId(), eventId, eventName, "generic", message);
+            }
+            notificationMessageInput.setText("");
+            Toast.makeText(getContext(), "Sent notification!", Toast.LENGTH_SHORT).show();
+
+        });
+
+
     }
 
-
     private void loadWaitingList(View view) {
-        controller.getWaitingList(eventId, new Callback<List<WaitingListEntry>>() {
+        controller.getWaitingList(eventId, new Callback<>() {
             @Override
             public void onSuccess(List<WaitingListEntry> result) {
                 if (result.isEmpty()) {
