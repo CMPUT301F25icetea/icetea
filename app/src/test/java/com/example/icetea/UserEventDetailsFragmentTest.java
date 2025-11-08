@@ -31,7 +31,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
+//Part of this code was implemented by using GenAI mainly for understanding some implementation process and doing it
 /**
  * Test suite for UserEventDetailsFragment functionality.
  * Tests event data display, waitlist status management, and user interactions.
