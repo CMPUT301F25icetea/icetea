@@ -16,11 +16,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.icetea.R;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * Displays the list of winners selected for a specific event.
+ *
+ */
 public class OrganizerEntrantWinnersFragment extends Fragment {
 
     private RecyclerView winnersRecyclerView;
@@ -28,8 +32,19 @@ public class OrganizerEntrantWinnersFragment extends Fragment {
     private OrganizerWinnerAdapter adapter;
     private String eventId;
 
+    /**
+     * Default empty constructor.
+     */
     public OrganizerEntrantWinnersFragment() {}
 
+    /**
+     * get the layout for displaying event winners and init UI components.
+     *
+     * @param inflater  the LayoutInflater used to inflate the fragment's layout
+     * @param container the parent view that the fragment’s UI should be attached to
+     * @param savedInstanceState if non-null, this fragment is being re-created from a previous saved state
+     * @return View for this fragment’s layout
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -51,13 +66,18 @@ public class OrganizerEntrantWinnersFragment extends Fragment {
             loadWinners(eventId);
         }
 
-        notifyButton.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Notifications coming soon!", Toast.LENGTH_SHORT).show();
-        });
+        notifyButton.setOnClickListener(v ->
+                Toast.makeText(getContext(), "Notifications coming soon!", Toast.LENGTH_SHORT).show()
+        );
 
         return view;
     }
 
+    /**
+     * get the list of winners for a given event from Firestore and updates the RecyclerView.
+     *
+     * @param eventId the ID of the event whose winners should be loaded
+     */
     private void loadWinners(String eventId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("waitlist")

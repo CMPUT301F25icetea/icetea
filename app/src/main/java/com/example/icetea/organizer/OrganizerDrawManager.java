@@ -19,22 +19,45 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Handles random winner selection, Firestore updates,
+ * and notifications for event draws.
+ */
 public class OrganizerDrawManager {
 
     private final CollectionReference waitlistCollection;
     private final CollectionReference drawLogCollection;
 
+    /**
+     * init Firestore collection references for managing waitlist and draw logs.
+     */
     public OrganizerDrawManager() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         waitlistCollection = db.collection("waitlist");
         drawLogCollection = db.collection("drawLogs");
     }
 
+    /**
+     * Determines the notification type for a user
+     *
+     * @param index    the position of the user in the shuffled list
+     * @param drawSize the number of winners to select
+     * @return "won" if the user is in the draw size, otherwise "lost"
+     * @throws IllegalArgumentException if drawSize is not positive
+     */
     public static String getNotificationType(int index, int drawSize) {
         if (drawSize <= 0) throw new IllegalArgumentException("drawSize must be positive");
         return (index < drawSize) ? "won" : "lost";
     }
 
+    /**
+     * Randomly selects number of user IDs as winners from the provided waitlist.
+     *
+     * @param waitlistUserIds the list of user IDs on the waitlist
+     * @param drawSize        the number of winners to select
+     * @return a list of selected winner user IDs
+     * @throws IllegalArgumentException if drawSize is not positive
+     */
     public static List<String> selectWinners(List<String> waitlistUserIds, int drawSize) {
         if (waitlistUserIds == null || waitlistUserIds.isEmpty()) return new ArrayList<>();
         if (drawSize <= 0) throw new IllegalArgumentException("drawSize must be positive");
@@ -46,6 +69,14 @@ public class OrganizerDrawManager {
         return new ArrayList<>(shuffled.subList(0, actualDrawSize));
     }
 
+    /**
+     * Randomly selects the final entrants (winners) from a list of waitlisted user IDs.
+     *
+     * @param waitlistUserIds the list of user IDs on the waitlist
+     * @param drawSize        the number of winners to select
+     * @return a list of final entrant user IDs
+     * @throws IllegalArgumentException if drawSize is not positive
+     */
     public static List<String> getFinalEntrants(List<String> waitlistUserIds, int drawSize) {
         if (waitlistUserIds == null || waitlistUserIds.isEmpty()) return new ArrayList<>();
         if (drawSize <= 0) throw new IllegalArgumentException("drawSize must be positive");
@@ -57,6 +88,14 @@ public class OrganizerDrawManager {
         return new ArrayList<>(shuffled.subList(0, actualDrawSize));
     }
 
+    /**
+     * Executes the draw process for a specific event.
+     *
+     * @param context   the application context for displaying Toast messages
+     * @param eventId   the unique Firestore ID of the event
+     * @param eventName the name of the event for notification purposes
+     * @param drawSize  the number of winners to select
+     */
     public void drawEntrants(Context context, String eventId, String eventName, int drawSize) {
         waitlistCollection.whereEqualTo("eventId", eventId)
                 .whereEqualTo("status", "invited")
@@ -126,6 +165,15 @@ public class OrganizerDrawManager {
                         Toast.makeText(context, "Error checking existing winners.", Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * Sends a notification to a user after the draw has been completed.
+     *
+     * @param userId    the ID of the user to notify
+     * @param eventId   the ID of the event associated with the draw
+     * @param eventName the name of the event
+     * @param type      the type of notification
+     * @param message   the message to include in the notification
+     */
     protected void sendNotification(String userId, String eventId, String eventName,
                                     String type, String message) {
         OrganizerNotificationManager notificationManager = new OrganizerNotificationManager();

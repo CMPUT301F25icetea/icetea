@@ -31,24 +31,52 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * Handles the organizer’s event creation form, including input validation,
+ * date selection, and submission to the database.
+ */
 public class OrganizerCreateEventFragment extends Fragment {
 
     private EventController controller;
     private EditText inputName, inputDescription, inputStartDate, inputEndDate,
             inputRegistrationOpen, inputRegistrationEnd, inputCapacity, inputLocation;
 
+    /**
+     * defult empty constructor
+     */
     public OrganizerCreateEventFragment() { }
 
+    /**
+     * Creates a new instance of {@code OrganizerCreateEventFragment}.
+     *
+     * @return a new instance of OrganizerCreateEventFragment
+     */
     public static OrganizerCreateEventFragment newInstance() {
         return new OrganizerCreateEventFragment();
     }
 
+    /**
+     * get the layout for this fragment's UI.
+     *
+     * @param inflater  the LayoutInflater used to inflate the fragment's layout
+     * @param container the parent view that the fragment’s UI should be attached to
+     * @param savedInstanceState if non-null, this fragment is being re-created from a previous saved state
+     * @return the root View for this fragment’s layout
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_organizer_create_event, container, false);
     }
 
+    /**
+     * Called after {@link #onCreateView}. Initializes the event creation form,
+     * sets up date pickers, and handles the create button click to
+     * trigger event creation through {@link EventController}.
+     *
+     * @param view the view returned by {@link #onCreateView}
+     * @param savedInstanceState if non-null, this fragment is being re-created from a previous saved state
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);

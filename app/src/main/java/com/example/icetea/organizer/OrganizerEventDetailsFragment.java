@@ -1,17 +1,8 @@
 package com.example.icetea.organizer;
 
 import android.app.AlertDialog;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.media.Image;
-import android.net.Uri;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
-
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,41 +10,49 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.LinearLayout;
 
 import com.example.icetea.util.NavigationHelper;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-
-import android.widget.LinearLayout;
 
 import com.example.icetea.R;
 import com.example.icetea.models.WaitlistDB;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.example.icetea.util.Callback;
 import com.example.icetea.util.QRCode;
 
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ *
+ * Displays detailed information about a selected event for the organizer.
+ *
+ */
 public class OrganizerEventDetailsFragment extends Fragment {
 
     private TextView nameText, descText, locationText, dateRangeText, regRangeText, capacityText;
-    private Button finalEntrantsButton, drawAttendeesButton;
-    private Button waitingListButton;
+    private Button finalEntrantsButton, drawAttendeesButton, waitingListButton;
     private LinearLayout waitingListContainer;
-    private ListenerRegistration waitlistRegistration;
     private ImageView qrImageView;
     private String eventId, eventName;
 
+    /**
+     * Default empty constructor.
+     */
     public OrganizerEventDetailsFragment() {
     }
 
+    /**
+     * get the event details layout and init all event-related UI components.
+     *
+     * @param inflater  the LayoutInflater used to get the fragment's layout
+     * @param container the parent view that the fragment’s UI should be attached to
+     * @param savedInstanceState if non-null, this fragment is being re-created from a previous saved state
+     * @return the View for this fragment’s layout
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_organizer_event_details, container, false);
@@ -67,7 +66,6 @@ public class OrganizerEventDetailsFragment extends Fragment {
         finalEntrantsButton = view.findViewById(R.id.buttonFinalEntrants);
         drawAttendeesButton = view.findViewById(R.id.buttonDrawAttendees);
         waitingListButton = view.findViewById(R.id.buttonWaitingList);
-
         qrImageView = view.findViewById(R.id.qrImageView);
 
         Bundle args = getArguments();
@@ -91,22 +89,26 @@ public class OrganizerEventDetailsFragment extends Fragment {
         if (eventId != null) {
             checkIfDrawAlreadyDone();
         }
+
+        // Generate QR code for the event
         QRCode.generateQRCode(eventId, qrImageView);
 
-        qrImageView.setOnClickListener(v -> {QRCode.downloadQrCode(getContext(), qrImageView, new Callback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                Toast.makeText(getContext(), "QR code saved to photos!", Toast.LENGTH_SHORT).show();
-            }
+        // Allow downloading QR code
+        qrImageView.setOnClickListener(v -> {
+            QRCode.downloadQrCode(getContext(), qrImageView, new Callback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    Toast.makeText(getContext(), "QR code saved to photos!", Toast.LENGTH_SHORT).show();
+                }
 
-            @Override
-            public void onFailure(Exception e) {
-                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-
-            }
+                @Override
+                public void onFailure(Exception e) {
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
         });
-        });
 
+        // View final entrants
         finalEntrantsButton.setOnClickListener(v -> {
             if (eventId == null) {
                 Toast.makeText(getContext(), "Event ID not found.", Toast.LENGTH_SHORT).show();
@@ -136,6 +138,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
                     });
         });
 
+        // Draw attendees
         drawAttendeesButton.setOnClickListener(v -> {
             if (eventId == null) {
                 Toast.makeText(getContext(), "Event ID not found.", Toast.LENGTH_SHORT).show();
@@ -190,9 +193,14 @@ public class OrganizerEventDetailsFragment extends Fragment {
             builder.show();
         });
 
-        waitingListButton.setOnClickListener(btn -> {
-            NavigationHelper.replaceFragment(getParentFragmentManager(), R.id.organizer_fragment_container, OrganizerWaitingListFragment.newInstance(eventId, eventName), true);
-        });
+        // Navigate to waiting list view
+        waitingListButton.setOnClickListener(btn ->
+                NavigationHelper.replaceFragment(getParentFragmentManager(),
+                        R.id.organizer_fragment_container,
+                        OrganizerWaitingListFragment.newInstance(eventId, eventName),
+                        true)
+        );
+
         return view;
     }
 
@@ -212,9 +220,11 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Error checking draw status.", Toast.LENGTH_SHORT).show());
     }
+
     private String formatDate(long millis) {
         if (millis == 0) return "N/A";
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
         return sdf.format(new Date(millis));
     }
 }
+

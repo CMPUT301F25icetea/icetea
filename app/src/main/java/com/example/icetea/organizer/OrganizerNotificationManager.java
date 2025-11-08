@@ -14,6 +14,16 @@ public class OrganizerNotificationManager {
             notifCollection = FirebaseFirestore.getInstance().collection("Notification");
     }
     //TODO: ADD CALLBACK
+
+    /**
+     * Sends a notification to a specific user by adding a new document to Firestore.
+     *
+     * @param userId    the ID of the user receiving the notification
+     * @param eventId   the ID of the event associated with this notification
+     * @param eventName the name of the event
+     * @param type      the notification type
+     * @param message   the message content of the notification
+     */
     public void sendNotification(String userId, String eventId, String eventName,
                                  String type, String message) {
         Map<String, Object> notifData = new HashMap<>();
