@@ -4,11 +4,9 @@ import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.example.icetea.R;
-import com.example.icetea.util.NavigationHelper;
+
 /**
  * AuthActivity serves as the entry point for authentication.
  *
@@ -33,7 +31,7 @@ public class AuthActivity extends AppCompatActivity {
         getSupportFragmentManager()
                 .beginTransaction()
                 .setReorderingAllowed(true)
-                .replace(R.id.entry_fragment_container, LandingPageFragment.newInstance())
+                .replace(R.id.auth_fragment_container, LandingPageFragment.newInstance())
                 .commit();
     }
 }

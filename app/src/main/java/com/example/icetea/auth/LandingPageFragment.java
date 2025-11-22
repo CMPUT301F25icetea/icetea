@@ -1,10 +1,12 @@
 package com.example.icetea.auth;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -12,9 +14,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.icetea.MainActivity;
-import com.example.icetea.util.NavigationHelper;
+import com.example.icetea.util.Callback;
 import com.example.icetea.R;
 
 /**
@@ -25,6 +28,7 @@ import com.example.icetea.R;
  */
 public class LandingPageFragment extends Fragment {
 
+    private AuthController controller;
     /**
      * Required empty public constructor.
      */
@@ -72,28 +76,29 @@ public class LandingPageFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        controller = new AuthController();
 
-        // Check if user is logged in
-        if (FBAuthenticator.isLoggedIn()) {
-            NavigationHelper.openActivity(this, MainActivity.class);
-            return;
-        }
+        controller.userExists(new Callback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean exists) {
+                if (exists) {
+                    FragmentActivity activity = getActivity();
+                    if (activity != null) {
+                        startActivity(new Intent(activity, MainActivity.class));
+                        activity.finish();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         // Set up login and sign-up buttons
-        Button loginButton = view.findViewById(R.id.buttonGoToLoginFromLandingPage);
         Button signUpButton = view.findViewById(R.id.buttonGoToSignUpFromLandingPage);
-
-        loginButton.setOnClickListener(v -> {
-            FragmentManager fm = getParentFragmentManager();
-            FragmentTransaction transaction = fm.beginTransaction();
-            transaction.setReorderingAllowed(true);
-            transaction.setCustomAnimations(
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_left
-            );
-            transaction.replace(R.id.entry_fragment_container, LoginFragment.newInstance());
-            transaction.commit();
-        });
 
         signUpButton.setOnClickListener(v -> {
             FragmentManager fm = getParentFragmentManager();
@@ -103,11 +108,8 @@ public class LandingPageFragment extends Fragment {
                     R.anim.slide_in_right,
                     R.anim.slide_out_left
             );
-            transaction.replace(R.id.entry_fragment_container, SignUpFragment.newInstance());
+            transaction.replace(R.id.auth_fragment_container, SignUpFragment.newInstance());
             transaction.commit();
         });
-
-        // add deviceonclicklistener
-
     }
 }

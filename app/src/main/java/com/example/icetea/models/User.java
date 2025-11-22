@@ -5,7 +5,12 @@ package com.example.icetea.models;
  * Contains basic information such as ID, email, role, and optional first and last names.
  */
 public class User {
-    private String id, email, role, firstName, lastName;
+    private String id;
+    private String email;
+
+    private String name;
+    private String phone;
+    private boolean notificationsEnabled;
 
     /**
      * Default constructor required by Firestore and serialization frameworks.
@@ -19,12 +24,11 @@ public class User {
      *
      * @param id The unique user ID
      * @param email The user's email address
-     * @param role The user's role (e.g., "entrant" or "organizer")
      */
-    public User(String id, String email, String role) {
+    public User(String id, String name, String email) {
         this.id = id;
+        this.name = name;
         this.email = email;
-        this.role = role;
     }
 
     /**
@@ -63,57 +67,11 @@ public class User {
         this.email = email;
     }
 
-    /**
-     * Returns the user's role.
-     *
-     * @return Role string
-     */
-    public String getRole() {
-        return role;
+    public String getName() {
+        return name;
     }
 
-    /**
-     * Sets the user's role.
-     *
-     * @param role Role string
-     */
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    /**
-     * Returns the user's first name.
-     *
-     * @return First name
-     */
-    public String getFirstName() {
-        return firstName;
-    }
-
-    /**
-     * Sets the user's first name.
-     *
-     * @param firstName First name
-     */
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    /**
-     * Returns the user's last name.
-     *
-     * @return Last name
-     */
-    public String getLastName() {
-        return lastName;
-    }
-
-    /**
-     * Sets the user's last name.
-     *
-     * @param lastName Last name
-     */
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setName(String name) {
+        this.name = name;
     }
 }

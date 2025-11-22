@@ -100,53 +100,39 @@
             android:background="@null"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Register as a ..."
-        android:fontFamily="@font/roboto_slab"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayoutRoleGroup"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+<!--    <com.google.android.material.textfield.TextInputLayout-->
+<!--        android:id="@+id/inputLayoutPhoneSignUp"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:hint="Phone"-->
+<!--        app:boxBackgroundMode="outline"-->
+<!--        app:boxBackgroundColor="@color/darkerBeige"-->
+<!--        app:boxStrokeColor="@color/black"-->
+<!--        app:hintTextColor="@color/black"-->
+<!--        app:boxStrokeWidth="2dp"-->
+<!--        app:boxCornerRadiusTopStart="8dp"-->
+<!--        app:boxCornerRadiusTopEnd="8dp"-->
+<!--        app:boxCornerRadiusBottomStart="8dp"-->
+<!--        app:boxCornerRadiusBottomEnd="8dp"-->
+<!--        app:endIconMode="custom"-->
+<!--        app:layout_constraintVertical_bias="0.8"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintWidth_percent="0.85">-->
 
-    <LinearLayout
-        android:id="@+id/linearLayoutRoleGroup"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal"
-        app:layout_constraintVertical_bias="0.77"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonEntrantSignUp"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/button_role_unselected"
-            android:text="Entrant"
-            android:textColor="@color/black"
-            android:layout_marginStart="8dp"
-            app:cornerRadius="8dp"
-            app:strokeWidth="2dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonOrganizerSignUp"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/button_role_unselected"
-            android:text="Organizer"
-            android:textColor="@color/black"
-            android:layout_marginStart="8dp"
-            app:cornerRadius="8dp"
-            app:strokeWidth="2dp" />
-    </LinearLayout>
-
+<!--        <com.google.android.material.textfield.TextInputEditText-->
+<!--            android:id="@+id/inputEditTextPhoneSignUp"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:drawableStart="@drawable/phone_icon"-->
+<!--            android:drawablePadding="8dp"-->
+<!--            android:inputType="phone"-->
+<!--            android:paddingVertical="12dp"-->
+<!--            android:textColor="@android:color/black"-->
+<!--            android:background="@null"/>-->
+<!--    </com.google.android.material.textfield.TextInputLayout>-->
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonContinueSignUp"

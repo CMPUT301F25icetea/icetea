@@ -98,11 +98,11 @@ public class ProfileFragment extends Fragment {
                     swapRoleButton.setVisibility(View.VISIBLE);
                     swapRoleButton.setOnClickListener(v -> {
                         // Swap between organizer and entrant views
-                        if (getId() == R.id.entrant_fragment_container) {
-                            NavigationHelper.replaceFragment(requireActivity().getSupportFragmentManager(), R.id.main, OrganizerContainerFragment.newInstance(), false);
-                        } else if (getId() == R.id.organizer_fragment_container) {
-                            NavigationHelper.replaceFragment(requireActivity().getSupportFragmentManager(), R.id.main, EntrantContainerFragment.newInstance(), false);
-                        }
+//                        if (getId() == R.id.entrant_fragment_container) {
+//                            NavigationHelper.replaceFragment(requireActivity().getSupportFragmentManager(), R.id.main, OrganizerContainerFragment.newInstance(), false);
+//                        } else if (getId() == R.id.organizer_fragment_container) {
+//                            NavigationHelper.replaceFragment(requireActivity().getSupportFragmentManager(), R.id.main, EntrantContainerFragment.newInstance(), false);
+//                        }
                     });
 
                 } else {

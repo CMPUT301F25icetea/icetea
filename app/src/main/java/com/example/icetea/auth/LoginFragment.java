@@ -1,6 +1,5 @@
 package com.example.icetea.auth;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -22,7 +21,6 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +31,6 @@ import android.widget.Toast;
 
 import com.example.icetea.MainActivity;
 import com.example.icetea.util.Callback;
-import com.example.icetea.util.NavigationHelper;
 import com.example.icetea.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -153,7 +150,7 @@ public class LoginFragment extends Fragment {
                     R.anim.slide_in_left,
                     R.anim.slide_out_right
             );
-            transaction.replace(R.id.entry_fragment_container, LandingPageFragment.newInstance());
+            transaction.replace(R.id.auth_fragment_container, LandingPageFragment.newInstance());
             transaction.commit();
         });
 
@@ -210,7 +207,7 @@ public class LoginFragment extends Fragment {
                     R.anim.slide_in_right,
                     R.anim.slide_out_left
             );
-            transaction.replace(R.id.entry_fragment_container, SignUpFragment.newInstance());
+            transaction.replace(R.id.auth_fragment_container, SignUpFragment.newInstance());
             transaction.commit();
         });
     }
