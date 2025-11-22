@@ -4,7 +4,6 @@
     android:viewportWidth="400"
     android:viewportHeight="800">
 
-    <!-- Top golden yellow wave region -->
     <path
         android:fillColor="@color/goldenYellow"
         android:pathData="
@@ -15,7 +14,6 @@
             C 300,360 100,240 0,300
             Z" />
 
-    <!-- Wave line -->
     <path
         android:strokeColor="@color/goldenYellow"
         android:strokeWidth="6"
@@ -24,7 +22,6 @@
             M 0,300
             C 100,240 300,360 400,300" />
 
-    <!-- Bottom soft beige region -->
     <path
         android:fillColor="@color/beige"
         android:pathData="
