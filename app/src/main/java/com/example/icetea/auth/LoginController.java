@@ -1,5 +1,6 @@
 package com.example.icetea.auth;
 
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Patterns;
 
@@ -12,23 +13,6 @@ import com.example.icetea.util.Callback;
  */
 public class LoginController {
 
-    /**
-     * Validates the provided email and password input.
-     *
-     * @param email The user's email address.
-     * @param password The user's password.
-     * @return A string containing an error message if validation fails,
-     *         or null if the input is valid.
-     */
-    public String validateInput(String email, String password) {
-
-        if (email.isEmpty() || password.isEmpty()) {
-            return "Email/Password cannot be empty";
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            return "Invalid Email Format";
-        }
-        return null;
-    }
 
     /**
      * Attempts to log in a user with the given email and password.
@@ -44,8 +28,28 @@ public class LoginController {
             if (task.isSuccessful()) {
                 callback.onSuccess(null);
             } else {
-                callback.onFailure(new Exception(task.getException() != null ? task.getException().getMessage() : "Unknown Error : LoginController"));
+                if (task.getException() != null) {
+                    callback.onFailure(task.getException());
+                } else {
+                    callback.onFailure(new Exception("Unknown Error : LoginController"));
+                }
             }
         });
+    }
+
+    public String validateEmail(String email) {
+        if (email.isEmpty()) {
+            return "Email cannot be empty";
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            return "Email is invalid";
+        }
+        return null;
+    }
+
+    public String validatePasswordLogin(String password) {
+        if (password.isEmpty()) {
+            return "Password cannot be empty";
+        }
+        return null;
     }
 }

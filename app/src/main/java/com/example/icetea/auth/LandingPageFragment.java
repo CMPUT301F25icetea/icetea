@@ -5,6 +5,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,8 +16,6 @@ import android.widget.Button;
 import com.example.icetea.MainActivity;
 import com.example.icetea.util.NavigationHelper;
 import com.example.icetea.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 /**
  * Fragment representing the landing page of the app.
@@ -74,22 +74,40 @@ public class LandingPageFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Check if user is logged in
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (FBAuthenticator.isLoggedIn()) {
             NavigationHelper.openActivity(this, MainActivity.class);
             return;
         }
 
         // Set up login and sign-up buttons
-        Button loginButton = view.findViewById(R.id.buttonGoToLogin);
-        Button signUpButton = view.findViewById(R.id.buttonGoToSignUp);
+        Button loginButton = view.findViewById(R.id.buttonGoToLoginFromLandingPage);
+        Button signUpButton = view.findViewById(R.id.buttonGoToSignUpFromLandingPage);
 
         loginButton.setOnClickListener(v -> {
-            NavigationHelper.replaceFragment(getParentFragmentManager(), R.id.entry_fragment_container, LoginFragment.newInstance(), true);
+            FragmentManager fm = getParentFragmentManager();
+            FragmentTransaction transaction = fm.beginTransaction();
+            transaction.setReorderingAllowed(true);
+            transaction.setCustomAnimations(
+                    R.anim.slide_in_right,
+                    R.anim.slide_out_left
+            );
+            transaction.replace(R.id.entry_fragment_container, LoginFragment.newInstance());
+            transaction.commit();
         });
 
         signUpButton.setOnClickListener(v -> {
-            NavigationHelper.replaceFragment(getParentFragmentManager(), R.id.entry_fragment_container, SignUpFragment.newInstance(), true);
+            FragmentManager fm = getParentFragmentManager();
+            FragmentTransaction transaction = fm.beginTransaction();
+            transaction.setReorderingAllowed(true);
+            transaction.setCustomAnimations(
+                    R.anim.slide_in_right,
+                    R.anim.slide_out_left
+            );
+            transaction.replace(R.id.entry_fragment_container, SignUpFragment.newInstance());
+            transaction.commit();
         });
+
+        // add deviceonclicklistener
+
     }
 }
