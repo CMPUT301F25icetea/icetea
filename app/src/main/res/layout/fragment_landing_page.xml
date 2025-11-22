@@ -5,46 +5,72 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background"
     tools:context=".auth.LandingPageFragment">
 
+    <TextView
+        android:id="@+id/textViewSloganLandingPage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Events Made Easy"
+        android:fontFamily="@font/roboto_slab"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.02"
+        android:textColor="@color/black"
+        app:layout_constraintVertical_bias="0.15"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
-        android:id="@+id/buttonContainer"
+        android:id="@+id/buttonContainerLandingPage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
+        android:orientation="vertical"
+        app:layout_constraintVertical_bias="0.9"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <Button
-            android:id="@+id/buttonGoToLogin"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonGoToLoginFromLandingPage"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
-            android:text="Login"
-            android:backgroundTint="@null"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp"
+            android:text="SIGN IN"
+            app:backgroundTint="@color/emeraldGreen"
+            app:cornerRadius="8dp"
+            android:textColor="@android:color/white"
+        />
 
-        <Button
-            android:id="@+id/buttonGoToSignUp"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonGoToSignUpFromLandingPage"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
-            android:text="Sign Up"
-            android:backgroundTint="@null" />
-
+            android:layout_marginBottom="8dp"
+            android:text="CREATE AN ACCOUNT"
+            android:textColor="@android:color/black"
+            app:backgroundTint="@color/zxing_transparent"
+            app:strokeColor="@color/black"
+            app:strokeWidth="2dp"
+            app:cornerRadius="8dp"/>
     </LinearLayout>
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/buttonGoToSignUpWithDevice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Continue as a guest"
-        android:textSize="20sp"
-        android:textColor="#67DAE9"
-        android:layout_marginBottom="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Continue with this device"
+        android:textColor="#4A90E2"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="20dp"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
