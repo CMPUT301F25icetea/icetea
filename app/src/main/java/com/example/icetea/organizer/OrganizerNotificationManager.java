@@ -11,7 +11,7 @@ public class OrganizerNotificationManager {
     private final CollectionReference notifCollection;
 
     public OrganizerNotificationManager() {
-            notifCollection = FirebaseFirestore.getInstance().collection("Notification");
+            notifCollection = FirebaseFirestore.getInstance().collection("notification");
     }
     //TODO: ADD CALLBACK
 

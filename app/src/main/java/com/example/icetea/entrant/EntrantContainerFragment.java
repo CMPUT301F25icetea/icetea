@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.icetea.common.ProfileFragment;
 import com.example.icetea.util.NavigationHelper;
 import com.example.icetea.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -48,7 +47,7 @@ public class EntrantContainerFragment extends Fragment {
                 NavigationHelper.replaceFragment(getChildFragmentManager(), R.id.entrant_fragment_container, EntrantScannerFragment.newInstance(), false);
                 return true;
             } else if (id == R.id.nav_entrant_profile) {
-                NavigationHelper.replaceFragment(getChildFragmentManager(), R.id.entrant_fragment_container, ProfileFragment.newInstance(), false);
+                //NavigationHelper.replaceFragment(getChildFragmentManager(), R.id.entrant_fragment_container, ProfileFragment.newInstance(), false);
                 return true;
             } else if (id == R.id.nav_entrant_settings) {
                 NavigationHelper.replaceFragment(getChildFragmentManager(), R.id.entrant_fragment_container, EntrantSettingsFragment.newInstance(), false);

@@ -1,34 +1,28 @@
 package com.example.icetea.auth;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.example.icetea.MainActivity;
 import com.example.icetea.util.Callback;
-import com.example.icetea.util.NavigationHelper;
 import com.example.icetea.R;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -40,7 +34,7 @@ import com.google.android.material.textfield.TextInputLayout;
  * the user to {@link MainActivity}.
  */
 public class SignUpFragment extends Fragment {
-    private SignUpController controller;
+    private AuthController controller;
 
     /**
      * Default empty public constructor.
@@ -75,7 +69,7 @@ public class SignUpFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Initialize the controller
-        controller = new SignUpController();
+        controller = new AuthController();
 
         ImageButton backButton = view.findViewById(R.id.imageButtonSignUpBack);
         Button continueButton = view.findViewById(R.id.buttonContinueSignUp);
@@ -83,8 +77,7 @@ public class SignUpFragment extends Fragment {
         TextInputLayout emailInputLayout = view.findViewById(R.id.inputLayoutEmailSignUp);
         TextInputEditText nameEditText = view.findViewById(R.id.inputEditTextNameSignUp);
         TextInputEditText emailEditText = view.findViewById(R.id.inputEditTextEmailSignUp);
-        Button entrantRoleButton = view.findViewById(R.id.buttonEntrantSignUp);
-        Button organizerRoleButton = view.findViewById(R.id.buttonOrganizerSignUp);
+
 
         // Back button bounds
         ViewCompat.setOnApplyWindowInsetsListener(backButton, (v, insets) -> {
@@ -104,71 +97,50 @@ public class SignUpFragment extends Fragment {
                     R.anim.slide_in_left,
                     R.anim.slide_out_right
             );
-            transaction.replace(R.id.entry_fragment_container, LandingPageFragment.newInstance());
+            transaction.replace(R.id.auth_fragment_container, LandingPageFragment.newInstance());
             transaction.commit();
         });
 
-        // Track selected role
-        final MaterialButton[] selectedButton = new MaterialButton[1]; // Initially null
-
-        // Utility to update selection
-        View.OnClickListener roleClickListener = v -> {
-            MaterialButton clicked = (MaterialButton) v;
-
-            // Reset previous selection
-            if (selectedButton[0] != null) {
-                selectedButton[0].setBackgroundTintList(
-                        ContextCompat.getColorStateList(requireContext(), R.color.button_role_unselected)
-                );
-                selectedButton[0].setScaleX(1f);
-                selectedButton[0].setScaleY(1f);
-            }
-
-            // Set new selection
-            clicked.setBackgroundTintList(
-                    ContextCompat.getColorStateList(requireContext(), R.color.darkerBeige)
-            );
-            clicked.setScaleX(1.1f); // 10% bigger
-            clicked.setScaleY(1.1f);
-
-            selectedButton[0] = clicked;
-        };
-
-        // Set click listeners
-        entrantRoleButton.setOnClickListener(roleClickListener);
-        organizerRoleButton.setOnClickListener(roleClickListener);
 
 
-        // Sign-up button handles validation and account creation
         continueButton.setOnClickListener(v -> {
-            String email = emailEditText.getText().toString().trim();
-            String password = "123456";//passwordEditText.getText().toString().trim();
-            String role = "";
+            nameInputLayout.setError(null);
+            emailInputLayout.setError(null);
 
-            if (selectedButton[0] != null) {
-                int id = selectedButton[0].getId();
-                if (id == R.id.buttonEntrantSignUp) {
-                    // Entrant is selected
-                    role = "entrant";
-                    Log.d("Role", "Entrant selected");
-                } else if (id == R.id.buttonOrganizerSignUp) {
-                    // Organizer is selected
-                    Log.d("Role", "Organizer selected");
-                    role = "organizer";
-                }
+            String name = nameEditText.getText() != null ? nameEditText.getText().toString().trim() : "";
+            String email = emailEditText.getText() != null ? emailEditText.getText().toString().trim() : "";
+
+            // Validate
+            String nameError = controller.validateName(name);
+            String emailError = controller.validateEmail(email);
+
+            boolean hasError = false;
+
+            if (nameError != null) {
+                nameInputLayout.setError(nameError);
+                hasError = true;
             }
 
-            // Perform sign-up
-            controller.signUp(email, password, role, new Callback<Void>() {
+            if (emailError != null) {
+                emailInputLayout.setError(emailError);
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            controller.signUp(name, email, new Callback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
-                    // Navigate to MainActivity on successful sign-up
-                    NavigationHelper.openActivity(SignUpFragment.this, MainActivity.class);
+
+                    FragmentActivity activity = getActivity();
+                    if (activity != null) {
+                        startActivity(new Intent(activity, MainActivity.class));
+                        activity.finish();
+                    }
                 }
 
                 @Override
                 public void onFailure(Exception e) {
-                    // Show error message if sign-up fails
                     Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });

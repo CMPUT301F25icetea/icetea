@@ -57,8 +57,8 @@ public class UserDB {
      * @param id User ID
      * @param listener Listener to handle the retrieved document
      */
-    public void getUser(String id, OnCompleteListener<DocumentSnapshot> listener) {
-        usersCollection.document(id)
+    public void getUser(String fid, OnCompleteListener<DocumentSnapshot> listener) {
+        usersCollection.document(fid)
                 .get()
                 .addOnCompleteListener(listener);
     }
@@ -70,8 +70,8 @@ public class UserDB {
      * @param updates HashMap of fields to update
      * @param listener Listener to handle completion
      */
-    public void updateUser(String id, HashMap<String, Object> updates, OnCompleteListener<Void> listener) {
-        usersCollection.document(id)
+    public void updateUser(String fid, HashMap<String, Object> updates, OnCompleteListener<Void> listener) {
+        usersCollection.document(fid)
                 .update(updates)
                 .addOnCompleteListener(listener);
     }

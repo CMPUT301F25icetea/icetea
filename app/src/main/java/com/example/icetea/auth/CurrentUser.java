@@ -1,36 +1,28 @@
-package com.example.icetea.models;
+package com.example.icetea.auth;
 
-public class User {
-    private String id;
-    private String email;
+import android.graphics.Bitmap;
+
+public class CurrentUser {
+    private String fid;
     private String name;
+    private String email;
     private String phone;
     private boolean notifications;
-    private String avatar;
+    private Bitmap avatar;
 
-    /**
-     * Default constructor required by Firestore and serialization frameworks.
-     */
-    public User() {
-        // Required empty constructor
+    private static CurrentUser instance;
+
+    public static CurrentUser getInstance() {
+        if (instance == null) instance = new CurrentUser();
+        return instance;
     }
 
-    /**
-     * Returns the user's ID.
-     *
-     * @return User ID
-     */
-    public String getId() {
-        return id;
+    public String getFid() {
+        return fid;
     }
 
-    /**
-     * Sets the user's ID.
-     *
-     * @param id User ID
-     */
-    public void setId(String id) {
-        this.id = id;
+    public void setFid(String fid) {
+        this.fid = fid;
     }
 
     public String getName() {
@@ -65,11 +57,11 @@ public class User {
         this.notifications = notifications;
     }
 
-    public String getAvatar() {
+    public Bitmap getAvatar() {
         return avatar;
     }
 
-    public void setAvatar(String avatar) {
+    public void setAvatar(Bitmap avatar) {
         this.avatar = avatar;
     }
 }

@@ -5,7 +5,7 @@
     android:viewportHeight="800">
 
     <path
-        android:fillColor="@color/goldenYellow"
+        android:fillColor="@color/yellow"
         android:pathData="
             M 0,300
             L 0,0
@@ -15,7 +15,7 @@
             Z" />
 
     <path
-        android:strokeColor="@color/goldenYellow"
+        android:strokeColor="@color/yellow"
         android:strokeWidth="6"
         android:fillColor="@android:color/transparent"
         android:pathData="
