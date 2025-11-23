@@ -76,28 +76,9 @@ public class LandingPageFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         controller = new AuthController();
 
-        controller.userExists(new Callback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean exists) {
-                if (exists) {
-                    FragmentActivity activity = getActivity();
-                    if (activity != null) {
-                        startActivity(new Intent(activity, MainActivity.class));
-                        activity.finish();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-
-        // Set up login and sign-up buttons
         Button signUpButton = view.findViewById(R.id.buttonGoToSignUpFromLandingPage);
 
         signUpButton.setOnClickListener(v -> {

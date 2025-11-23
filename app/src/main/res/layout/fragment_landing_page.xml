@@ -33,7 +33,7 @@
         android:gravity="center"
         android:text="GET STARTED"
         android:textColor="@color/white"
-        app:backgroundTint="@color/emeraldGreen"
+        app:backgroundTint="@color/green"
         app:cornerRadius="8dp"
         app:layout_constraintVertical_bias="0.9"
         app:layout_constraintBottom_toBottomOf="parent"

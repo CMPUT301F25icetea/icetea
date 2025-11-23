@@ -107,8 +107,8 @@ public class SignUpFragment extends Fragment {
             nameInputLayout.setError(null);
             emailInputLayout.setError(null);
 
-            String name = String.valueOf(nameEditText.getText()).trim();
-            String email = String.valueOf(emailEditText.getText()).trim();
+            String name = nameEditText.getText() != null ? nameEditText.getText().toString().trim() : "";
+            String email = emailEditText.getText() != null ? emailEditText.getText().toString().trim() : "";
 
             // Validate
             String nameError = controller.validateName(name);

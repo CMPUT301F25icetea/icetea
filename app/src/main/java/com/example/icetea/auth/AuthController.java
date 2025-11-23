@@ -5,22 +5,31 @@ import android.util.Patterns;
 import com.example.icetea.models.User;
 import com.example.icetea.models.UserDB;
 import com.example.icetea.util.Callback;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
-
-import org.checkerframework.checker.units.qual.C;
 
 public class AuthController {
 
     public void signUp(String name, String email, Callback<Void> callback) {
-        FBI.getCurrentFID(task -> {
+        FBInstallations.getCurrentFID(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 String fid = task.getResult();
+                FBInstallations.setFid(fid);
 
                 User newUser = new User();
                 newUser.setId(fid);
                 newUser.setName(name);
                 newUser.setEmail(email);
+                newUser.setPhone(null);
+                newUser.setNotifications(true);
+                newUser.setAvatar(null);
+
+                CurrentUser user = CurrentUser.getInstance();
+                user.setFid(fid);
+                user.setName(name);
+                user.setEmail(email);
+                user.setPhone(null);
+                user.setNotifications(true);
+                user.setAvatar(null);
 
                 UserDB.getInstance().saveUser(newUser, dbtask -> {
                     if (dbtask.isSuccessful()) {
@@ -44,10 +53,10 @@ public class AuthController {
 
     public void userExists(Callback<Boolean> callback) {
         // Get current FID
-        FBI.getCurrentFID(task -> {
+        FBInstallations.getCurrentFID(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 String fid = task.getResult();
-
+                FBInstallations.setFid(fid);
                 // Check if user exists in Firestore
                 UserDB.getInstance().getUser(fid, userTask -> {
                     if (userTask.isSuccessful() && userTask.getResult() != null) {

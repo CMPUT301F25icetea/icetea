@@ -2,12 +2,10 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="backgroundColour">#8A8686</color>
-    <color name="goldenYellow">#DAA520</color>
-    <color name="emeraldGreen">#105E26</color>
-    <color name="beige">#E2D8C2</color>
-    <color name="darkerBeige">#dec898</color>
+    <color name="yellow">#efb342</color>
+    <color name="green">#0c5a4c</color>
+    <color name="beige">#fbeed9</color>
+    <color name="darkerBeige">#f1deba</color>
     <color name="bodyText">#666666</color>
-    <color name="button_role_unselected">#E2D8C2</color>
-
+    <color name="backgroundColour">#324462</color>
 </resources>

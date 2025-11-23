@@ -28,5 +28,7 @@
     <string name="notification_event_name">Event Name</string>
     <string name="notification_message">Notification message</string>
     <string name="notification_timestamp">Timestamp</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

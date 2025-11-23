@@ -70,8 +70,8 @@ public class UserDB {
      * @param updates HashMap of fields to update
      * @param listener Listener to handle completion
      */
-    public void updateUser(String id, HashMap<String, Object> updates, OnCompleteListener<Void> listener) {
-        usersCollection.document(id)
+    public void updateUser(String fid, HashMap<String, Object> updates, OnCompleteListener<Void> listener) {
+        usersCollection.document(fid)
                 .update(updates)
                 .addOnCompleteListener(listener);
     }
