@@ -31,7 +31,7 @@ public class AuthController {
                 user.setNotifications(true);
                 user.setAvatar(null);
 
-                UserDB.getInstance().saveUser(newUser, dbtask -> {
+                UserDB.getInstance().createUser(newUser, dbtask -> {
                     if (dbtask.isSuccessful()) {
                         callback.onSuccess(null);
                     } else {

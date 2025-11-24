@@ -18,14 +18,10 @@ import android.widget.Toast;
 
 import com.example.icetea.R;
 import com.example.icetea.auth.CurrentUser;
-import com.example.icetea.auth.SignUpFragment;
-import com.example.icetea.event.Event;
-import com.example.icetea.event.EventDB;
+import com.example.icetea.models.Event;
+import com.example.icetea.models.EventDB;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
-
-import org.checkerframework.checker.units.qual.Current;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +77,9 @@ public class MyEventsFragment extends Fragment {
         });
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewMyEvents);
-        adapter = new EventAdapter(myEventList);
+        adapter = new EventAdapter(myEventList, event ->{
+
+        });
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 

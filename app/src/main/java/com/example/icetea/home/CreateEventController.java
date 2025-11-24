@@ -3,8 +3,8 @@ package com.example.icetea.home;
 import android.util.Log;
 
 import com.example.icetea.auth.CurrentUser;
-import com.example.icetea.event.Event;
-import com.example.icetea.event.EventDB;
+import com.example.icetea.models.Event;
+import com.example.icetea.models.EventDB;
 import com.example.icetea.util.Callback;
 import com.google.firebase.Timestamp;
 
@@ -47,7 +47,7 @@ public class CreateEventController {
 
         Event newEvent = new Event();
         newEvent.setOrganizerId(CurrentUser.getInstance().getFid());
-        newEvent.setEventName(eventName);
+        newEvent.setName(eventName);
         newEvent.setDescription(eventDescription);
         newEvent.setCriteria(eventCriteria);
         newEvent.setPosterBase64(posterBase64);
@@ -57,11 +57,12 @@ public class CreateEventController {
         newEvent.setEventEndDate(eventEndTs);
         newEvent.setLocation(eventLocation);
         newEvent.setMaxEntrants(maxEntrantsInt);
+        newEvent.setCurrentEntrants(0);
         newEvent.setGeolocationRequirement(geolocationRequired);
-        Log.d("tag", "ran");
+        newEvent.setAlreadyDrew(false);
+
         EventDB.getInstance().createEvent(newEvent, task -> {
             if (task.isSuccessful()) {
-                Log.d("tag", "ran2");
                 callback.onSuccess(null);
             } else {
                 Exception e = task.getException() != null

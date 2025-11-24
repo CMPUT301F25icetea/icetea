@@ -1,5 +1,8 @@
 package com.example.icetea.models;
 
+import com.google.firebase.Timestamp;
+
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -16,7 +19,6 @@ import java.util.Locale;
  * - status: String (waiting/selected/cancelled)
  */
 public class Waitlist {
-    // ==================== Constants ====================
 
     /** The user is currently on the waitlist. */
     public static final String STATUS_WAITING = "waiting";
@@ -29,18 +31,17 @@ public class Waitlist {
     /** The user was selected and has declined the spot. */
     public static final String STATUS_DECLINED = "declined";
 
-    // ==================== Fields ====================
-
-    /** The ID of the event this waitlist entry belongs to. */
-    private String eventId;
     /** The ID of the user on the waitlist. */
     private String userId;
+    /** The ID of the event this waitlist entry belongs to. */
+    private String eventId;
     /** The timestamp (in milliseconds) when the user joined the waitlist. */
-    private long joinedAt;
+    private Timestamp timestamp;
     /** The current status of the waitlist entry (e.g., "waiting", "selected"). */
     private String status;
+    private Double latitude;
+    private Double longitude;
 
-    // ==================== Constructors ====================
 
     /**
      * Required empty constructor for Firestore deserialization
@@ -48,37 +49,6 @@ public class Waitlist {
     public Waitlist() {
         // Firestore requires this
     }
-
-    /**
-     * Constructor for creating a new waitlist entry.
-     * Automatically sets the joinedAt timestamp to now and status to "waiting".
-     *
-     * @param eventId The ID of the event.
-     * @param userId The ID of the user.
-     */
-    public Waitlist(String eventId, String userId) {
-        this.eventId = eventId;
-        this.userId = userId;
-        this.joinedAt = System.currentTimeMillis();
-        this.status = STATUS_WAITING;
-    }
-
-    /**
-     * Full constructor with all parameters.
-     *
-     * @param eventId  The ID of the event.
-     * @param userId   The ID of the user.
-     * @param joinedAt The timestamp when the user joined.
-     * @param status   The current status of the entry.
-     */
-    public Waitlist(String eventId, String userId, long joinedAt, String status) {
-        this.eventId = eventId;
-        this.userId = userId;
-        this.joinedAt = joinedAt;
-        this.status = status;
-    }
-
-    // ==================== Getters and Setters ====================
 
     /**
      * @return The ID of the event.
@@ -111,15 +81,15 @@ public class Waitlist {
     /**
      * @return The join timestamp (in milliseconds).
      */
-    public long getJoinedAt() {
-        return joinedAt;
+    public Timestamp getTimestamp() {
+        return timestamp;
     }
 
     /**
-     * @param joinedAt The join timestamp (in milliseconds).
+     * @param timestamp The join timestamp (in milliseconds).
      */
-    public void setJoinedAt(long joinedAt) {
-        this.joinedAt = joinedAt;
+    public void setTimestamp(Timestamp timestamp) {
+        this.timestamp = timestamp;
     }
 
     /**
@@ -136,206 +106,23 @@ public class Waitlist {
         this.status = status;
     }
 
-    // ==================== Helper Methods ====================
-
-    /**
-     * Generate the Firestore document ID for this waitlist entry.
-     * Format: {eventId}_{userId}
-     *
-     * @return A composite Document ID string.
-     */
-    public String getDocumentId() {
-        return eventId + "_" + userId;
+    public Double getLatitude() {
+        return latitude;
     }
 
-    /**
-     * Create document ID from event and user IDs.
-     *
-     * @param eventId The ID of the event.
-     * @param userId  The ID of the user.
-     * @return A composite Document ID string.
-     */
-    public static String createDocumentId(String eventId, String userId) {
-        return eventId + "_" + userId;
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 
-    /**
-     * Get formatted join date.
-     * @return Formatted date string (e.g., "Nov 02, 2024").
-     */
-    public String getFormattedJoinedAt() {
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-        return sdf.format(new Date(joinedAt));
+    public Double getLongitude() {
+        return longitude;
     }
 
-    /**
-     * Get formatted join date and time.
-     * @return Formatted date-time string (e.g., "Nov 02, 2024 3:30 PM").
-     */
-    public String getFormattedJoinedAtWithTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy h:mm a", Locale.getDefault());
-        return sdf.format(new Date(joinedAt));
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 
-    /**
-     * Get time since joined in a human-readable format.
-     * @return Relative time string (e.g., "2 hours ago", "3 days ago").
-     */
-    public String getTimeSinceJoined() {
-        long now = System.currentTimeMillis();
-        long diff = now - joinedAt;
-
-        long seconds = diff / 1000;
-        long minutes = seconds / 60;
-        long hours = minutes / 60;
-        long days = hours / 24;
-        long weeks = days / 7;
-
-        if (weeks > 0) {
-            return weeks + (weeks == 1 ? " week ago" : " weeks ago");
-        } else if (days > 0) {
-            return days + (days == 1 ? " day ago" : " days ago");
-        } else if (hours > 0) {
-            return hours + (hours == 1 ? " hour ago" : " hours ago");
-        } else if (minutes > 0) {
-            return minutes + (minutes == 1 ? " minute ago" : " minutes ago");
-        } else {
-            return "Just now";
-        }
-    }
-
-    /**
-     * Check if user is waiting.
-     * @return true if status is {@link #STATUS_WAITING}.
-     */
-    public boolean isWaiting() {
-        return STATUS_WAITING.equals(status);
-    }
-
-    /**
-     * Check if user was selected.
-     * @return true if status is {@link #STATUS_SELECTED}.
-     */
-    public boolean isSelected() {
-        return STATUS_SELECTED.equals(status);
-    }
-
-    /**
-     * Check if user cancelled.
-     * @return true if status is {@link #STATUS_CANCELLED}.
-     */
-    public boolean isCancelled() {
-        return STATUS_CANCELLED.equals(status);
-    }
-
-    /**
-     * Mark this entry as selected.
-     * Changes the internal status to {@link #STATUS_SELECTED}.
-     */
-    public void markAsSelected() {
-        this.status = STATUS_SELECTED;
-    }
-
-    /**
-     * Mark this entry as cancelled.
-     * Changes the internal status to {@link #STATUS_CANCELLED}.
-     */
-    public void markAsCancelled() {
-        this.status = STATUS_CANCELLED;
-    }
-
-    /**
-     * Check if user accepted their spot.
-     * @return true if status is {@link #STATUS_ACCEPTED}.
-     */
-    public boolean isAccepted() {return STATUS_ACCEPTED.equals(status);}
-
-    /**
-     * Check if user declined their spot.
-     * @return true if the status if {@link #STATUS_DECLINED}.
-     */
-    public boolean isDeclined() {return STATUS_DECLINED.equals(status);}
-
-    /**
-     * Mark this entry as accepted.
-     * Changes the internal status to {@link #STATUS_ACCEPTED}.
-     */
-    public void markAsAccepted() {this.status = STATUS_ACCEPTED;}
-
-    /**
-     * Mark this entry as declined.
-     * Changes the internal status to {@link #STATUS_DECLINED}.
-     */
-    public void markAsDeclined() {this.status = STATUS_DECLINED;}
-
-    /**
-     * Validate waitlist data before saving to database.
-     * @return Error message string if invalid, or null if valid.
-     */
-    public String validate() {
-        if (eventId == null || eventId.trim().isEmpty()) {
-            return "Event ID is required";
-        }
-        if (userId == null || userId.trim().isEmpty()) {
-            return "User ID is required";
-        }
-        if (status == null || status.trim().isEmpty()) {
-            return "Status is required";
-        }
-        // Check if the status is one of the predefined valid statuses
-        if (!STATUS_WAITING.equals(status) &&
-                !STATUS_SELECTED.equals(status) &&
-                !STATUS_CANCELLED.equals(status) &&
-                !STATUS_ACCEPTED.equals(status) &&
-                !STATUS_DECLINED.equals(status)) {
-            return "Invalid status value";
-        }
-        return null; // Valid
-    }
-
-
-    // ==================== Object Methods ====================
-
-    /**
-     * Provides a concise string representation of the waitlist entry, useful for logging.
-     *
-     * @return A string summary of the waitlist entry.
-     */
-    @Override
-    public String toString() {
-        return "Waitlist{" +
-                "eventId='" + eventId + '\'' +
-                ", userId='" + userId + '\'' +
-                ", status='" + status + '\'' +
-                ", joinedAt=" + getFormattedJoinedAt() +
-                '}';
-    }
-
-    /**
-     * Compares this waitlist entry to another object for equality.
-     * Two entries are considered equal if their composite document IDs
-     * (e.g., "eventId_userId") are identical.
-     *
-     * @param o The object to compare with.
-     * @return True if the objects represent the same waitlist entry, false otherwise.
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Waitlist waitlist = (Waitlist) o;
-        // Two entries are equal if their composite document ID is the same
-        return getDocumentId().equals(waitlist.getDocumentId());
-    }
-
-    /**
-     * Generates a hash code for the waitlist entry.
-     * The hash code is based on the composite document ID.
-     *
-     * @return The hash code.
-     */
-    @Override
-    public int hashCode() {
-        return getDocumentId().hashCode();
+    public String getId() {
+        return userId + "_" + eventId;
     }
 }

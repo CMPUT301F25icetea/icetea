@@ -3,7 +3,6 @@ package com.example.icetea.profile;
 import android.util.Patterns;
 import android.widget.EditText;
 
-import com.example.icetea.auth.FBAuthenticator;
 import com.example.icetea.models.UserDB;
 import com.example.icetea.util.Callback;
 import com.google.firebase.firestore.DocumentSnapshot;

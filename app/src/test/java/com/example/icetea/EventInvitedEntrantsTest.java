@@ -3,8 +3,8 @@ package com.example.icetea;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import com.example.icetea.event.Event;
-import com.example.icetea.event.EventDB;
+import com.example.icetea.models.Event;
+import com.example.icetea.models.EventDB;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;

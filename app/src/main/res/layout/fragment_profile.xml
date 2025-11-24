@@ -110,7 +110,7 @@
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
             android:background="@null"
-            android:drawableStart="@drawable/profile_black_icon"
+            android:drawableStart="@drawable/ic_profile"
             android:drawablePadding="8dp"
             android:paddingVertical="12dp"
             android:textColor="@android:color/black"/>
@@ -144,7 +144,7 @@
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
             android:background="@null"
-            android:drawableStart="@drawable/email_icon"
+            android:drawableStart="@drawable/ic_email"
             android:drawablePadding="8dp"
             android:paddingVertical="12dp"
             android:textColor="@android:color/black"/>
@@ -178,7 +178,7 @@
             android:layout_height="wrap_content"
             android:inputType="phone"
             android:background="@null"
-            android:drawableStart="@drawable/phone_icon"
+            android:drawableStart="@drawable/ic_phone"
             android:drawablePadding="8dp"
             android:paddingVertical="12dp"
             android:textColor="@android:color/black"/>

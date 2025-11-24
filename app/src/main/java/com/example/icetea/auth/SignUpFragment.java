@@ -26,13 +26,6 @@ import com.example.icetea.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-/**
- * Fragment responsible for handling the user sign-up UI and interactions.
- *
- * Provides fields for email, password, and role selection. Delegates validation
- * and account creation to {@link SignUpController}. On successful sign-up, navigates
- * the user to {@link MainActivity}.
- */
 public class SignUpFragment extends Fragment {
     private AuthController controller;
 

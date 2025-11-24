@@ -2,7 +2,7 @@ package com.example.icetea;
 
 import static org.junit.Assert.*;
 
-import com.example.icetea.entrant.Notification;
+import com.example.icetea.models.Notification;
 import com.google.firebase.Timestamp;
 
 import org.junit.Before;

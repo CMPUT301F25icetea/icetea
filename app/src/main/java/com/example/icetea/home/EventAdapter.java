@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.icetea.R;
-import com.example.icetea.event.Event;
+import com.example.icetea.models.Event;
 import com.example.icetea.util.ImageUtil;
 
 import java.text.SimpleDateFormat;
@@ -22,8 +22,15 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
     private final List<Event> events;
 
-    public EventAdapter(List<Event> events) {
+    private final OnItemClickListener listener;
+
+    public interface OnItemClickListener {
+        void onItemClick(Event event);
+    }
+    public EventAdapter(List<Event> events, OnItemClickListener listener) {
         this.events = events;
+        this.listener = listener;
+
     }
 
     @NonNull
@@ -37,7 +44,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
-        holder.textEventName.setText(event.getEventName());
+        holder.textEventName.setText(event.getName());
         holder.textEventDescription.setText(event.getDescription());
         holder.textEventLocation.setText(event.getLocation());
 
@@ -62,6 +69,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         } else {
             holder.imageEventPoster.setImageResource(R.drawable.default_poster);
         }
+        holder.bind(event, listener);
     }
 
     @Override
@@ -82,5 +90,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             textEventLocation = itemView.findViewById(R.id.textEventLocation);
             textRegEnd = itemView.findViewById(R.id.textRegEnd);
         }
+
+        public void bind(final Event event, final OnItemClickListener listener) {
+            itemView.setOnClickListener(v -> listener.onItemClick(event));
+        }
+
     }
 }

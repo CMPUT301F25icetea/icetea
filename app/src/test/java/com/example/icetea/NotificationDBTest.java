@@ -3,15 +3,13 @@ package com.example.icetea;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
-import com.example.icetea.entrant.Notification;
-import com.example.icetea.entrant.NotificationDB;
-import com.google.android.gms.tasks.OnCompleteListener;
+import com.example.icetea.models.Notification;
+import com.example.icetea.models.NotificationDB;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import org.junit.Before;
 import org.junit.Test;

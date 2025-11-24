@@ -27,7 +27,6 @@
             android:background="@color/beige"
             app:shapeAppearanceOverlay="@style/RoundedImage"/>
 
-
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dp"

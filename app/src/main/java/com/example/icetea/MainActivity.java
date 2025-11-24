@@ -8,9 +8,8 @@ import androidx.fragment.app.Fragment;
 
 import com.example.icetea.history.HistoryFragment;
 import com.example.icetea.home.HomeFragment;
-import com.example.icetea.main.NotificationsFragment;
+import com.example.icetea.notifications.NotificationsFragment;
 import com.example.icetea.profile.ProfileFragment;
-import com.example.icetea.main.SettingsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 /**
@@ -52,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (id == R.id.nav_profile) {
                 selectedFragment = ProfileFragment.newInstance();
             } else if (id == R.id.nav_settings) {
-                selectedFragment = SettingsFragment.newInstance();
+                //selectedFragment = SettingsFragment.newInstance();
             }
 
             if (selectedFragment != null) {

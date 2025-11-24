@@ -17,6 +17,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:contentDescription="Create Event"
-        android:src="@drawable/create_icon"
+        android:src="@drawable/ic_create"
         />
 </FrameLayout>
