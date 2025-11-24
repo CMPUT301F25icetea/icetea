@@ -1,6 +1,5 @@
 package com.example.icetea.organizer;
 
-import android.app.NotificationManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -18,10 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.icetea.R;
-import com.example.icetea.auth.FBAuthenticator;
-import com.example.icetea.event.Event;
-import com.example.icetea.event.EventAdapter;
-import com.example.icetea.event.EventController;
 import com.example.icetea.models.WaitingListAdapter;
 import com.example.icetea.models.WaitingListController;
 import com.example.icetea.models.WaitingListEntry;

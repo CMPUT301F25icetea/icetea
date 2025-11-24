@@ -2,8 +2,6 @@ package com.example.icetea.event;
 
 import com.google.firebase.Timestamp;
 
-import java.util.List;
-
 /**
  * Represents an event in the system.
  *
@@ -29,19 +27,19 @@ public class Event {
         // Firestore requires empty constructor
     }
 
-    public String getEventCriteria() {
+    public String getCriteria() {
         return eventCriteria;
     }
 
-    public void setEventCriteria(String eventCriteria) {
+    public void setCriteria(String eventCriteria) {
         this.eventCriteria = eventCriteria;
     }
 
-    public String getEventDescription() {
+    public String getDescription() {
         return eventDescription;
     }
 
-    public void setEventDescription(String eventDescription) {
+    public void setDescription(String eventDescription) {
         this.eventDescription = eventDescription;
     }
 
@@ -77,11 +75,11 @@ public class Event {
         this.geolocationRequirement = geolocationRequirement;
     }
 
-    public String getEventLocation() {
+    public String getLocation() {
         return eventLocation;
     }
 
-    public void setEventLocation(String eventLocation) {
+    public void setLocation(String eventLocation) {
         this.eventLocation = eventLocation;
     }
 
