@@ -1,4 +1,4 @@
-package com.example.icetea.entrant;
+package com.example.icetea.models;
 
 import com.google.firebase.Timestamp;
 

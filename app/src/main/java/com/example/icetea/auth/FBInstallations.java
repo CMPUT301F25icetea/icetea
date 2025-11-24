@@ -10,7 +10,6 @@ public class FBInstallations {
     public static void getCurrentFID(OnCompleteListener<String> listener) {
         FirebaseInstallations.getInstance().getId().addOnCompleteListener(listener);
     }
-
     public static String getFid() {
         return fid;
     }

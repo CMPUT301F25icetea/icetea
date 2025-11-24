@@ -1,8 +1,5 @@
 package com.example.icetea.models;
 
-import android.telecom.Call;
-
-import com.example.icetea.util.Callback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -45,7 +42,7 @@ public class UserDB {
      * @param user The User to save
      * @param listener Listener to handle completion
      */
-    public void saveUser(User user, OnCompleteListener<Void> listener) {
+    public void createUser(User user, OnCompleteListener<Void> listener) {
         usersCollection.document(user.getId())
                 .set(user)
                 .addOnCompleteListener(listener);
@@ -54,7 +51,7 @@ public class UserDB {
     /**
      * Retrieves a User document by ID from Firestore.
      *
-     * @param id User ID
+     * @param fid User ID
      * @param listener Listener to handle the retrieved document
      */
     public void getUser(String fid, OnCompleteListener<DocumentSnapshot> listener) {
@@ -66,7 +63,7 @@ public class UserDB {
     /**
      * Updates fields of a User document in Firestore.
      *
-     * @param id User ID
+     * @param fid User ID
      * @param updates HashMap of fields to update
      * @param listener Listener to handle completion
      */
@@ -76,59 +73,4 @@ public class UserDB {
                 .addOnCompleteListener(listener);
     }
 
-    /**
-     * Deletes a User document from Firestore.
-     *
-     * @param id User ID
-     * @param listener Listener to handle completion
-     */
-    public void deleteUser(String id, OnCompleteListener<Void> listener) {
-        usersCollection.document(id)
-                .delete()
-                .addOnCompleteListener(listener);
-    }
-
-    /**
-     * Retrieves the top role of a user.
-     *
-     * @param id User ID
-     * @param callback Callback to return the role or error
-     */
-    public void getUserTopRole(String id, Callback<String> callback) {
-        getUser(id, task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-                if (document != null && document.exists()) {
-                    String role = document.getString("role");
-                    callback.onSuccess(role);
-                } else {
-                    callback.onFailure(new Exception("User not found"));
-                }
-            } else {
-                callback.onFailure(task.getException());
-            }
-        });
-    }
-
-    /**
-     * Retrieves the email of a user.
-     *
-     * @param id User ID
-     * @param callback Callback to return the email or error
-     */
-    public void getUserEmail(String id, Callback<String> callback) {
-        getUser(id, task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-                if (document != null && document.exists()) {
-                    String email = document.getString("email");
-                    callback.onSuccess(email);
-                } else {
-                    callback.onFailure(new Exception("User not found"));
-                }
-            } else {
-                callback.onFailure(task.getException());
-            }
-        });
-    }
 }

@@ -5,6 +5,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,8 +17,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.icetea.R;
-import com.example.icetea.event.Event;
-import com.example.icetea.event.EventDB;
+import com.example.icetea.models.Event;
+import com.example.icetea.models.EventDB;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
@@ -53,7 +55,21 @@ public class AllEventsFragment extends Fragment {
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewAllEvents);
         eventList = new ArrayList<>();
-        adapter = new EventAdapter(eventList);
+        adapter = new EventAdapter(eventList, event -> {
+            FragmentManager fm = requireActivity().getSupportFragmentManager();
+            FragmentTransaction transaction = fm.beginTransaction();
+            transaction.setReorderingAllowed(true);
+            transaction.setCustomAnimations(
+                    R.anim.slide_in_right,
+                    R.anim.slide_out_left,
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
+            );
+            transaction.replace(R.id.main_fragment_container, EventDetailsFragment.newInstance(event.getEventId()));
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
         loadEvents();

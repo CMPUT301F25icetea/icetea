@@ -28,11 +28,11 @@ import com.example.icetea.R;
  */
 public class LandingPageFragment extends Fragment {
 
-    private AuthController controller;
     /**
      * Required empty public constructor.
      */
     public LandingPageFragment() {
+        // req
     }
 
     /**
@@ -76,8 +76,6 @@ public class LandingPageFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        controller = new AuthController();
 
         Button signUpButton = view.findViewById(R.id.buttonGoToSignUpFromLandingPage);
 

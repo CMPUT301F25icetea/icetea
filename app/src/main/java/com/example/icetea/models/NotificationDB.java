@@ -1,7 +1,6 @@
-package com.example.icetea.entrant;
+package com.example.icetea.models;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -27,7 +26,7 @@ public class NotificationDB {
      */
     public NotificationDB() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        notificationCollection = db.collection("Notification");
+        notificationCollection = db.collection("notification");
     }
 
     /**

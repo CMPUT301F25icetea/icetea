@@ -1,4 +1,4 @@
-package com.example.icetea.entrant;
+package com.example.icetea.models;
 
 import android.content.Context;
 import android.text.format.DateFormat;
