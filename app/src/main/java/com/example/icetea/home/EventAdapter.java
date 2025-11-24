@@ -1,4 +1,4 @@
-package com.example.icetea.event;
+package com.example.icetea.home;
 
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.icetea.R;
+import com.example.icetea.event.Event;
 import com.example.icetea.util.ImageUtil;
 
 import java.text.SimpleDateFormat;

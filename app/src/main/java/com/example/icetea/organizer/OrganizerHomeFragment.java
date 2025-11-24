@@ -16,7 +16,7 @@ import android.widget.Toast;
 
 import com.example.icetea.auth.FBAuthenticator;
 import com.example.icetea.event.Event;
-import com.example.icetea.event.EventAdapter;
+import com.example.icetea.home.EventAdapter;
 import com.example.icetea.event.EventController;
 import com.example.icetea.R;
 import com.example.icetea.util.Callback;
@@ -78,7 +78,7 @@ public class OrganizerHomeFragment extends Fragment {
 
         eventController = new EventController();
 
-        adapter = new EventAdapter(eventList, event -> openEventDetails(event));
+        //adapter = new EventAdapter(eventList, event -> openEventDetails(event));
         recyclerView.setAdapter(adapter);
         loadEvents(view);
     }

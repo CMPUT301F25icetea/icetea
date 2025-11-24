@@ -73,7 +73,7 @@ public class EventController {
      * @param callback Callback to return the list of events or an error
      */
     public void getEventsByOrganizerId(String organizerId, Callback<List<Event>> callback) {
-        eventDB.getEventsByOrganizerId(organizerId, task -> {
+        eventDB.getEventsByOrganizer(organizerId, task -> {
             if (task.isSuccessful()) {
                 List<Event> events = new ArrayList<>();
                 for (DocumentSnapshot doc : task.getResult()) {

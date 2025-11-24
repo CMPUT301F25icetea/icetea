@@ -48,14 +48,14 @@ public class CreateEventController {
         Event newEvent = new Event();
         newEvent.setOrganizerId(CurrentUser.getInstance().getFid());
         newEvent.setEventName(eventName);
-        newEvent.setEventDescription(eventDescription);
-        newEvent.setEventCriteria(eventCriteria);
+        newEvent.setDescription(eventDescription);
+        newEvent.setCriteria(eventCriteria);
         newEvent.setPosterBase64(posterBase64);
         newEvent.setRegistrationStartDate(regStartTs);
         newEvent.setRegistrationEndDate(regEndTs);
         newEvent.setEventStartDate(eventStartTs);
         newEvent.setEventEndDate(eventEndTs);
-        newEvent.setEventLocation(eventLocation);
+        newEvent.setLocation(eventLocation);
         newEvent.setMaxEntrants(maxEntrantsInt);
         newEvent.setGeolocationRequirement(geolocationRequired);
         Log.d("tag", "ran");

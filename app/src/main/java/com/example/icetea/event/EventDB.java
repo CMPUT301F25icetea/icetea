@@ -1,6 +1,7 @@
 package com.example.icetea.event;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -70,7 +71,7 @@ public class EventDB {
      * @param organizerId The ID of the organizer
      * @param listener Listener to handle the query snapshot
      */
-    public void getEventsByOrganizerId(String organizerId, OnCompleteListener<QuerySnapshot> listener) {
+    public void getEventsByOrganizer(String organizerId, OnCompleteListener<QuerySnapshot> listener) {
         eventsCollection.whereEqualTo("organizerId", organizerId)
                 .get()
                 .addOnCompleteListener(listener);
@@ -85,6 +86,14 @@ public class EventDB {
     public void deleteEvent(Event event, OnCompleteListener<Void> listener) {
         eventsCollection.document(event.getEventId())
                 .delete()
+                .addOnCompleteListener(listener);
+    }
+
+    public void getActiveEvents(OnCompleteListener<QuerySnapshot> listener) {
+        Timestamp now = Timestamp.now();
+        eventsCollection
+                .whereGreaterThan("registrationEndDate", now)
+                .get()
                 .addOnCompleteListener(listener);
     }
 
