@@ -2,14 +2,10 @@
 
     <style name="Base.Theme.Icetea" parent="Theme.Material3.DayNight.NoActionBar">
 
-        <!-- Primary & Secondary colors -->
         <item name="colorPrimary">@color/yellow</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/green</item>
         <item name="colorOnSecondary">@color/white</item>
-
-
-        <!-- Material3 Settings -->
         <item name="materialThemeOverlay">@style/ThemeOverlay.Material3</item>
 
     </style>

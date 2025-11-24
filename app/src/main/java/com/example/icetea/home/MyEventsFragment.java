@@ -50,15 +50,18 @@ public class MyEventsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         FloatingActionButton createEventButton = view.findViewById(R.id.fabCreateEvent);
-        createEventButton.setOnClickListener(v ->{
+        createEventButton.setOnClickListener(v -> {
             FragmentManager fm = requireActivity().getSupportFragmentManager();
             FragmentTransaction transaction = fm.beginTransaction();
             transaction.setReorderingAllowed(true);
             transaction.setCustomAnimations(
                     R.anim.slide_in_right,
-                    R.anim.slide_out_left
+                    R.anim.slide_out_left,
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
             );
             transaction.replace(R.id.main_fragment_container, CreateEventFragment.newInstance());
+            transaction.addToBackStack(null);
             transaction.commit();
         });
     }

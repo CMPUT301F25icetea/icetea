@@ -41,11 +41,11 @@ public class EventDB {
      * @param event The Event to save
      * @param listener Listener to handle completion
      */
-    public void saveEvent(Event event, OnCompleteListener<Void> listener) {
-        String id = event.getId();
+    public void createEvent(Event event, OnCompleteListener<Void> listener) {
+        String id = event.getEventId();
         if (id == null) {
             id = eventsCollection.document().getId();
-            event.setId(id);
+            event.setEventId(id);
         }
         eventsCollection.document(id)
                 .set(event)
@@ -83,7 +83,7 @@ public class EventDB {
      * @param listener Listener to handle completion
      */
     public void deleteEvent(Event event, OnCompleteListener<Void> listener) {
-        eventsCollection.document(event.getId())
+        eventsCollection.document(event.getEventId())
                 .delete()
                 .addOnCompleteListener(listener);
     }

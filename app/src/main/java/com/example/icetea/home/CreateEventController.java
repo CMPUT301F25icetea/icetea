@@ -1,5 +1,13 @@
 package com.example.icetea.home;
 
+import android.util.Log;
+
+import com.example.icetea.auth.CurrentUser;
+import com.example.icetea.event.Event;
+import com.example.icetea.event.EventDB;
+import com.example.icetea.util.Callback;
+import com.google.firebase.Timestamp;
+
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
@@ -7,6 +15,76 @@ import java.text.SimpleDateFormat;
 
 public class CreateEventController {
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault());
+    public void createEvent(String eventName, String eventDescription, String eventCriteria,
+                            String posterBase64, String regStart, String regEnd,
+                            String eventStart, String eventEnd, String eventLocation,
+                            String maxEntrants, boolean geolocationRequired, Callback<Void> callback) {
+
+        Timestamp regStartTs = textToTimestamp(regStart);
+        Timestamp regEndTs = textToTimestamp(regEnd);
+        Timestamp eventStartTs = textToTimestamp(eventStart);
+        Timestamp eventEndTs = textToTimestamp(eventEnd);
+
+        if (regEndTs == null) {
+            callback.onFailure(new Exception("Invalid registration close date format"));
+            return;
+        }
+
+        if (eventStartTs == null) {
+            callback.onFailure(new Exception("Invalid event start date format"));
+            return;
+        }
+
+        Integer maxEntrantsInt = null;
+        if (maxEntrants != null && !maxEntrants.trim().isEmpty()) {
+            try {
+                int value = Integer.parseInt(maxEntrants.trim());
+                if (value > 0) {
+                    maxEntrantsInt = value;
+                }
+            } catch (NumberFormatException ignored) {}
+        }
+
+        Event newEvent = new Event();
+        newEvent.setOrganizerId(CurrentUser.getInstance().getFid());
+        newEvent.setEventName(eventName);
+        newEvent.setEventDescription(eventDescription);
+        newEvent.setEventCriteria(eventCriteria);
+        newEvent.setPosterBase64(posterBase64);
+        newEvent.setRegistrationStartDate(regStartTs);
+        newEvent.setRegistrationEndDate(regEndTs);
+        newEvent.setEventStartDate(eventStartTs);
+        newEvent.setEventEndDate(eventEndTs);
+        newEvent.setEventLocation(eventLocation);
+        newEvent.setMaxEntrants(maxEntrantsInt);
+        newEvent.setGeolocationRequirement(geolocationRequired);
+        Log.d("tag", "ran");
+        EventDB.getInstance().createEvent(newEvent, task -> {
+            if (task.isSuccessful()) {
+                Log.d("tag", "ran2");
+                callback.onSuccess(null);
+            } else {
+                Exception e = task.getException() != null
+                        ? task.getException()
+                        : new Exception("Failed to create event");
+                callback.onFailure(e);
+            }
+        });
+    }
+
+    public Timestamp textToTimestamp(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            Date date = sdf.parse(text);
+            if (date == null) return null;
+            return new Timestamp(date);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
     public String validateName(String name) {
         if (name == null || name.isEmpty()) {
             return "Name cannot be empty";
@@ -21,7 +99,7 @@ public class CreateEventController {
         return null;
     }
 
-    //validate image size
+    //TODO: validate image size (also for profile)
 
     public String validateRegOpen(String regOpen, String regClose, String eventStart, String eventEnd) {
         if (regOpen == null || regOpen.isEmpty()) return null;
@@ -176,7 +254,6 @@ public class CreateEventController {
         return null;
     }
 
-
     public String validateMaxEntrants(String maxEntrants) {
         if (maxEntrants == null || maxEntrants.isEmpty()) return null;
 
@@ -191,7 +268,5 @@ public class CreateEventController {
 
         return null;
     }
-
-
 
 }

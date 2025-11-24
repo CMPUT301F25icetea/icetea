@@ -58,7 +58,7 @@ public class EventCapacityTest {
             when(mockTask.isSuccessful()).thenReturn(true);
             listener.onComplete(mockTask);
             return null;
-        }).when(mockEventDB).saveEvent(eq(event), any(OnCompleteListener.class));
+        }).when(mockEventDB).createEvent(eq(event), any(OnCompleteListener.class));
 
         // Mock getEvent() to return the event as if fetched from Firestore
         doAnswer(invocation -> {

@@ -87,9 +87,14 @@ public class LandingPageFragment extends Fragment {
             transaction.setReorderingAllowed(true);
             transaction.setCustomAnimations(
                     R.anim.slide_in_right,
-                    R.anim.slide_out_left
+                    R.anim.slide_out_left,
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
             );
             transaction.replace(R.id.auth_fragment_container, SignUpFragment.newInstance());
+
+            transaction.addToBackStack(null);
+
             transaction.commit();
         });
     }

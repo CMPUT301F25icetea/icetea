@@ -10,14 +10,17 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.icetea.R;
+import com.example.icetea.util.Callback;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -71,6 +74,12 @@ public class CreateEventFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         controller = new CreateEventController();
+
+        ImageButton backButton = view.findViewById(R.id.buttonBack);
+
+        backButton.setOnClickListener(v ->
+                requireActivity().getSupportFragmentManager().popBackStack()
+        );
 
         MaterialButton createButton = view.findViewById(R.id.buttonCreateEvent);
 
@@ -179,10 +188,21 @@ public class CreateEventFragment extends Fragment {
             if (newPosterUri != null) {
                 posterBase64 = ImageUtil.uriToBase64(requireContext(), newPosterUri);
             }
-            //call controller with all input, deal with converting into timestamps there
-            // in controller call eventdb
 
+            controller.createEvent(eventName, eventDescription, eventCriteria, posterBase64,
+                    regStartText, regEndText, eventStartText, eventEndText, location, maxEntrantsText,
+                    geolocationRequired, new Callback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            requireActivity().getSupportFragmentManager().popBackStack();
+                            Toast.makeText(getContext(), "Event Created", Toast.LENGTH_SHORT).show();
+                        }
 
+                        @Override
+                        public void onFailure(Exception e) {
+                            Toast.makeText(getContext(), e.getMessage() + " Error creating event", Toast.LENGTH_SHORT).show();
+                        }
+                    });
         });
     }
 

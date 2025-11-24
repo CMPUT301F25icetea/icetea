@@ -88,17 +88,11 @@ public class SignUpFragment extends Fragment {
             return insets;
         });
 
-        // Back button navigates to previous screen
         backButton.setOnClickListener(v -> {
             FragmentManager fm = getParentFragmentManager();
-            FragmentTransaction transaction = fm.beginTransaction();
-            transaction.setReorderingAllowed(true);
-            transaction.setCustomAnimations(
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_right
-            );
-            transaction.replace(R.id.auth_fragment_container, LandingPageFragment.newInstance());
-            transaction.commit();
+            if (fm.getBackStackEntryCount() > 0) {
+                fm.popBackStack();
+            }
         });
 
 

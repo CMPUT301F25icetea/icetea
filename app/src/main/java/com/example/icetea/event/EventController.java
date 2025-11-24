@@ -2,14 +2,12 @@ package com.example.icetea.event;
 
 import com.example.icetea.auth.FBAuthenticator;
 import com.example.icetea.util.Callback;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -36,7 +34,7 @@ public class EventController {
      * @param callback Callback to handle success or failure
      */
     public void createEvent(Event event, Callback<Void> callback) {
-        eventDB.saveEvent(event, task -> {
+        eventDB.createEvent(event, task -> {
             if (task.isSuccessful()) {
                 callback.onSuccess(null);
             } else {
@@ -57,7 +55,7 @@ public class EventController {
                 DocumentSnapshot doc = task.getResult();
                 if (doc != null && doc.exists()) {
                     Event event = doc.toObject(Event.class);
-                    if (event != null) event.setId(doc.getId());
+                    if (event != null) event.setEventId(doc.getId());
                     callback.onSuccess(event);
                 } else {
                     callback.onFailure(new Exception("Event not found"));
@@ -81,7 +79,7 @@ public class EventController {
                 for (DocumentSnapshot doc : task.getResult()) {
                     Event e = doc.toObject(Event.class);
                     if (e != null)  {
-                        e.setId(doc.getId());
+                        e.setEventId(doc.getId());
                         events.add(e);
                     }
                 }
@@ -99,7 +97,7 @@ public class EventController {
      * @param callback Callback to handle success or failure
      */
     public void updateEvent(Event event, Callback<Void> callback) {
-        eventDB.saveEvent(event, task -> {
+        eventDB.createEvent(event, task -> {
             if (task.isSuccessful()) {
                 callback.onSuccess(null);
             } else {
@@ -203,19 +201,19 @@ public class EventController {
         String organizerId = FBAuthenticator.getCurrentUserId();
 
         return new Event(
-                null,
-                organizerId,
-                name,
-                description,
-                location,
-                capacity,
-                startDate,
-                endDate,
-                regStart,
-                regEnd,
-                null,
-                Collections.emptyList(),
-                Collections.emptyList()
+//                null,
+//                organizerId,
+//                name,
+//                description,
+//                location,
+//                capacity,
+//                startDate,
+//                endDate,
+//                regStart,
+//                regEnd,
+//                null,
+//                Collections.emptyList(),
+//                Collections.emptyList()
         );
     }
 

@@ -75,7 +75,7 @@ public class CreateEventTest {
             OnCompleteListener<Void> listener = (OnCompleteListener<Void>) invocation.getArgument(1);
             listener.onComplete(mockTask);
             return null;
-        }).when(mockEventDB).saveEvent(eq(newEvent), any(OnCompleteListener.class));
+        }).when(mockEventDB).createEvent(eq(newEvent), any(OnCompleteListener.class));
 
 
         final boolean[] successCalled = {false};
@@ -93,6 +93,6 @@ public class CreateEventTest {
         });
 
         assertTrue("onSuccess() should have been called", successCalled[0]);
-        verify(mockEventDB, times(1)).saveEvent(eq(newEvent), any());
+        verify(mockEventDB, times(1)).createEvent(eq(newEvent), any());
     }
 }

@@ -67,7 +67,7 @@ public class CreateRegistrationPeriodTest {
             when(mockTask.isSuccessful()).thenReturn(true);
             listener.onComplete(mockTask);
             return null;
-        }).when(mockEventDB).saveEvent(eq(newEvent), any(OnCompleteListener.class));
+        }).when(mockEventDB).createEvent(eq(newEvent), any(OnCompleteListener.class));
 
         // Mock getEvent() to call listener with a fake DocumentSnapshot
         doAnswer(invocation -> {

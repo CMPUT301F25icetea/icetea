@@ -124,24 +124,24 @@ public class OrganizerHomeFragment extends Fragment {
         OrganizerEventDetailsFragment fragment = new OrganizerEventDetailsFragment();
 
         Bundle args  = new Bundle();
-        args.putString("eventId", event.getId());
-        args.putString("name", event.getName());
-        args.putString("description", event.getDescription());
-        args.putString("location", event.getLocation());
-        args.putInt("capacity", event.getCapacity() != null ? event.getCapacity() : 0);
-
-        if (event.getStartDate() != null) {
-            args.putLong("startDate", event.getStartDate().toDate().getTime());
-        }
-        if (event.getEndDate() != null) {
-            args.putLong("endDate", event.getEndDate().toDate().getTime());
-        }
-        if (event.getRegistrationStartDate() != null) {
-            args.putLong("regOpen", event.getRegistrationStartDate().toDate().getTime());
-        }
-        if (event.getRegistrationEndDate() != null) {
-            args.putLong("regClose", event.getRegistrationEndDate().toDate().getTime());
-        }
+//        args.putString("eventId", event.getId());
+//        args.putString("name", event.getName());
+//        args.putString("description", event.getDescription());
+//        args.putString("location", event.getLocation());
+//        args.putInt("capacity", event.getCapacity() != null ? event.getCapacity() : 0);
+//
+//        if (event.getStartDate() != null) {
+//            args.putLong("startDate", event.getStartDate().toDate().getTime());
+//        }
+//        if (event.getEndDate() != null) {
+//            args.putLong("endDate", event.getEndDate().toDate().getTime());
+//        }
+//        if (event.getRegistrationStartDate() != null) {
+//            args.putLong("regOpen", event.getRegistrationStartDate().toDate().getTime());
+//        }
+//        if (event.getRegistrationEndDate() != null) {
+//            args.putLong("regClose", event.getRegistrationEndDate().toDate().getTime());
+//        }
 
         fragment.setArguments(args);
 

@@ -1,14 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".main.NotificationsFragment">
+    android:layout_height="match_parent">
 
-    <!-- TODO: Update blank fragment layout -->
+    <View
+        android:id="@+id/topHeaderBackgroundNotifications"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/yellow"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.1"/>
+
     <TextView
+        android:id="@+id/textNotificationsHeader"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="notifications" />
+        android:layout_height="wrap_content"
+        android:text="Notifications"
+        android:textSize="28sp"
+        android:textColor="@android:color/white"
+        android:gravity="center"
+        android:fontFamily="@font/roboto_slab"
+        app:layout_constraintTop_toTopOf="@id/topHeaderBackgroundNotifications"
+        app:layout_constraintBottom_toBottomOf="@id/topHeaderBackgroundNotifications"/>
 
-</FrameLayout>
+    <ScrollView
+        android:id="@+id/scrollNotifications"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        android:background="@color/beige"
+        app:layout_constraintTop_toBottomOf="@id/topHeaderBackgroundNotifications"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <!-- will look better than this...-->
+            <TextView
+                android:id="@+id/exampleNotification"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="You have a new notification!"
+                android:textSize="16sp"
+                android:textColor="@color/green"
+                android:padding="12dp"
+                android:background="@color/darkerBeige"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginBottom="8dp"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

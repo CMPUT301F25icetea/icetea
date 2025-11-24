@@ -91,10 +91,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
          * @param listener The click listener to invoke when the item is clicked
          */
         public void bind(Event event, OnItemClickListener listener) {
-            nameText.setText(event.getName());
-            descriptionText.setText(event.getDescription());
-            startDateText.setText("Event starts on: " + Event.formatTimestampHumanReadable(event.getStartDate()));
-            registrationEndText.setText("Registration closes on: " + Event.formatTimestampHumanReadable(event.getStartDate()));
+            nameText.setText(event.getEventName());
+            descriptionText.setText(event.getEventDescription());
+            //startDateText.setText("Event starts on: " + Event.formatTimestampHumanReadable(event.getStartDate()));
+            //registrationEndText.setText("Registration closes on: " + Event.formatTimestampHumanReadable(event.getStartDate()));
 
             itemView.setOnClickListener(v -> listener.onItemClick(event));
         }
