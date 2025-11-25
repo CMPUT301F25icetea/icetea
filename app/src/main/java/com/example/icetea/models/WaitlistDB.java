@@ -4,11 +4,13 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +26,7 @@ public class WaitlistDB {
     private static WaitlistDB instance;
     /** Reference to the 'waitlist' collection in Firestore. */
     private final CollectionReference waitlistCollection;
+    private final CollectionReference eventsCollection;
 
     /**
      * Private constructor to enforce the Singleton pattern.
@@ -32,6 +35,7 @@ public class WaitlistDB {
     private WaitlistDB() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         waitlistCollection = db.collection("waitlist");
+        eventsCollection = db.collection("events");
     }
 
     /**
@@ -47,37 +51,34 @@ public class WaitlistDB {
     }
 
     public void addToWaitlist(Waitlist waitlistObj, OnCompleteListener<Void> listener) {
-        // Get event document
-        waitlistCollection.document(waitlistObj.getId())
-                .set(waitlistObj)
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        listener.onComplete(task);
-                        return;
-                    }
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        WriteBatch batch = db.batch();
 
-                    Map<String, Object> updates = new HashMap<>();
-                    updates.put("currentEntrants", FieldValue.increment(1));
-                    EventDB.getInstance().updateEvent(waitlistObj.getEventId(), updates, listener);
-                });
+        DocumentReference waitlistRef = waitlistCollection.document(waitlistObj.getId());
+        batch.set(waitlistRef, waitlistObj);
+
+        DocumentReference eventRef = eventsCollection.document(waitlistObj.getEventId());
+        batch.update(eventRef, "currentEntrants", FieldValue.increment(1));
+
+        batch.commit()
+                .addOnCompleteListener(listener);
     }
 
     public void removeFromWaitlist(String userId, String eventId, OnCompleteListener<Void> listener) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        WriteBatch batch = db.batch();
+
         String waitlistId = userId + "_" + eventId;
-        waitlistCollection.document(waitlistId)
-                .delete()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        listener.onComplete(task);
-                        return;
-                    }
 
-                    Map<String, Object> updates = new HashMap<>();
-                    updates.put("currentEntrants", FieldValue.increment(-1));
-                    EventDB.getInstance().updateEvent(eventId, updates, listener);
+        DocumentReference waitlistRef = waitlistCollection.document(waitlistId);
+        batch.delete(waitlistRef);
 
-                });
+        DocumentReference eventRef = db.collection("events").document(eventId);
+        batch.update(eventRef, "currentEntrants", FieldValue.increment(-1));
+
+        batch.commit().addOnCompleteListener(listener);
     }
+
 
     public void getWaitlistEntry(String userId, String eventId, OnCompleteListener<DocumentSnapshot> listener) {
         waitlistCollection.document(userId + "_" + eventId)
@@ -109,19 +110,11 @@ public class WaitlistDB {
                 .addOnCompleteListener(listener);
     }
 
-    /**
-     * Gets the list of entrants who have accepted their spot in the event.
-     * Queries for entries where status is {@link Waitlist#STATUS_ACCEPTED}.
-     *
-     * @param eventId  The ID of the event.
-     * @param listener Completion listener for the {@link com.google.firebase.firestore.QuerySnapshot}.
-     */
-    public void getFinalEntrants(String eventId, OnCompleteListener<com.google.firebase.firestore.QuerySnapshot> listener) {
+    public void getEntrantsByStatus(String eventId, String status, OnCompleteListener<com.google.firebase.firestore.QuerySnapshot> listener) {
         waitlistCollection
                 .whereEqualTo("eventId", eventId)
-                .whereEqualTo("status", Waitlist.STATUS_ACCEPTED)
+                .whereEqualTo("status", status)
                 .get()
                 .addOnCompleteListener(listener);
     }
-
 }
