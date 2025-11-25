@@ -1,24 +1,44 @@
 package com.example.icetea.models;
 
 public class User {
-    private String id, email, role, firstName, lastName;
+    private String id;
+    private String email;
+    private String name;
+    private String phone;
+    private boolean notifications;
+    private String avatar;
 
+    /**
+     * Default constructor required by Firestore and serialization frameworks.
+     */
     public User() {
-        //req
+        // Required empty constructor
     }
 
-    public User(String id, String email, String role) {
-        this.id = id;
-        this.email = email;
-        this.role = role;
-    }
-
+    /**
+     * Returns the user's ID.
+     *
+     * @return User ID
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Sets the user's ID.
+     *
+     * @param id User ID
+     */
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {
@@ -28,26 +48,28 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
-    public String getRole() {
-        return role;
-    }
-    public void setRole(String role) {
-        this.role = role;
-    }
-    public String getFirstName() {
-        return firstName;
+
+    public String getPhone() {
+        return phone;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
-    public String getLastName() {
-        return lastName;
+    public boolean getNotifications() {
+        return notifications;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setNotifications(boolean notifications) {
+        this.notifications = notifications;
     }
 
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
 }

@@ -1,64 +1,71 @@
 package com.example.icetea;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
 
-import com.example.icetea.auth.FBAuthenticator;
-import com.example.icetea.auth.LoginFragment;
-import com.example.icetea.entrant.EntrantContainerFragment;
-import com.example.icetea.models.User;
-import com.example.icetea.models.UserDB;
-import com.example.icetea.organizer.OrganizerContainerFragment;
-import com.example.icetea.util.Callback;
-import com.example.icetea.util.NavigationHelper;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.example.icetea.history.HistoryFragment;
+import com.example.icetea.home.HomeFragment;
+import com.example.icetea.notifications.NotificationsFragment;
+import com.example.icetea.profile.ProfileFragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+/**
+ * Main entry point for the IceTea application. Determines the current user's role
+ * and navigates to the appropriate container fragment (entrant or organizer).
+ */
 public class MainActivity extends AppCompatActivity {
 
+    /**
+     * Called when the activity is starting. Sets up edge-to-edge layout and determines
+     * the user's role to navigate to the correct container fragment.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously
+     *                           being shut down, this contains the data it most recently
+     *                           supplied. Otherwise, it is null.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
 
-        UserDB.getInstance().getUserTopRole(FBAuthenticator.getCurrentUserId(), new Callback<String>() {
-            @Override
-            public void onSuccess(String role) {
-                if ("entrant".equals(role)) {
-                    NavigationHelper.replaceFragment(
-                            getSupportFragmentManager(),
-                            R.id.main,
-                            EntrantContainerFragment.newInstance(),
-                            false
-                    );
-                } else if ("organizer".equals(role)) {
-                    NavigationHelper.replaceFragment(
-                            getSupportFragmentManager(),
-                            R.id.main,
-                            OrganizerContainerFragment.newInstance(),
-                            false
-                    );
-                } else {
-                    Toast.makeText(MainActivity.this, "Error retrieving role: " + role, Toast.LENGTH_SHORT).show();
-                }
+        if (savedInstanceState == null) {
+            loadFragment(HomeFragment.newInstance());
+        }
+
+        bottomNav.setOnItemSelectedListener(item -> {
+            Fragment selectedFragment = null;
+
+            int id = item.getItemId();
+            if (id == R.id.nav_home) {
+                selectedFragment = HomeFragment.newInstance();
+            } else if (id == R.id.nav_history) {
+                selectedFragment = HistoryFragment.newInstance();
+            } else if (id == R.id.nav_notifications) {
+                selectedFragment = NotificationsFragment.newInstance();
+            } else if (id == R.id.nav_profile) {
+                selectedFragment = ProfileFragment.newInstance();
+            } else if (id == R.id.nav_settings) {
+                //selectedFragment = SettingsFragment.newInstance();
             }
-            @Override
-            public void onFailure(Exception e) {
-                Toast.makeText(MainActivity.this, "Failed to get user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+            if (selectedFragment != null) {
+                loadFragment(selectedFragment);
+                return true;
             }
+            return false;
         });
-    }
+}
+        private void loadFragment(Fragment fragment) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_fragment_container, fragment)
+                    .commit();
+        }
+
 }

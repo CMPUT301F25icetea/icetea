@@ -1,8 +1,5 @@
 package com.example.icetea.models;
 
-import android.telecom.Call;
-
-import com.example.icetea.util.Callback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -10,16 +7,28 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 
+/**
+ * Singleton class that provides database access for User objects using Firebase Firestore.
+ * Handles CRUD operations for users and provides helper methods to retrieve user-specific data.
+ */
 public class UserDB {
 
     private static UserDB instance;
     private final CollectionReference usersCollection;
 
+    /**
+     * Private constructor initializes the Firestore collection reference for users.
+     */
     private UserDB() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         usersCollection = db.collection("users");
     }
 
+    /**
+     * Returns the singleton instance of UserDB.
+     *
+     * @return UserDB instance
+     */
     public static UserDB getInstance() {
         if (instance == null) {
             instance = new UserDB();
@@ -27,58 +36,41 @@ public class UserDB {
         return instance;
     }
 
-    public void saveUser(User user, OnCompleteListener<Void> listener) {
+    /**
+     * Saves a User object to Firestore.
+     *
+     * @param user The User to save
+     * @param listener Listener to handle completion
+     */
+    public void createUser(User user, OnCompleteListener<Void> listener) {
         usersCollection.document(user.getId())
                 .set(user)
                 .addOnCompleteListener(listener);
     }
 
-    public void getUser(String id, OnCompleteListener<DocumentSnapshot> listener) {
-        usersCollection.document(id)
+    /**
+     * Retrieves a User document by ID from Firestore.
+     *
+     * @param fid User ID
+     * @param listener Listener to handle the retrieved document
+     */
+    public void getUser(String fid, OnCompleteListener<DocumentSnapshot> listener) {
+        usersCollection.document(fid)
                 .get()
                 .addOnCompleteListener(listener);
     }
 
-    public void updateUser(String id, HashMap<String, Object> updates, OnCompleteListener<Void> listener) {
-        usersCollection.document(id)
+    /**
+     * Updates fields of a User document in Firestore.
+     *
+     * @param fid User ID
+     * @param updates HashMap of fields to update
+     * @param listener Listener to handle completion
+     */
+    public void updateUser(String fid, HashMap<String, Object> updates, OnCompleteListener<Void> listener) {
+        usersCollection.document(fid)
                 .update(updates)
                 .addOnCompleteListener(listener);
     }
 
-    public void deleteUser(String id, OnCompleteListener<Void> listener) {
-        usersCollection.document(id)
-                .delete()
-                .addOnCompleteListener(listener);
-    }
-    public void getUserTopRole(String id, Callback<String> callback) {
-        getUser(id, task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-                if (document != null && document.exists()) {
-                    String role = document.getString("role");
-                    callback.onSuccess(role);
-                } else {
-                    callback.onFailure(new Exception("User not found"));
-                }
-            } else {
-                callback.onFailure(task.getException());
-            }
-        });
-    }
-
-    public void getUserEmail(String id, Callback<String> callback) {
-        getUser(id, task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-                if (document != null && document.exists()) {
-                    String email = document.getString("email");
-                    callback.onSuccess(email);
-                } else {
-                    callback.onFailure(new Exception("User not found"));
-                }
-            } else {
-            callback.onFailure(task.getException());
-        }
-        });
-    }
 }

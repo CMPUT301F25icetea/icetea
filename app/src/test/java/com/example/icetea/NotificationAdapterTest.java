@@ -4,11 +4,9 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
 
-import com.example.icetea.entrant.Notification;
-import com.example.icetea.entrant.NotificationAdapter;
+import com.example.icetea.models.Notification;
+import com.example.icetea.models.NotificationAdapter;
 import com.google.firebase.Timestamp;
 
 import org.junit.Before;

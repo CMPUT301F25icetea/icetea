@@ -1,32 +1,46 @@
 package com.example.icetea.auth;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.icetea.MainActivity;
 import com.example.icetea.util.Callback;
-import com.example.icetea.util.NavigationHelper;
 import com.example.icetea.R;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 public class SignUpFragment extends Fragment {
-    private SignUpController controller;
+    private AuthController controller;
 
+    /**
+     * Default empty public constructor.
+     */
     public SignUpFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Factory method to create a new instance of this fragment.
+     *
+     * @return A new instance of SignUpFragment.
+     */
     public static SignUpFragment newInstance() {
         return new SignUpFragment();
     }
@@ -39,6 +53,7 @@ public class SignUpFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_sign_up, container, false);
     }
 
@@ -46,38 +61,69 @@ public class SignUpFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        controller = new SignUpController();
+        // Initialize the controller
+        controller = new AuthController();
 
-        Button backButton = view.findViewById(R.id.buttonSignInBack);
-        Button signUpButton = view.findViewById(R.id.buttonSignUp);
+        ImageButton backButton = view.findViewById(R.id.imageButtonSignUpBack);
+        Button continueButton = view.findViewById(R.id.buttonContinueSignUp);
+        TextInputLayout nameInputLayout = view.findViewById(R.id.inputLayoutNameSignUp);
+        TextInputLayout emailInputLayout = view.findViewById(R.id.inputLayoutEmailSignUp);
+        TextInputEditText nameEditText = view.findViewById(R.id.inputEditTextNameSignUp);
+        TextInputEditText emailEditText = view.findViewById(R.id.inputEditTextEmailSignUp);
 
-        EditText emailEditText = view.findViewById(R.id.signUpEmailAddress);
-        EditText passwordEditText = view.findViewById(R.id.signUpPassword);
 
-        RadioGroup roleRadioGroup = view.findViewById(R.id.roleRadioGroup);
-
-        backButton.setOnClickListener(v -> {
-            NavigationHelper.goBack(this);
+        // Back button bounds
+        ViewCompat.setOnApplyWindowInsetsListener(backButton, (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) v.getLayoutParams();
+            params.topMargin = statusBarHeight;
+            v.setLayoutParams(params);
+            return insets;
         });
 
-        signUpButton.setOnClickListener(v -> {
-            String email = emailEditText.getText().toString().trim();
-            String password = passwordEditText.getText().toString().trim();
+        backButton.setOnClickListener(v -> {
+            FragmentManager fm = getParentFragmentManager();
+            if (fm.getBackStackEntryCount() > 0) {
+                fm.popBackStack();
+            }
+        });
 
-            int selectedId = roleRadioGroup.getCheckedRadioButtonId();
-            RadioButton selectedRadioButton = view.findViewById(selectedId);
-            String role = selectedRadioButton.getText().toString().toLowerCase();
 
-            String inputErrorMessage = controller.validateInput(email, password, role);
-            if (inputErrorMessage != null) {
-                Toast.makeText(getContext(), inputErrorMessage, Toast.LENGTH_SHORT).show();
-                return;
+
+        continueButton.setOnClickListener(v -> {
+            nameInputLayout.setError(null);
+            emailInputLayout.setError(null);
+
+            String name = nameEditText.getText() != null ? nameEditText.getText().toString().trim() : "";
+            String email = emailEditText.getText() != null ? emailEditText.getText().toString().trim() : "";
+
+            // Validate
+            String nameError = controller.validateName(name);
+            String emailError = controller.validateEmail(email);
+
+            boolean hasError = false;
+
+            if (nameError != null) {
+                nameInputLayout.setError(nameError);
+                hasError = true;
             }
 
-            controller.signUp(email, password, role, new Callback<Void>() {
+            if (emailError != null) {
+                emailInputLayout.setError(emailError);
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            controller.signUp(name, email, new Callback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
-                    NavigationHelper.openActivity(SignUpFragment.this, MainActivity.class);
+
+                    FragmentActivity activity = getActivity();
+                    if (activity != null) {
+                        startActivity(new Intent(activity, MainActivity.class));
+                        activity.finish();
+                    }
                 }
 
                 @Override
