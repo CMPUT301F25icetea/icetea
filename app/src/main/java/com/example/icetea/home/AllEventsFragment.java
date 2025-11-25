@@ -19,6 +19,8 @@ import android.widget.Toast;
 import com.example.icetea.R;
 import com.example.icetea.models.Event;
 import com.example.icetea.models.EventDB;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
@@ -53,6 +55,22 @@ public class AllEventsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        FloatingActionButton btnScanQR = view.findViewById(R.id.buttonGoToScanner);
+        // QR Scanner button click
+        btnScanQR.setOnClickListener(v -> {
+            FragmentManager fm = requireActivity().getSupportFragmentManager();
+            FragmentTransaction transaction = fm.beginTransaction();
+            transaction.setReorderingAllowed(true);
+            transaction.setCustomAnimations(
+                    R.anim.slide_in_right,
+                    R.anim.slide_out_left,
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
+            );
+            transaction.replace(R.id.main_fragment_container, QRScannerFragment.newInstance());
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewAllEvents);
         eventList = new ArrayList<>();
         adapter = new EventAdapter(eventList, event -> {

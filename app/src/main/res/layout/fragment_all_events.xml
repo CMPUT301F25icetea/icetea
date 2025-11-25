@@ -69,4 +69,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_event_card"/>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/buttonGoToScanner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="Create Event"
+        android:src="@drawable/ic_create"
+        app:tint="@android:color/white"
+        app:backgroundTint="@color/green"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="24dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

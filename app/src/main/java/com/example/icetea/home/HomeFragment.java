@@ -47,7 +47,6 @@ public class HomeFragment extends Fragment {
 
         ViewPager2 viewPager = view.findViewById(R.id.viewPagerHome);
         TabLayout tabs = view.findViewById(R.id.tabsHome);
-        MaterialButton btnScanQR = view.findViewById(R.id.btnScanQR);
 
         FragmentStateAdapter adapter = new FragmentStateAdapter(this) {
             @NonNull
@@ -65,25 +64,9 @@ public class HomeFragment extends Fragment {
 
         viewPager.setAdapter(adapter);
 
-        // This ties the TabLayout and ViewPager2 together
         new TabLayoutMediator(tabs, viewPager,
                 (tab, position) -> tab.setText(position == 0 ? "All Events" : "My Events")
         ).attach();
 
-        // QR Scanner button click
-        btnScanQR.setOnClickListener(v -> {
-            FragmentManager fm = requireActivity().getSupportFragmentManager();
-            FragmentTransaction transaction = fm.beginTransaction();
-            transaction.setReorderingAllowed(true);
-            transaction.setCustomAnimations(
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_left,
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_right
-            );
-            transaction.replace(R.id.main_fragment_container, QRScannerFragment.newInstance());
-            transaction.addToBackStack(null);
-            transaction.commit();
-        });
     }
 }
