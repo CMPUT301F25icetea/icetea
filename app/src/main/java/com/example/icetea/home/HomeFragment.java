@@ -3,7 +3,10 @@ package com.example.icetea.home;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -12,11 +15,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.icetea.R;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 public class HomeFragment extends Fragment {
-
 
     public HomeFragment() {
         // Required empty public constructor
@@ -35,10 +38,16 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        return inflater.inflate(R.layout.fragment_home, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         ViewPager2 viewPager = view.findViewById(R.id.viewPagerHome);
         TabLayout tabs = view.findViewById(R.id.tabsHome);
+        MaterialButton btnScanQR = view.findViewById(R.id.btnScanQR);
 
         FragmentStateAdapter adapter = new FragmentStateAdapter(this) {
             @NonNull
@@ -61,6 +70,20 @@ public class HomeFragment extends Fragment {
                 (tab, position) -> tab.setText(position == 0 ? "All Events" : "My Events")
         ).attach();
 
-        return view;
+        // QR Scanner button click
+        btnScanQR.setOnClickListener(v -> {
+            FragmentManager fm = requireActivity().getSupportFragmentManager();
+            FragmentTransaction transaction = fm.beginTransaction();
+            transaction.setReorderingAllowed(true);
+            transaction.setCustomAnimations(
+                    R.anim.slide_in_right,
+                    R.anim.slide_out_left,
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
+            );
+            transaction.replace(R.id.main_fragment_container, QRScannerFragment.newInstance());
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
     }
 }
