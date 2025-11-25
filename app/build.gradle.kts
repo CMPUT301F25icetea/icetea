@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.recyclerview)
     implementation(libs.fragment.testing)
+    implementation(libs.firebase.messaging)
     testImplementation(libs.junit)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
