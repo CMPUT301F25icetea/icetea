@@ -33,9 +33,10 @@ public class NotificationService extends FirebaseMessagingService {
         if (eventName == null) eventName = "Event";
 
         if (customMessage != null && !customMessage.isEmpty()) {
-            NotificationHelper.showStatusNotification(this, eventName, customMessage);
+            //TODO: WHEN NOTIFICATION HELPER IS IMPLEMENTED
+            //NotificationHelper.showStatusNotification(this, eventName, customMessage);
         } else if (typeOrMessage != null) {
-            NotificationHelper.showStatusNotification(this, eventName, typeOrMessage);
+            //NotificationHelper.showStatusNotification(this, eventName, typeOrMessage);
         }
     }
 }
