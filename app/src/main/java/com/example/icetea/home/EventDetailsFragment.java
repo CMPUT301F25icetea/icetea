@@ -187,9 +187,10 @@ public class EventDetailsFragment extends Fragment {
             }
         });
 
+        //todo: create "declined" button beside accept button is status = "selected"
+        //todo: verify somewhere that regEnd has not passed
         actionButton.setOnClickListener(v -> {
             actionButton.setEnabled(false);
-            // TODO: check for geolocation requirement (and regEndTime?)
             String userId = CurrentUser.getInstance().getFid();
             if (status == null) {
                 Waitlist waitlist = new Waitlist();
