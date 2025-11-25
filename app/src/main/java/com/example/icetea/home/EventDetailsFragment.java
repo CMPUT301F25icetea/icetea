@@ -1,10 +1,17 @@
 package com.example.icetea.home;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -21,6 +28,11 @@ import com.example.icetea.models.Event;
 import com.example.icetea.models.Waitlist;
 import com.example.icetea.util.Callback;
 import com.example.icetea.util.ImageUtil;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.Timestamp;
 
@@ -35,6 +47,10 @@ public class EventDetailsFragment extends Fragment {
 
     private EventDetailsController controller;
     private static final String ARG_EVENT_ID = "eventId";
+    private FusedLocationProviderClient fusedLocationClient;
+    private ActivityResultLauncher<String> locationPermissionLauncher;
+    private Event event;
+
 
     private String eventId;
     private String status;
@@ -58,6 +74,22 @@ public class EventDetailsFragment extends Fragment {
         if (getArguments() != null) {
             eventId = getArguments().getString(ARG_EVENT_ID);
         }
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+
+        locationPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        getUserLocation();
+                    } else {
+                        if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                            Toast.makeText(getContext(), "Location permission denied.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            showLocationSettingsDialog();
+                        }
+                    }
+                }
+        );
     }
 
     @Override
@@ -91,8 +123,9 @@ public class EventDetailsFragment extends Fragment {
 
         controller.getEventObject(eventId, new Callback<Event>() {
             @Override
-            public void onSuccess(Event event) {
+            public void onSuccess(Event result) {
 
+                event = result;
                 if (event.getPosterBase64() != null && !event.getPosterBase64().isEmpty()) {
                     Bitmap bitmap = ImageUtil.base64ToBitmap(event.getPosterBase64());
                     poster.setImageBitmap(bitmap);
@@ -192,7 +225,8 @@ public class EventDetailsFragment extends Fragment {
         actionButton.setOnClickListener(v -> {
             actionButton.setEnabled(false);
             String userId = CurrentUser.getInstance().getFid();
-            if (status == null) {
+
+            if (status == null && !event.getGeolocationRequirement()) {
                 Waitlist waitlist = new Waitlist();
                 waitlist.setUserId(userId);
                 waitlist.setEventId(eventId);
@@ -217,6 +251,10 @@ public class EventDetailsFragment extends Fragment {
                             }
                         }
                 );
+            } else if (status == null && event.getGeolocationRequirement()) {
+                checkLocationPermission();
+                actionButton.setEnabled(true);
+                //get geolocation first
 
             } else if (status.equals(Waitlist.STATUS_WAITING)) {
 
@@ -257,5 +295,41 @@ public class EventDetailsFragment extends Fragment {
 
         });
     }
+    private void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            getUserLocation();
+        } else {
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+    private void getUserLocation() {
+        try {
+            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, new CancellationTokenSource().getToken())
+                    .addOnSuccessListener(location -> {
+                        if (location != null) {
+                            double latitude = location.getLatitude();
+                            double longitude = location.getLongitude();
+                            Toast.makeText(getContext(), "Lat: " + latitude + ", Lng: " + longitude, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), "Location not found", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void showLocationSettingsDialog() {
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Location Permission Needed")
+                .setMessage("Please enable location permission in settings to join this event.")
+                .setPositiveButton("Go to Settings", (dialog, which) -> {
+                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    intent.setData(Uri.fromParts("package", requireContext().getPackageName(), null));
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
 }

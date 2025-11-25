@@ -41,6 +41,8 @@ dependencies {
     implementation(libs.recyclerview)
     implementation(libs.fragment.testing)
     implementation(libs.firebase.messaging)
+    implementation(libs.play.services.location)
+    implementation(libs.firebase.messaging)
     testImplementation(libs.junit)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
