@@ -54,11 +54,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ProfileFragment extends Fragment {
     private Runnable checkInputChanged;
     private ImageView avatarImageView;
@@ -289,7 +284,6 @@ public class ProfileFragment extends Fragment {
                                 CurrentUser.getInstance().clearSession();
                                 Toast.makeText(requireContext(), "Account deleted", Toast.LENGTH_SHORT).show();
 
-                                // Navigate back to the auth/welcome screen
                                 Intent intent = new Intent(requireActivity(), AuthActivity.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent);

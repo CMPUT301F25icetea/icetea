@@ -40,11 +40,6 @@ import com.google.firebase.Timestamp;
 
 import java.util.Objects;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link EventDetailsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class EventDetailsFragment extends Fragment {
 
     private EventDetailsController controller;
@@ -53,8 +48,6 @@ public class EventDetailsFragment extends Fragment {
     private ActivityResultLauncher<String> locationPermissionLauncher;
     private Event event;
     private LocationCallback pendingLocationCallback;
-
-
     private String eventId;
     private String status;
 

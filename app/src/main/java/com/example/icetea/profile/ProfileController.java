@@ -6,13 +6,20 @@ import android.widget.EditText;
 
 import com.example.icetea.models.UserDB;
 import com.example.icetea.util.Callback;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Controller responsible for managing the user's profile data.
@@ -64,94 +71,54 @@ public class ProfileController {
         return null;
     }
 
+    // batched deletions, added deleting waitlist entries on events they owned
     public void deleteProfile(String userId, Callback<Void> callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Step 1: Delete all events owned by the user
-        db.collection("events")
-                .whereEqualTo("organizerId", userId)
+        CollectionReference eventsCollection = db.collection("events");
+        CollectionReference waitlistCollection = db.collection("waitlist");
+        DocumentReference userDocRef = db.collection("users").document(userId);
+
+        Task<QuerySnapshot> userEventsTask = eventsCollection.whereEqualTo("organizerId", userId).get();
+        Task<QuerySnapshot> waitlistsForUserEventsTask = eventsCollection.whereEqualTo("organizerId", userId)
                 .get()
-                .addOnSuccessListener(querySnapshot -> {
+                .continueWithTask(eventsSnap -> {
+                    List<String> eventIds = new ArrayList<>();
+                    for (DocumentSnapshot doc : eventsSnap.getResult()) {
+                        eventIds.add(doc.getId());
+                    }
+                    return waitlistCollection.whereIn("eventId", eventIds).get();
+                });
+
+        Task<QuerySnapshot> waitlistsForUserTask = waitlistCollection.whereEqualTo("userId", userId).get();
+
+        Tasks.whenAllSuccess(userEventsTask, waitlistsForUserEventsTask, waitlistsForUserTask)
+                .addOnSuccessListener(results -> {
+                    QuerySnapshot eventsSnap = (QuerySnapshot) results.get(0);
+                    QuerySnapshot waitlistsForEventsSnap = (QuerySnapshot) results.get(1);
+                    QuerySnapshot waitlistsForUserSnap = (QuerySnapshot) results.get(2);
+
                     WriteBatch batch = db.batch();
 
-                    // Delete each event owned by this user
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                    for (DocumentSnapshot doc : eventsSnap.getDocuments()) {
                         batch.delete(doc.getReference());
                     }
 
-                    batch.commit().addOnSuccessListener(aVoid -> {
-                        // Step 2: Delete all waiting list entries for this user
-                        deleteWaitingListEntries(db, userId, callback);
-                    }).addOnFailureListener(e -> {
-                        Log.e("ProfileController", "Failed to delete events", e);
-                        callback.onFailure(e);
-                    });
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("ProfileController", "Failed to query events", e);
-                    callback.onFailure(e);
-                });
-    }
-
-    private void deleteWaitingListEntries(FirebaseFirestore db, String userId, Callback<Void> callback) {
-        // Delete all waitlist documents where this user is a participant
-        db.collection("waitlist")
-                .whereEqualTo("userId", userId)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    WriteBatch batch = db.batch();
-
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                    for (DocumentSnapshot doc : waitlistsForEventsSnap.getDocuments()) {
                         batch.delete(doc.getReference());
                     }
 
-                    batch.commit().addOnSuccessListener(aVoid -> {
-                        // Step 3: Delete the user profile
-                        deleteUserProfile(db, userId, callback);
-                    }).addOnFailureListener(e -> {
-                        Log.e("ProfileController", "Failed to delete waiting list entries", e);
-                        callback.onFailure(e);
-                    });
+                    for (DocumentSnapshot doc : waitlistsForUserSnap.getDocuments()) {
+                        batch.delete(doc.getReference());
+                    }
+
+                    batch.delete(userDocRef);
+
+                    batch.commit()
+                            .addOnSuccessListener(aVoid -> callback.onSuccess(null))
+                            .addOnFailureListener(callback::onFailure);
                 })
-                .addOnFailureListener(e -> {
-                    Log.e("ProfileController", "Failed to query waiting lists", e);
-                    callback.onFailure(e);
-                });
-    }
-
-    private void deleteUserProfile(FirebaseFirestore db, String userId, Callback<Void> callback) {
-        // Delete the user document
-        db.collection("users").document(userId)
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    Log.d("ProfileController", "User profile deleted successfully");
-
-                    // Delete from Firebase Authentication
-                    deleteFirebaseAuthUser(callback);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("ProfileController", "Failed to delete user profile", e);
-                    callback.onFailure(e);
-                });
-    }
-
-    private void deleteFirebaseAuthUser(Callback<Void> callback) {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            currentUser.delete()
-                    .addOnSuccessListener(aVoid -> {
-                        Log.d("ProfileController", "Firebase Auth user deleted successfully");
-                        callback.onSuccess(null);
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("ProfileController", "Failed to delete Firebase Auth user", e);
-                        // Still consider it a success if Firestore data was deleted
-                        // The auth account can be cleaned up later
-                        callback.onSuccess(null);
-                    });
-        } else {
-            callback.onSuccess(null);
-        }
+                .addOnFailureListener(callback::onFailure);
     }
 
 }
