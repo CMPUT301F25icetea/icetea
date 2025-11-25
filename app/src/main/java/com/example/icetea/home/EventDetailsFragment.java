@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import com.example.icetea.models.Event;
 import com.example.icetea.models.Waitlist;
 import com.example.icetea.util.Callback;
 import com.example.icetea.util.ImageUtil;
+import com.example.icetea.util.LocationCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
@@ -50,6 +52,7 @@ public class EventDetailsFragment extends Fragment {
     private FusedLocationProviderClient fusedLocationClient;
     private ActivityResultLauncher<String> locationPermissionLauncher;
     private Event event;
+    private LocationCallback pendingLocationCallback;
 
 
     private String eventId;
@@ -80,13 +83,17 @@ public class EventDetailsFragment extends Fragment {
                 new ActivityResultContracts.RequestPermission(),
                 isGranted -> {
                     if (isGranted) {
-                        getUserLocation();
+                        if (pendingLocationCallback != null) {
+                            getUserLocation(pendingLocationCallback);
+                            pendingLocationCallback = null;
+                        }
                     } else {
                         if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
                             Toast.makeText(getContext(), "Location permission denied.", Toast.LENGTH_SHORT).show();
                         } else {
                             showLocationSettingsDialog();
                         }
+                        pendingLocationCallback = null;
                     }
                 }
         );
@@ -251,12 +258,46 @@ public class EventDetailsFragment extends Fragment {
                             }
                         }
                 );
-            } else if (status == null && event.getGeolocationRequirement()) {
-                checkLocationPermission();
-                actionButton.setEnabled(true);
-                //get geolocation first
 
-            } else if (status.equals(Waitlist.STATUS_WAITING)) {
+            } else if (status == null && event.getGeolocationRequirement()) {
+                actionButton.setText("Locating... (this may take a few seconds)");
+
+                checkLocationPermission(new LocationCallback() {
+                    @Override
+                    public void onLocationResult(double latitude, double longitude) {
+                        Waitlist waitlist = new Waitlist();
+                        waitlist.setUserId(userId);
+                        waitlist.setEventId(eventId);
+                        waitlist.setTimestamp(Timestamp.now());
+                        waitlist.setLatitude(latitude);
+                        waitlist.setLongitude(longitude);
+                        waitlist.setStatus(Waitlist.STATUS_WAITING);
+
+                        controller.addToWaitlist(waitlist, new Callback<Void>() {
+                            @Override
+                            public void onSuccess(Void result) {
+                                actionButton.setText("Leave Waitlist");
+                                actionButton.setEnabled(true);
+                                actionButton.setAlpha(1.0f);
+                                status = Waitlist.STATUS_WAITING;
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                actionButton.setEnabled(true);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onLocationFailed(Exception e) {
+                        Toast.makeText(getContext(), "Could not get location", Toast.LENGTH_SHORT).show();
+                        actionButton.setEnabled(true);
+                    }
+                });
+
+            } else if (Waitlist.STATUS_WAITING.equals(status)) {
 
                 controller.removeFromWaitlist(userId, eventId, new Callback<Void>() {
                     @Override
@@ -274,7 +315,7 @@ public class EventDetailsFragment extends Fragment {
                     }
                 });
 
-            } else if (status.equals(Waitlist.STATUS_SELECTED)) {
+            } else if (Waitlist.STATUS_SELECTED.equals(status)) {
                 controller.updateEntrantStatus(CurrentUser.getInstance().getFid(), eventId, Waitlist.STATUS_ACCEPTED, new Callback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
@@ -295,28 +336,27 @@ public class EventDetailsFragment extends Fragment {
 
         });
     }
-    private void checkLocationPermission() {
+    private void checkLocationPermission(LocationCallback callback) {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            getUserLocation();
+            getUserLocation(callback);
         } else {
+            pendingLocationCallback = callback;
             locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
-    private void getUserLocation() {
+    private void getUserLocation(LocationCallback callback) {
         try {
             fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, new CancellationTokenSource().getToken())
                     .addOnSuccessListener(location -> {
                         if (location != null) {
-                            double latitude = location.getLatitude();
-                            double longitude = location.getLongitude();
-                            Toast.makeText(getContext(), "Lat: " + latitude + ", Lng: " + longitude, Toast.LENGTH_SHORT).show();
+                            callback.onLocationResult(location.getLatitude(), location.getLongitude());
                         } else {
-                            Toast.makeText(getContext(), "Location not found", Toast.LENGTH_SHORT).show();
+                            callback.onLocationFailed(new Exception("Error finding your location"));
                         }
                     });
         } catch (SecurityException e) {
-            e.printStackTrace();
+            callback.onLocationFailed(new Exception("Error finding your location"));
         }
     }
 
