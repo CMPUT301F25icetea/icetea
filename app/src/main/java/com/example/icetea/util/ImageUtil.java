@@ -19,6 +19,7 @@ public class ImageUtil {
         return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
     }
 
+    //todo: add size constraints
     public static String uriToBase64(Context context, Uri uri) {
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
