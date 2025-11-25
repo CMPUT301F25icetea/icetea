@@ -64,4 +64,8 @@ public class CurrentUser {
     public void setAvatar(Bitmap avatar) {
         this.avatar = avatar;
     }
+
+    public void clearSession() {
+
+    }
 }

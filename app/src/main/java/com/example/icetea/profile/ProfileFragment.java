@@ -1,6 +1,12 @@
 package com.example.icetea.profile;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -8,24 +14,39 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.icetea.R;
+import com.example.icetea.auth.AuthActivity;
 import com.example.icetea.auth.CurrentUser;
 import com.example.icetea.util.Callback;
 import com.example.icetea.util.ImageUtil;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.shape.MaterialShapeDrawable;
+import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -252,125 +273,39 @@ public class ProfileFragment extends Fragment {
             saveButton.setAlpha(0.5f);
             cancelButton.setAlpha(0.5f);
         });
+        // Add this code at the END of your onViewCreated method, right after the cancelButton.setOnClickListener block
+
+        deleteButton.setOnClickListener(v -> {
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Delete Account")
+                    .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        String userId = CurrentUser.getInstance().getFid();
+
+                        controller.deleteProfile(userId, new Callback<Void>() {
+                            @Override
+                            public void onSuccess(Void result) {
+                                CurrentUser.getInstance().clearSession();
+                                Toast.makeText(requireContext(), "Account deleted", Toast.LENGTH_SHORT).show();
+
+                                // Navigate back to the auth/welcome screen
+                                Intent intent = new Intent(requireActivity(), AuthActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                                requireActivity().finish();
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                Toast.makeText(requireContext(), "Delete failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    })
+                    .show();
+        });
+
     }
+
 }
-//        deleteButton.setOnClickListener(v -> {
-//            String currentEmail = CurrentUser.getInstance().getEmail();
-//
-//            // --- Input EditText ---
-//            EditText input = new EditText(requireContext());
-//            input.setHint("Enter your email address");
-//            input.setSingleLine(true);
-//            input.setGravity(Gravity.CENTER);
-//            input.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-//
-//            GradientDrawable editBg = new GradientDrawable();
-//            editBg.setColor(ContextCompat.getColor(requireContext(), R.color.darkerBeige));
-//            editBg.setCornerRadius(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources().getDisplayMetrics()));
-//            input.setBackground(editBg);
-//
-//            int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12, getResources().getDisplayMetrics());
-//            input.setPadding(padding, padding, padding, padding);
-//
-//            // Wrap EditText in a container to prevent clipping
-//            LinearLayout inputContainer = new LinearLayout(requireContext());
-//            inputContainer.setOrientation(LinearLayout.VERTICAL);
-//            inputContainer.setGravity(Gravity.CENTER_HORIZONTAL);
-//            int containerPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
-//            inputContainer.setPadding(0, containerPadding, 0, containerPadding);
-//            inputContainer.setClipToPadding(false);
-//
-//            LinearLayout.LayoutParams inputParams = new LinearLayout.LayoutParams(
-//                    (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 250, getResources().getDisplayMetrics()),
-//                    LinearLayout.LayoutParams.WRAP_CONTENT
-//            );
-//            inputParams.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
-//            input.setLayoutParams(inputParams);
-//
-//            inputContainer.addView(input);
-//
-//            // --- Spannable message ---
-//            String messageText = "Deleting your account will delete all your data.\nThis action cannot be undone.\nPlease enter this account's email address to confirm deletion. (%s)";
-//            SpannableString spannableMessage = new SpannableString(String.format(messageText, currentEmail));
-//
-//            // Bold "This action cannot be undone."
-//            String boldPart = "This action cannot be undone.";
-//            int boldStart = spannableMessage.toString().indexOf(boldPart);
-//            int boldEnd = boldStart + boldPart.length();
-//            spannableMessage.setSpan(new StyleSpan(Typeface.BOLD), boldStart, boldEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//
-//            // Color the email
-//            int emailStart = spannableMessage.toString().indexOf(currentEmail);
-//            int emailEnd = emailStart + currentEmail.length();
-//            spannableMessage.setSpan(new ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.emeraldGreen)),
-//                    emailStart, emailEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//
-//            // --- Build dialog ---
-//            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
-//            builder.setTitle("Delete Account");
-//            builder.setMessage(spannableMessage);
-//            builder.setView(inputContainer);
-//
-//            GradientDrawable bg = new GradientDrawable();
-//            bg.setColor(ContextCompat.getColor(requireContext(), R.color.beige));
-//            bg.setCornerRadius(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics()));
-//            builder.setBackground(bg);
-//
-//            builder.setNegativeButton("Cancel", null);
-//            builder.setPositiveButton("Delete", null);
-//
-//            AlertDialog dialog = builder.create();
-//
-//            dialog.setOnShowListener(dialogInterface -> {
-//                Button cancelBtn = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-//                Button deleteBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-//
-//                MaterialShapeDrawable deleteBg = new MaterialShapeDrawable(
-//                        ShapeAppearanceModel.builder()
-//                                .setAllCornerSizes(
-//                                        TypedValue.applyDimension(
-//                                                TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics()))
-//                                .build()
-//                );
-//                deleteBg.setFillColor(ColorStateList.valueOf(Color.RED));
-//                deleteBtn.setBackground(deleteBg);
-//                deleteBtn.setTextColor(Color.WHITE);
-//
-//
-//                // Cancel button background with stroke
-//                MaterialShapeDrawable cancelBg = new MaterialShapeDrawable(
-//                        ShapeAppearanceModel.builder()
-//                                .setAllCornerSizes(
-//                                        TypedValue.applyDimension(
-//                                                TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics()))
-//                                .build()
-//                );
-//                cancelBg.setFillColor(ColorStateList.valueOf(Color.TRANSPARENT));
-//                cancelBg.setStroke(
-//                        (int)TypedValue.applyDimension(
-//                                TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics()),
-//                        Color.BLACK
-//                );
-//                cancelBtn.setBackground(cancelBg);
-//                cancelBtn.setTextColor(Color.BLACK);
-//
-//
-//                // --- Button actions ---
-//                deleteBtn.setOnClickListener(v1 -> {
-//                    String typedEmail = input.getText().toString().trim();
-//                    if (typedEmail.isEmpty()) {
-//                        input.setError("Please enter your email");
-//                    } else if (!typedEmail.equals(currentEmail)) {
-//                        input.setError("Email does not match your account");
-//                    } else {
-//                        // Email matches → delete profile
-//                        // deleteUserProfile();
-//                        dialog.dismiss();
-//                    }
-//                });
-//
-//                cancelBtn.setOnClickListener(v1 -> dialog.dismiss());
-//            });
-//
-//            dialog.show();
-//        });
+
