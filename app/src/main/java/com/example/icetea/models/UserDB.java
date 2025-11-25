@@ -73,4 +73,17 @@ public class UserDB {
                 .addOnCompleteListener(listener);
     }
 
+    /**
+     * save the user FCM token to firebase
+     *
+     * @param fid User ID
+     * @param token FCM device token
+     */
+    public void saveFcmToken(String fid, String token) {
+        HashMap<String, Object> updates = new HashMap<>();
+        updates.put("fcmToken", token);
+
+        usersCollection.document(fid).update(updates);
+    }
+
 }
