@@ -17,6 +17,6 @@ import com.example.icetea.MainActivity;
 import com.example.icetea.R;
 
 public class NotificationHelper {
-    //TODO: where user receive message
+    //TODO: where user receive message implement if needed
 }
 
