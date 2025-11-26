@@ -6,12 +6,13 @@ import com.example.icetea.models.Waitlist;
 import com.example.icetea.models.WaitlistDB;
 import com.example.icetea.util.Callback;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class ManageEventController {
@@ -31,7 +32,7 @@ public class ManageEventController {
         });
     }
 
-    //todo: send out notifications
+    // todo: send out notifications
     public void drawWinners(String eventId, int count, Callback<Void> callback) {
         if (count <= 0) {
             callback.onFailure(new IllegalArgumentException("Count must be greater than 0"));
@@ -79,5 +80,16 @@ public class ManageEventController {
         });
     }
 
+    public void updateEventPoster(String eventId, String posterBase64, Callback<Void> callback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        HashMap<String, Object> updates = new HashMap<>();
+        updates.put("posterBase64", posterBase64);
+
+        db.collection("events")
+                .document(eventId)
+                .update(updates)
+                .addOnSuccessListener(unused -> callback.onSuccess(null))
+                .addOnFailureListener(callback::onFailure);
+    }
 }
