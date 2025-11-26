@@ -39,7 +39,6 @@ public class ManageEventFragment extends Fragment {
     private Event event;
     private String eventId;
 
-    // Poster UI + state
     private ImageView posterImageView;
     private MaterialButton changePosterButton;
     private boolean posterChanged = false;
@@ -106,16 +105,13 @@ public class ManageEventFragment extends Fragment {
                 requireActivity().getSupportFragmentManager().popBackStack()
         );
 
-        // Poster views
         posterImageView = view.findViewById(R.id.imageManageEventPoster);
         changePosterButton = view.findViewById(R.id.buttonChangeEventPoster);
 
-        // Open gallery on button click
         changePosterButton.setOnClickListener(v ->
                 pickPosterLauncher.launch("image/*")
         );
 
-        // Also allow tapping the image
         posterImageView.setOnClickListener(v ->
                 pickPosterLauncher.launch("image/*")
         );
