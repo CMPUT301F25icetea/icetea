@@ -138,32 +138,3 @@
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    <!--need:-->
-<!--    draw replacements-->
-<!--    draw people -> turns into view final (csv)-->
-<!--    send notifications-->
-<!--    view waitinglist-->
-<!--    show and download qr code (bottom)-->
-
-
-<!--this fragment:-->
-<!--    draw people button -> final entrants fragment (csv option within)-->
-<!--    view waiting list fragment button-->
-<!--    edit event fragment button-->
-<!--    qr code with download-->
-
-
-
-<!--edit all event fields - seperate fragment, copy of event details-->
-
-
-<!--waitinglist fragment:-->
-<!--waiting list-->
-<!--filters-->
-<!--view selected on map-->
-<!--scrollview-->
-<!--    people - each with options to only cancel or cancel and replace (if status invited)-->
-<!--scrollview-->
-
