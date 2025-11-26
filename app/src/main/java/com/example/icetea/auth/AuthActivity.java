@@ -62,7 +62,9 @@ public class AuthActivity extends AppCompatActivity {
                             user.setPhone(phone);
                             user.setNotifications(notifications);
                             user.setAvatar(ImageUtil.base64ToBitmap(avatar));
-                            startActivity(new Intent(AuthActivity.this, MainActivity.class));
+                            Intent intent = new Intent(AuthActivity.this, MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
                             finish();
                         } else {
                             Toast.makeText(AuthActivity.this, "Failed to query user data", Toast.LENGTH_SHORT).show();
