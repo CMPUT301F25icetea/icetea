@@ -8,17 +8,20 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.icetea.R;
-import com.example.icetea.auth.SignUpFragment;
 import com.example.icetea.models.Event;
 import com.example.icetea.util.Callback;
+import com.example.icetea.util.ImageUtil;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
@@ -36,10 +39,39 @@ public class ManageEventFragment extends Fragment {
     private Event event;
     private String eventId;
 
+    // Poster UI + state
+    private ImageView posterImageView;
+    private MaterialButton changePosterButton;
+    private boolean posterChanged = false;
+    private String newPosterBase64 = null;
+
+    private final ActivityResultLauncher<String> pickPosterLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri != null) {
+                    try {
+                        String base64 = ImageUtil.uriToBase64(requireContext(), uri);
+
+                        posterImageView.setImageURI(uri);
+                        posterChanged = true;
+                        newPosterBase64 = base64;
+
+                        updateEventPoster();
+
+                    } catch (ImageUtil.ImageTooLargeException e) {
+                        Toast.makeText(getContext(),
+                                "Image too large. Please select a smaller image.",
+                                Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Toast.makeText(getContext(),
+                                "Failed to process image.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
     public ManageEventFragment() {
         // Required empty public constructor
     }
-
 
     public static ManageEventFragment newInstance(String eventId) {
         ManageEventFragment fragment = new ManageEventFragment();
@@ -54,14 +86,12 @@ public class ManageEventFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             eventId = getArguments().getString(ARG_EVENT_ID);
-
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_manage_event, container, false);
     }
 
@@ -76,14 +106,37 @@ public class ManageEventFragment extends Fragment {
                 requireActivity().getSupportFragmentManager().popBackStack()
         );
 
+        // Poster views
+        posterImageView = view.findViewById(R.id.imageManageEventPoster);
+        changePosterButton = view.findViewById(R.id.buttonChangeEventPoster);
+
+        // Open gallery on button click
+        changePosterButton.setOnClickListener(v ->
+                pickPosterLauncher.launch("image/*")
+        );
+
+        // Also allow tapping the image
+        posterImageView.setOnClickListener(v ->
+                pickPosterLauncher.launch("image/*")
+        );
+
         MaterialButton drawWinners = view.findViewById(R.id.buttonDrawWinners);
 
         controller.getEventObject(eventId, new Callback<Event>() {
             @Override
             public void onSuccess(Event result) {
                 event = result;
-                if (event.getAlreadyDrew()){
+
+                if (event.getAlreadyDrew()) {
                     drawWinners.setText("View Final Entrants");
+                }
+
+                // Show correct poster
+                String posterBase64 = event.getPosterBase64();
+                if (posterBase64 != null && !posterBase64.isEmpty()) {
+                    posterImageView.setImageBitmap(
+                            ImageUtil.base64ToBitmap(posterBase64)
+                    );
                 }
             }
 
@@ -91,22 +144,6 @@ public class ManageEventFragment extends Fragment {
             public void onFailure(Exception e) {
                 Toast.makeText(getContext(), "Error loading event", Toast.LENGTH_SHORT).show();
             }
-        });
-
-        MaterialButton editEventButton = view.findViewById(R.id.buttonManageEventEditEvent);
-        editEventButton.setOnClickListener(v -> {
-            FragmentManager fm = requireActivity().getSupportFragmentManager();
-            FragmentTransaction transaction = fm.beginTransaction();
-            transaction.setReorderingAllowed(true);
-            transaction.setCustomAnimations(
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_left,
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_right
-            );
-            transaction.replace(R.id.main_fragment_container, EditEventFragment.newInstance(eventId));
-            transaction.addToBackStack(null);
-            transaction.commit();
         });
 
         MaterialButton viewWaitingListButton = view.findViewById(R.id.buttonViewWaitingList);
@@ -198,6 +235,31 @@ public class ManageEventFragment extends Fragment {
                 Toast.makeText(getContext(), "Please refresh, error finding event", Toast.LENGTH_SHORT).show();
             }
 
+        });
+    }
+
+    private void updateEventPoster() {
+        if (!posterChanged || newPosterBase64 == null || eventId == null) {
+            return;
+        }
+
+        controller.updateEventPoster(eventId, newPosterBase64, new Callback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                Toast.makeText(getContext(), "Event poster updated", Toast.LENGTH_SHORT).show();
+                posterChanged = false;
+
+                if (event != null) {
+                    event.setPosterBase64(newPosterBase64);
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(getContext(),
+                        "Failed to update poster: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
         });
     }
 }
