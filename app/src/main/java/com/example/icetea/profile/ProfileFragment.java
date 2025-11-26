@@ -25,7 +25,6 @@ import android.text.SpannableString;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.util.Base64;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -52,20 +51,30 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Base64;
 import java.util.HashMap;
 
 public class ProfileFragment extends Fragment {
     private Runnable checkInputChanged;
     private ImageView avatarImageView;
     private boolean avatarChanged = false;
-    private Uri newAvatarUri;
+    private String newAvatarBase64;
     private final ActivityResultLauncher<String> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
                 if (uri != null) {
-                    avatarImageView.setImageURI(uri);
-                    avatarChanged = true;
-                    checkInputChanged.run();
-                    newAvatarUri = uri;
+                    String uriToBase64;
+                    try {
+                        uriToBase64 = ImageUtil.uriToBase64(requireContext(), uri);
+                        avatarImageView.setImageURI(uri);
+                        avatarChanged = true;
+                        checkInputChanged.run();
+                        newAvatarBase64 = uriToBase64;
+                    } catch (ImageUtil.ImageTooLargeException e) {
+                        Toast.makeText(getContext(), "Image too large. Please select a smaller image.", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Toast.makeText(getContext(), "Failed to process image.", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
     private ProfileController controller;
@@ -101,6 +110,11 @@ public class ProfileFragment extends Fragment {
         uploadButton.setOnClickListener(v -> {
             pickImageLauncher.launch("image/*");
         });
+
+        avatarImageView.setOnClickListener(v -> {
+            pickImageLauncher.launch("image/*");
+        });
+
 
         TextInputLayout nameTextLayout = view.findViewById(R.id.inputLayoutNameProfile);
         TextInputLayout emailTextLayout = view.findViewById(R.id.inputLayoutEmailProfile);
@@ -169,7 +183,6 @@ public class ProfileFragment extends Fragment {
             String email = emailEditText.getText() != null ? emailEditText.getText().toString().trim() : "";
             String phone = phoneEditText.getText() != null ? phoneEditText.getText().toString().trim() : "";
 
-            // Validate
             String nameError = controller.validateName(name);
             String emailError = controller.validateEmail(email);
             String phoneError = controller.validatePhone(phone);
@@ -190,22 +203,20 @@ public class ProfileFragment extends Fragment {
                 phoneTextLayout.setError(phoneError);
                 hasError = true;
             }
-//            if (uriToBase64 == null) {
-//                Toast.makeText(getContext(), "Error uploading avatar", Toast.LENGTH_SHORT).show();
-//                hasError = true;
-//            }
-            if (hasError) return;
 
             HashMap<String, Object> updates = new HashMap<>();
+
+            if (avatarChanged) {
+                updates.put("avatar", newAvatarBase64);
+            } else {
+                newAvatarBase64 = null;
+            }
+
+            if (hasError) return;
+
             updates.put("name", name);
             updates.put("email", email);
             updates.put("phone", phone.isEmpty() ? null : phone);
-
-            // todo:differentiate between newUri == null vs uritobase64 returning null (error)
-            String uriToBase64 = ImageUtil.uriToBase64(requireContext(), newAvatarUri);
-            if (avatarChanged) {
-                updates.put("avatar", uriToBase64);
-            }
 
             controller.updateProfile(CurrentUser.getInstance().getFid(), updates, new Callback<Void>() {
                 @Override
@@ -216,9 +227,9 @@ public class ProfileFragment extends Fragment {
                     CurrentUser.getInstance().setPhone(phone);
 
                     if (avatarChanged) {
-                        CurrentUser.getInstance().setAvatar(ImageUtil.base64ToBitmap(uriToBase64));
+                        CurrentUser.getInstance().setAvatar(ImageUtil.base64ToBitmap(newAvatarBase64));
                         avatarChanged = false;
-                        newAvatarUri = null;
+                        newAvatarBase64 = null;
                     }
 
                     View root = getView();
@@ -248,7 +259,7 @@ public class ProfileFragment extends Fragment {
             nameTextLayout.setError(null);
             emailTextLayout.setError(null);
             phoneTextLayout.setError(null);
-            newAvatarUri = null;
+            newAvatarBase64 = null;
             avatarChanged = false;
             if (CurrentUser.getInstance().getAvatar() == null) {
                 avatarImageView.setImageResource(R.drawable.profile);
@@ -268,7 +279,6 @@ public class ProfileFragment extends Fragment {
             saveButton.setAlpha(0.5f);
             cancelButton.setAlpha(0.5f);
         });
-        // Add this code at the END of your onViewCreated method, right after the cancelButton.setOnClickListener block
 
         deleteButton.setOnClickListener(v -> {
             new MaterialAlertDialogBuilder(requireContext())

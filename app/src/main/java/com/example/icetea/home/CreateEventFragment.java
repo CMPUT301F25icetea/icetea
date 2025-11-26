@@ -25,6 +25,7 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -176,15 +177,24 @@ public class CreateEventFragment extends Fragment {
                 inputLayoutMaxEntrants.setError(maxEntrantsError);
                 hasError = true;
             }
+            String posterBase64 = null;
+
+            if (newPosterUri != null) {
+                try {
+                    posterBase64 = ImageUtil.uriToBase64(requireContext(), newPosterUri);
+                } catch (IOException e) {
+                    Toast.makeText(getContext(), "Failed loading image", Toast.LENGTH_SHORT).show();
+                    hasError = true;
+                } catch (ImageUtil.ImageTooLargeException e) {
+                    Toast.makeText(getContext(), "Image too large to upload", Toast.LENGTH_SHORT).show();
+                    hasError = true;
+                }
+            }
 
             if (hasError) {
                 return;
             }
-            String posterBase64 = null;
 
-            if (newPosterUri != null) {
-                posterBase64 = ImageUtil.uriToBase64(requireContext(), newPosterUri);
-            }
 
             controller.createEvent(eventName, eventDescription, eventCriteria, posterBase64,
                     regStartText, regEndText, eventStartText, eventEndText, location, maxEntrantsText,
