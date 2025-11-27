@@ -49,7 +49,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="john.doe@example.com"
-            android:textSize="14sp"
+            android:textSize="13sp"
             android:textStyle="italic"
             app:layout_constraintStart_toStartOf="@id/textName"
             app:layout_constraintTop_toBottomOf="@id/textName"
@@ -59,7 +59,7 @@
             android:id="@+id/textStatus"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Status: Waiting"
+            android:text="Status: waiting"
             android:textSize="14sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@id/textName"
@@ -80,7 +80,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonReplace"
-                android:layout_width="100dp"
+                android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:text="Replace"
                 android:visibility="gone"
@@ -92,7 +92,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonRevoke"
-                android:layout_width="100dp"
+                android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:text="Revoke"
                 android:visibility="gone"

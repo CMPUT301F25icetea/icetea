@@ -23,15 +23,23 @@ import java.util.List;
 import java.util.Map;
 
 public class WaitlistAdapter extends RecyclerView.Adapter<WaitlistAdapter.WaitlistViewHolder> {
+    public interface ActionListener {
+        void onReplace(Waitlist entry);
+        void onRevoke(Waitlist entry);
+    }
+
+    private final ActionListener listener;
+
 
     private final Context context;
     private final List<Waitlist> entries;
     private final Map<String, UserData> userCache = new HashMap<>();
 
 
-    public WaitlistAdapter(Context context, List<Waitlist> entries) {
+    public WaitlistAdapter(Context context, List<Waitlist> entries, ActionListener listener) {
         this.context = context;
         this.entries = entries;
+        this.listener = listener;
     }
 
     @NonNull
@@ -53,6 +61,23 @@ public class WaitlistAdapter extends RecyclerView.Adapter<WaitlistAdapter.Waitli
         if (Waitlist.STATUS_SELECTED.equals(entry.getStatus())) {
             holder.buttonRevoke.setVisibility(View.VISIBLE);
             holder.buttonReplace.setVisibility(View.VISIBLE);
+            holder.buttonReplace.setEnabled(true);
+            holder.buttonReplace.setAlpha(1f);
+            holder.buttonReplace.setText("Replace");
+
+        } else if (Waitlist.STATUS_DECLINED.equals(entry.getStatus())) {
+            holder.buttonRevoke.setVisibility(View.GONE);
+            holder.buttonReplace.setVisibility(View.VISIBLE);
+            if (entry.getReplaced()) {
+                holder.buttonReplace.setText("Replaced");
+                holder.buttonReplace.setEnabled(false);
+                holder.buttonReplace.setAlpha(0.5f);
+            } else {
+                holder.buttonReplace.setText("Replace");
+                holder.buttonReplace.setEnabled(true);
+                holder.buttonReplace.setAlpha(1f);
+            }
+
         } else {
             holder.buttonRevoke.setVisibility(View.GONE);
             holder.buttonReplace.setVisibility(View.GONE);
@@ -94,6 +119,15 @@ public class WaitlistAdapter extends RecyclerView.Adapter<WaitlistAdapter.Waitli
                 }
             });
         }
+
+        holder.buttonReplace.setOnClickListener(v -> {
+            if (listener != null && holder.buttonReplace.isEnabled()) listener.onReplace(entry);
+        });
+
+        holder.buttonRevoke.setOnClickListener(v -> {
+            if (listener != null) listener.onRevoke(entry);
+        });
+
     }
 
     @Override

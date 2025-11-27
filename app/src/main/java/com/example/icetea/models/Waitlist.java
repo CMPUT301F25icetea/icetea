@@ -41,6 +41,7 @@ public class Waitlist {
     private String status;
     private Double latitude;
     private Double longitude;
+    private boolean replaced;
 
 
     /**
@@ -117,9 +118,16 @@ public class Waitlist {
     public Double getLongitude() {
         return longitude;
     }
-
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public boolean getReplaced() {
+        return replaced;
+    }
+
+    public void setReplaced(boolean replaced) {
+        this.replaced = replaced;
     }
 
     public String getId() {

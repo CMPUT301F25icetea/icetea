@@ -72,6 +72,7 @@ public class ProfileController {
     }
 
     // batched deletions
+    //todo: edge case - subtract 1 from event's currentEntrants if they were on the waitlist?
     public void deleteProfile(String userId, Callback<Void> callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 

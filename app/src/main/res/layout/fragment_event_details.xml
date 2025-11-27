@@ -45,7 +45,7 @@
         android:fillViewport="true"
         android:background="@color/beige"
         app:layout_constraintTop_toBottomOf="@id/topHeaderBackgroundEventDetail"
-        app:layout_constraintBottom_toTopOf="@id/buttonEventDetailsAction"
+        app:layout_constraintBottom_toTopOf="@id/buttonContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -211,22 +211,45 @@
                 app:layout_constraintEnd_toEndOf="parent"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonEventDetailsAction"
+    <LinearLayout
+        android:id="@+id/buttonContainer"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:text="Join Waitlist"
-        android:textSize="16sp"
-        android:textColor="@android:color/white"
-        app:backgroundTint="@color/green"
         android:layout_margin="16dp"
-        app:cornerRadius="12dp"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:iconPadding="8dp"
-        app:iconGravity="textStart"
-        app:iconTint="@android:color/white"
-        android:elevation="4dp"/>
+        android:gravity="center">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonEventDetailsAction"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Join Waitlist"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            app:backgroundTint="@color/green"
+            app:cornerRadius="12dp"
+            app:iconPadding="8dp"
+            app:iconGravity="textStart"
+            app:iconTint="@android:color/white"
+            android:elevation="4dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonDecline"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Decline Invite"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/lightRed"
+            app:cornerRadius="12dp"
+            android:elevation="4dp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
