@@ -120,6 +120,7 @@ public class EventDetailsFragment extends Fragment {
         TextView geolocation = view.findViewById(R.id.textGeolocationDetail);
 
         MaterialButton actionButton = view.findViewById(R.id.buttonEventDetailsAction);
+        MaterialButton declineButton = view.findViewById(R.id.buttonDecline);
 
         controller.getEventObject(eventId, new Callback<Event>() {
             @Override
@@ -144,7 +145,7 @@ public class EventDetailsFragment extends Fragment {
 
                 if (event.getMaxEntrants() == null || event.getMaxEntrants() == 0) {
                     waitlistCount.setText("There are/is currently " + event.getCurrentEntrants() + " people on the waitlist");
-                    //todo: fix english
+                    //todo: fix english and increment/decrement on joining/leaving? or just snapshot listener
                 } else {
                     waitlistCount.setText(event.getCurrentEntrants() + " / " + event.getMaxEntrants());
                 }
@@ -155,8 +156,8 @@ public class EventDetailsFragment extends Fragment {
                         //todo: add more styling on each scenario
 
                         status = result;
-                        boolean waitlistFull = event.getMaxEntrants() != null &&
-                                Objects.equals(event.getMaxEntrants(), event.getCurrentEntrants());
+                        boolean waitlistFull = event.getMaxEntrants() != null && event.getCurrentEntrants() != null
+                                && event.getCurrentEntrants() >= event.getMaxEntrants();
 
                         if (status == null) {
                             if (waitlistFull) {
@@ -182,6 +183,8 @@ public class EventDetailsFragment extends Fragment {
                                 actionButton.setText("Accept Invite");
                                 actionButton.setEnabled(true);
                                 actionButton.setAlpha(1.0f);
+                                declineButton.setEnabled(true);
+                                declineButton.setVisibility(View.VISIBLE);
                                 break;
 
                             case Waitlist.STATUS_CANCELLED:
@@ -220,10 +223,10 @@ public class EventDetailsFragment extends Fragment {
             }
         });
 
-        //todo: create "declined" button beside accept button is status = "selected"
-        //todo: verify somewhere that regEnd has not passed
+        //todo: verify somewhere that regEnd has not passed - possibly serverside
         actionButton.setOnClickListener(v -> {
             actionButton.setEnabled(false);
+            declineButton.setEnabled(false);
             String userId = CurrentUser.getInstance().getFid();
 
             if (status == null && !event.getGeolocationRequirement()) {
@@ -234,6 +237,7 @@ public class EventDetailsFragment extends Fragment {
                 waitlist.setLatitude(null);
                 waitlist.setLongitude(null);
                 waitlist.setStatus(Waitlist.STATUS_WAITING);
+                waitlist.setReplaced(false);
 
                 controller.addToWaitlist(waitlist, new Callback<Void>() {
                             @Override
@@ -248,6 +252,7 @@ public class EventDetailsFragment extends Fragment {
                             public void onFailure(Exception e) {
                                 Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                                 actionButton.setEnabled(true);
+                                declineButton.setEnabled(true);
                             }
                         }
                 );
@@ -265,6 +270,7 @@ public class EventDetailsFragment extends Fragment {
                         waitlist.setLatitude(latitude);
                         waitlist.setLongitude(longitude);
                         waitlist.setStatus(Waitlist.STATUS_WAITING);
+                        waitlist.setReplaced(false);
 
                         controller.addToWaitlist(waitlist, new Callback<Void>() {
                             @Override
@@ -279,6 +285,7 @@ public class EventDetailsFragment extends Fragment {
                             public void onFailure(Exception e) {
                                 Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                                 actionButton.setEnabled(true);
+                                declineButton.setEnabled(true);
                             }
                         });
                     }
@@ -287,6 +294,7 @@ public class EventDetailsFragment extends Fragment {
                     public void onLocationFailed(Exception e) {
                         Toast.makeText(getContext(), "Could not get location", Toast.LENGTH_SHORT).show();
                         actionButton.setEnabled(true);
+                        declineButton.setEnabled(true);
                     }
                 });
 
@@ -305,6 +313,7 @@ public class EventDetailsFragment extends Fragment {
                     public void onFailure(Exception e) {
                         Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                         actionButton.setEnabled(true);
+                        declineButton.setEnabled(true);
                     }
                 });
 
@@ -314,6 +323,7 @@ public class EventDetailsFragment extends Fragment {
                     public void onSuccess(Void result) {
                         actionButton.setText("Invitation Accepted");
                         actionButton.setEnabled(false);
+                        declineButton.setVisibility(View.GONE);
                         actionButton.setAlpha(0.5f);
                         status = Waitlist.STATUS_ACCEPTED;
                     }
@@ -322,12 +332,37 @@ public class EventDetailsFragment extends Fragment {
                     public void onFailure(Exception e) {
                         Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                         actionButton.setEnabled(true);
+                        declineButton.setEnabled(true);
                     }
                 });
 
             }
 
         });
+        declineButton.setOnClickListener(v -> {
+            actionButton.setEnabled(false);
+            declineButton.setEnabled(false);
+
+            controller.updateEntrantStatus(CurrentUser.getInstance().getFid(), eventId, Waitlist.STATUS_DECLINED, new Callback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    actionButton.setText("Invitation Declined");
+                    declineButton.setVisibility(View.GONE);
+                    actionButton.setEnabled(false);
+                    actionButton.setAlpha(0.5f);
+                    status = Waitlist.STATUS_DECLINED;
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                    actionButton.setEnabled(true);
+                    declineButton.setEnabled(true);
+                }
+            });
+
+        });
+
     }
     private void checkLocationPermission(LocationCallback callback) {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)

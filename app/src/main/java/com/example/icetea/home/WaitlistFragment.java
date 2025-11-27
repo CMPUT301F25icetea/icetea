@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.example.icetea.R;
 import com.example.icetea.models.Waitlist;
@@ -91,13 +92,20 @@ public class WaitlistFragment extends Fragment {
         }
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerWaitlist);
-        adapter = new WaitlistAdapter(requireContext(), new ArrayList<>());
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        viewModel = new ViewModelProvider(requireActivity()).get(WaitlistViewModel.class);
+        viewModel = new ViewModelProvider(this).get(WaitlistViewModel.class);
 
-        adapter = new WaitlistAdapter(requireContext(), new ArrayList<>());
+        adapter = new WaitlistAdapter(requireContext(), new ArrayList<>(), new WaitlistAdapter.ActionListener() {
+            @Override
+            public void onReplace(Waitlist entry) {
+                viewModel.replaceEntry(entry);
+            }
+
+            @Override
+            public void onRevoke(Waitlist entry) {
+                viewModel.revokeEntry(entry);
+            }
+        });
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
@@ -106,6 +114,12 @@ public class WaitlistFragment extends Fragment {
         });
 
         viewModel.startListening(eventId);
+
+        viewModel.getToastMessage().observe(getViewLifecycleOwner(), msg -> {
+            if (msg != null) {
+                Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 
