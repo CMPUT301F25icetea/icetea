@@ -16,7 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;   // 👈 add this
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.icetea.R;
@@ -105,7 +105,6 @@ public class ManageEventFragment extends Fragment {
 
         posterImageView = view.findViewById(R.id.imageManageEventPoster);
         changePosterButton = view.findViewById(R.id.buttonChangeEventPoster);
-
         eventNameTextView = view.findViewById(R.id.textManageEventName);
 
         changePosterButton.setOnClickListener(v ->
@@ -117,6 +116,32 @@ public class ManageEventFragment extends Fragment {
         );
 
         MaterialButton drawWinners = view.findViewById(R.id.buttonDrawWinners);
+        MaterialButton viewWaitingListButton = view.findViewById(R.id.buttonViewWaitingList);
+
+        //jimmy edit from here
+        MaterialButton viewQrCodeButton = view.findViewById(R.id.buttonViewQrCode);
+        viewQrCodeButton.setOnClickListener(v -> {
+            if (eventId == null) {
+                Toast.makeText(getContext(), "Error: event not loaded yet", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            ViewQRcodeFragment qrFragment = ViewQRcodeFragment.newInstance(eventId);
+
+            FragmentManager fm = requireActivity().getSupportFragmentManager();
+            FragmentTransaction transaction = fm.beginTransaction();
+            transaction.setReorderingAllowed(true);
+            transaction.setCustomAnimations(
+                    R.anim.slide_in_right,
+                    R.anim.slide_out_left,
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
+            );
+            transaction.replace(R.id.main_fragment_container, qrFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+        //to here
 
         controller.getEventObject(eventId, new Callback<Event>() {
             @Override
@@ -145,7 +170,6 @@ public class ManageEventFragment extends Fragment {
             }
         });
 
-        MaterialButton viewWaitingListButton = view.findViewById(R.id.buttonViewWaitingList);
         viewWaitingListButton.setOnClickListener(v -> {
             FragmentManager fm = requireActivity().getSupportFragmentManager();
             FragmentTransaction transaction = fm.beginTransaction();
