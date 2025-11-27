@@ -1,26 +1,60 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_frame"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/beige"
-    android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent">
 
-    <FrameLayout
-        android:id="@+id/main_fragment_container"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-    </FrameLayout>
+        android:layout_height="match_parent"
+        android:background="@color/beige"
+        android:orientation="vertical">
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_nav"
-        android:background="@color/darkerBeige"
+        <FrameLayout
+            android:id="@+id/main_fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/darkerBeige"
+            app:menu="@menu/menu_bottom"
+            app:labelVisibilityMode="labeled" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/banner_notification"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:menu="@menu/menu_bottom"
-        app:labelVisibilityMode="labeled"/>
+        android:orientation="horizontal"
+        android:background="@color/yellow"
+        android:padding="16dp"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:translationY="-100dp">
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/banner_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@android:color/black"
+            android:fontFamily="@font/roboto_slab"
+            android:textSize="16sp"
+            android:maxLines="1"
+            android:padding="12dp"
+            android:background="@drawable/bg_banner"
+            android:text="New notification!" />
+
+        <ImageView
+            android:id="@+id/banner_close"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_close"
+            android:contentDescription="Close" />
+    </LinearLayout>
+
+</FrameLayout>

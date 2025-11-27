@@ -20,6 +20,8 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.example.icetea.models.Notification;
+import com.example.icetea.models.NotificationDB;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.example.icetea.R;
@@ -27,8 +29,10 @@ import com.example.icetea.models.Event;
 import com.example.icetea.models.EventDB;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;

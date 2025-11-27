@@ -3,30 +3,21 @@ package com.example.icetea.models;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-/**
- * Database service for managing Notification documents in Firestore.
- *It handles querying
- * notifications for specific users and adding new notifications to the database.
- * @author AVYAAN
- * @version 1.0
- */
 public class NotificationDB {
     private static NotificationDB instance;
     private final CollectionReference notificationCollection;
 
-    /**
-     * Private constructor to prevent direct instantiation.
-     * Initializes the Firestore collection reference to the "Notification" collection.
-     */
     public NotificationDB() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        notificationCollection = db.collection("notification");
+        notificationCollection = db.collection("notifications");
     }
 
     /**
@@ -69,18 +60,19 @@ public class NotificationDB {
                 .addOnCompleteListener(listener);
     }
 
-    /**
-     * Updates the status of a notification (accept/decline).
-     * @param notificationId the Firestore document ID of the notification
-     * @param status the new status: "accepted" or "declined"
-     * @param listener the OnCompleteListener callback that handles the operation result
-     */
-    public void updateNotificationStatus(String notificationId, String status, OnCompleteListener<Void> listener) {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("status", status);
-
-        notificationCollection.document(notificationId)
-                .update(updates)
-                .addOnCompleteListener(listener);
+    public ListenerRegistration listenNotificationsForUser(String userId, NotificationsCallback callback) {
+        return notificationCollection
+                .whereEqualTo("userId", userId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener((querySnapshot, e) -> {
+                    if (e != null || querySnapshot == null) return;
+                    List<Notification> notifications = querySnapshot.toObjects(Notification.class);
+                    callback.onUpdate(notifications);
+                });
     }
+
+    public interface NotificationsCallback {
+        void onUpdate(List<Notification> notifications);
+    }
+
 }

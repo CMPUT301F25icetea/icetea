@@ -1,15 +1,22 @@
 package com.example.icetea;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.icetea.Settings.SettingsFragment;
+import com.example.icetea.auth.CurrentUser;
 import com.example.icetea.history.HistoryFragment;
 import com.example.icetea.home.HomeFragment;
 import com.example.icetea.notifications.NotificationsFragment;
+import com.example.icetea.notifications.NotificationsViewModel;
 import com.example.icetea.profile.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -19,7 +26,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
  * and navigates to the appropriate container fragment (entrant or organizer).
  */
 public class MainActivity extends AppCompatActivity {
-
+    NotificationsViewModel viewModel;
     /**
      * Called when the activity is starting. Sets up edge-to-edge layout and determines
      * the user's role to navigate to the correct container fragment.
@@ -62,12 +69,55 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
-}
-        private void loadFragment(Fragment fragment) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.main_fragment_container, fragment)
-                    .commit();
-        }
+
+        viewModel = new ViewModelProvider(this).get(NotificationsViewModel.class);
+        String userId = CurrentUser.getInstance().getFid();
+        viewModel.startListening(userId);
+
+        viewModel.getNewNotificationEvent().observe(this, notification -> {
+            if (notification != null) {
+                showBanner(notification.getTitle() + ": " + notification.getMessage());
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        viewModel.stopListening();
+    }
+    private void loadFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_fragment_container, fragment)
+                .commit();
+    }
+
+    private void showBanner(String message) {
+        LinearLayout banner = findViewById(R.id.banner_notification);
+        TextView bannerText = findViewById(R.id.banner_text);
+        ImageView bannerClose = findViewById(R.id.banner_close);
+
+        bannerText.setText(message);
+
+        banner.setVisibility(View.VISIBLE);
+
+        banner.animate()
+                .translationY(0)
+                .setDuration(300)
+                .start();
+
+        banner.postDelayed(this::hideBanner, 2000);
+
+        bannerClose.setOnClickListener(v -> hideBanner());
+    }
+    private void hideBanner() {
+        LinearLayout banner = findViewById(R.id.banner_notification);
+        banner.animate()
+                .translationY(-banner.getHeight())
+                .setDuration(300)
+                .withEndAction(() -> banner.setVisibility(View.GONE))
+                .start();
+    }
 
 }
