@@ -53,6 +53,7 @@
             app:thumbTint="@color/yellow"
             app:trackTint="@color/green" />
 
+
     </LinearLayout>
 
 </LinearLayout>
