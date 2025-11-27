@@ -2,9 +2,13 @@ package com.example.icetea.home;
 
 import com.example.icetea.models.Event;
 import com.example.icetea.models.EventDB;
+import com.example.icetea.models.Notification;
+import com.example.icetea.models.NotificationDB;
+import com.example.icetea.models.UserDB;
 import com.example.icetea.models.Waitlist;
 import com.example.icetea.models.WaitlistDB;
 import com.example.icetea.util.Callback;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -33,7 +37,6 @@ public class ManageEventController {
         });
     }
 
-    // todo: send out notifications
     public void drawWinners(String eventId, int count, Callback<Void> callback) {
         if (count <= 0) {
             callback.onFailure(new IllegalArgumentException("Count must be greater than 0"));
@@ -75,12 +78,23 @@ public class ManageEventController {
             DocumentReference eventRef = db.collection("events").document(eventId);
             batch.update(eventRef, "alreadyDrew", true);
 
+
             batch.commit()
-                    .addOnSuccessListener(aVoid -> callback.onSuccess(null))
+                    .addOnSuccessListener(aVoid -> {
+                        for (DocumentSnapshot doc : selectedList) {
+                            String userId = doc.getString("userId");
+                            sendNotificationIfEnabled(
+                                    userId,
+                                    "You're a winner!",
+                                    "You have been selected for the event_name <-- ill fix.",
+                                    eventId
+                            );
+                        }
+                        callback.onSuccess(null);
+                    })
                     .addOnFailureListener(callback::onFailure);
         });
     }
-    //todo:send notifications too
     public void replaceWinner(String userId, String eventId, Callback<Void> callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         WaitlistDB waitlistDB = WaitlistDB.getInstance();
@@ -117,10 +131,17 @@ public class ManageEventController {
                             "status", Waitlist.STATUS_CANCELLED,
                             "replaced", true
                     );
+                    sendNotificationIfEnabled(
+                            userId,
+                            "You were replaced",
+                            "Your spot in the event_name has been cancelled and a new winner was selected.",
+                            eventId
+                    );
                 } else if (Waitlist.STATUS_DECLINED.equals(currentStatus)) {
                     batch.update(currentEntry.getReference(),
                             "replaced", true
                     );
+
                 } else {
                     callback.onFailure(new Exception("Cannot replace a user with status: " + currentStatus));
                     return;
@@ -130,14 +151,23 @@ public class ManageEventController {
                         "status", Waitlist.STATUS_SELECTED
                 );
 
+
                 batch.commit()
-                        .addOnSuccessListener(aVoid -> callback.onSuccess(null))
+                        .addOnSuccessListener(aVoid -> {
+                            String newWinnerId = replacementEntry.getString("userId");
+                            sendNotificationIfEnabled(
+                                    newWinnerId,
+                                    "You're a winner!",
+                                    "You have been selected for the event_name<- add event name.",
+                                    eventId
+                            );
+                            callback.onSuccess(null);
+                        })
                         .addOnFailureListener(callback::onFailure);
             });
         });
     }
 
-    //todo: send notification too
     public void revokeWinner(String userId, String eventId, Callback<Void> callback) {
         WaitlistDB waitlistDB = WaitlistDB.getInstance();
 
@@ -157,15 +187,50 @@ public class ManageEventController {
 
             waitlistDB.updateWaitlistStatus(userId, eventId, Waitlist.STATUS_CANCELLED, statusTask -> {
                 if (statusTask.isSuccessful()) {
-                    callback.onSuccess(null);
-                } else {
+                    sendNotificationIfEnabled(
+                            userId,
+                            "Your spot was revoked",
+                            "Your winning spot in the event_name has been cancelled.",
+                            eventId
+                    );
+                    callback.onSuccess(null);                } else {
                     callback.onFailure(statusTask.getException() != null ? statusTask.getException() : new Exception("Failed to update status"));
                 }
             });
         });
     }
 
+    private void sendNotificationIfEnabled(String userId, String title, String message, String eventId) {
+        UserDB userDB = UserDB.getInstance();
+        userDB.getUser(userId, task -> {
+            if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
+                Boolean notificationsEnabled = task.getResult().getBoolean("notifications");
+                if (notificationsEnabled != null && notificationsEnabled) {
+                    sendNotification(userId, title, message, eventId);
+                } else {
+                    System.out.println("User " + userId + " has notifications disabled.");
+                }
+            } else {
+                System.err.println("Failed to fetch user " + userId + ": " + task.getException());
+            }
+        });
+    }
 
+    private void sendNotification(String userId, String title, String message, String eventId) {
+        NotificationDB notificationDB = NotificationDB.getInstance();
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setEventId(eventId);
+        notification.setTimestamp(Timestamp.now());
+
+        notificationDB.addNotification(notification, task -> {
+            if (!task.isSuccessful()) {
+                System.err.println("Failed to send notification: " + task.getException());
+            }
+        });
+    }
 
     public void updateEventPoster(String eventId, String posterBase64, Callback<Void> callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
