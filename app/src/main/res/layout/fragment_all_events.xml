@@ -38,7 +38,7 @@
                 android:id="@+id/editTextSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Search by keyword..."
+                android:hint="Search by Event Name/description..."
                 android:inputType="text" />
 
         </com.google.android.material.textfield.TextInputLayout>
