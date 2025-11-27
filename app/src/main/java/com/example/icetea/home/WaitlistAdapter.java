@@ -1,6 +1,7 @@
 package com.example.icetea.home;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,18 +12,24 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.icetea.R;
+import com.example.icetea.models.UserDB;
 import com.example.icetea.models.Waitlist;
-import com.example.icetea.models.WaitlistEntry;
+import com.example.icetea.util.ImageUtil;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WaitlistAdapter extends RecyclerView.Adapter<WaitlistAdapter.WaitlistViewHolder> {
 
     private final Context context;
-    private final List<WaitlistEntry> entries;
+    private final List<Waitlist> entries;
+    private final Map<String, UserData> userCache = new HashMap<>();
 
-    public WaitlistAdapter(Context context, List<WaitlistEntry> entries) {
+
+    public WaitlistAdapter(Context context, List<Waitlist> entries) {
         this.context = context;
         this.entries = entries;
     }
@@ -36,22 +43,56 @@ public class WaitlistAdapter extends RecyclerView.Adapter<WaitlistAdapter.Waitli
 
     @Override
     public void onBindViewHolder(@NonNull WaitlistViewHolder holder, int position) {
-        WaitlistEntry entry = entries.get(position);
+        Waitlist entry = entries.get(position);
 
-        holder.textName.setText(entry.getName());
-        holder.textEmail.setText(entry.getEmail());
-        holder.textStatus.setText(entry.getStatus());
-        if (entry.getAvatarBitmap() != null) {
-            holder.imageProfile.setImageBitmap(entry.getAvatarBitmap());
-        } else {
-            holder.imageProfile.setImageResource(R.drawable.default_avatar);
-        }
+        holder.textName.setText("Loading...");
+        holder.textEmail.setText("");
+        holder.imageProfile.setImageResource(R.drawable.default_avatar);
+        holder.textStatus.setText("Status: " + entry.getStatus());
+
         if (Waitlist.STATUS_SELECTED.equals(entry.getStatus())) {
             holder.buttonRevoke.setVisibility(View.VISIBLE);
             holder.buttonReplace.setVisibility(View.VISIBLE);
         } else {
             holder.buttonRevoke.setVisibility(View.GONE);
             holder.buttonReplace.setVisibility(View.GONE);
+        }
+
+        if (userCache.containsKey(entry.getUserId())) {
+            UserData cached = userCache.getOrDefault(entry.getUserId(), null);
+            if (cached != null) {
+                holder.textName.setText(cached.name);
+                holder.textEmail.setText(cached.email);
+                if (cached.avatar != null) holder.imageProfile.setImageBitmap(cached.avatar);
+            }
+        } else {
+            UserDB.getInstance().getUser(entry.getUserId(), task -> {
+                if (task.isSuccessful() && task.getResult() != null) {
+                    DocumentSnapshot doc = task.getResult();
+                    String name = doc.getString("name");
+                    String email = doc.getString("email");
+                    String avatarBase64 = doc.getString("avatar");
+
+                    Bitmap bitmap = null;
+                    if (avatarBase64 != null) {
+                        bitmap = ImageUtil.base64ToBitmap(avatarBase64);
+                    }
+
+                    UserData data = new UserData();
+                    data.name = name != null ? name : "Unknown";
+                    data.email = email != null ? email : "";
+                    data.avatar = bitmap;
+
+                    userCache.put(entry.getUserId(), data);
+
+                    holder.textName.setText(data.name);
+                    holder.textEmail.setText(data.email);
+                    if (data.avatar != null) holder.imageProfile.setImageBitmap(data.avatar);
+                } else {
+                    holder.textName.setText("Unknown");
+                    holder.textEmail.setText("");
+                }
+            });
         }
     }
 
@@ -68,7 +109,6 @@ public class WaitlistAdapter extends RecyclerView.Adapter<WaitlistAdapter.Waitli
 
         public WaitlistViewHolder(@NonNull View itemView) {
             super(itemView);
-
             imageProfile = itemView.findViewById(R.id.imageProfile);
             textName = itemView.findViewById(R.id.textName);
             textEmail = itemView.findViewById(R.id.textEmail);
@@ -77,4 +117,17 @@ public class WaitlistAdapter extends RecyclerView.Adapter<WaitlistAdapter.Waitli
             buttonReplace = itemView.findViewById(R.id.buttonReplace);
         }
     }
+
+    public void updateList(List<Waitlist> newEntries) {
+        entries.clear();
+        entries.addAll(newEntries);
+        notifyDataSetChanged();
+    }
+
+    private static class UserData {
+        String name;
+        String email;
+        Bitmap avatar;
+    }
+
 }

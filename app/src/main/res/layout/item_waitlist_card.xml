@@ -77,17 +77,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonRevoke"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:text="Revoke"
-                android:visibility="gone"
-                android:textColor="@android:color/white"
-                app:backgroundTint="@color/lightRed"
-                app:cornerRadius="8dp"
-                android:minWidth="0dp"
-                android:minHeight="0dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonReplace"
@@ -100,6 +89,19 @@
                 app:cornerRadius="8dp"
                 android:minWidth="0dp"
                 android:minHeight="0dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonRevoke"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Revoke"
+                android:visibility="gone"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/lightRed"
+                app:cornerRadius="8dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+
 
         </LinearLayout>
 

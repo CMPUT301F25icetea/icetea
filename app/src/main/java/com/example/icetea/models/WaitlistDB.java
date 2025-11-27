@@ -6,8 +6,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
@@ -117,4 +119,11 @@ public class WaitlistDB {
                 .get()
                 .addOnCompleteListener(listener);
     }
+    public ListenerRegistration listenToWaitlist(String eventId, EventListener<QuerySnapshot> listener) {
+        return FirebaseFirestore.getInstance()
+                .collection("waitlist")
+                .whereEqualTo("eventId", eventId)
+                .addSnapshotListener(listener);
+    }
+
 }

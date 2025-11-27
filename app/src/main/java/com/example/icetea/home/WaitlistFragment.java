@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,15 +15,20 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import com.example.icetea.R;
-import com.example.icetea.models.WaitlistEntry;
+import com.example.icetea.models.Waitlist;
+import com.google.android.material.chip.Chip;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public class WaitlistFragment extends Fragment {
 
     private static final String ARG_EVENT_ID = "eventId";
-
+    private WaitlistViewModel viewModel;
+    private WaitlistAdapter adapter;
     private String eventId;
 
     public WaitlistFragment() {
@@ -61,14 +67,62 @@ public class WaitlistFragment extends Fragment {
                 requireActivity().getSupportFragmentManager().popBackStack()
         );
 
+        Set<String> selectedStatuses = new HashSet<>();
+        selectedStatuses.add(Waitlist.STATUS_WAITING);
+
+        Chip chipWaiting = view.findViewById(R.id.chipWaiting);
+        Chip chipSelected = view.findViewById(R.id.chipSelected);
+        Chip chipAccepted = view.findViewById(R.id.chipAccepted);
+        Chip chipDeclined = view.findViewById(R.id.chipDeclined);
+        Chip chipCancelled = view.findViewById(R.id.chipCancelled);
+
+        Chip[] chips = {chipWaiting, chipSelected, chipAccepted, chipDeclined, chipCancelled};
+
+        for (Chip chip : chips) {
+            chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                String status = chip.getText().toString().toLowerCase(Locale.ROOT);
+                if (isChecked) {
+                    selectedStatuses.add(status);
+                } else {
+                    selectedStatuses.remove(status);
+                }
+                filterWaitlist(selectedStatuses);
+            });
+        }
+
         RecyclerView recyclerView = view.findViewById(R.id.recyclerWaitlist);
-        List<WaitlistEntry> entries = new ArrayList<>();
-        entries.add(new WaitlistEntry("FirstName LastName", "normalsized@email.com", "Status: Waiting", null));
-        WaitlistAdapter adapter = new WaitlistAdapter(requireContext(), entries);
+        adapter = new WaitlistAdapter(requireContext(), new ArrayList<>());
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        adapter.notifyDataSetChanged();
+        viewModel = new ViewModelProvider(requireActivity()).get(WaitlistViewModel.class);
+
+        adapter = new WaitlistAdapter(requireContext(), new ArrayList<>());
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        viewModel.getWaitlist().observe(getViewLifecycleOwner(), entries -> {
+            filterWaitlist(selectedStatuses);
+        });
+
+        viewModel.startListening(eventId);
 
     }
+
+    private void filterWaitlist(Set<String> selectedStatuses) {
+        if (viewModel.getWaitlist().getValue() == null) return;
+
+        List<Waitlist> allEntries = viewModel.getWaitlist().getValue();
+        List<Waitlist> filtered = new ArrayList<>();
+
+        for (Waitlist entry : allEntries) {
+            if (selectedStatuses.contains(entry.getStatus())) {
+                filtered.add(entry);
+            }
+        }
+
+        adapter.updateList(filtered);
+    }
+
+
 }
