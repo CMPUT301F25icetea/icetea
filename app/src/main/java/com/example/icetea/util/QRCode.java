@@ -21,7 +21,6 @@ import java.io.OutputStream;
  * Utility class for generating and saving QR codes.
  */
 public class QRCode {
-
     /**
      * Generates a QR code from the given text and sets it to an ImageView.
      *
