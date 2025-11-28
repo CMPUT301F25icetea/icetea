@@ -21,7 +21,7 @@
         android:id="@+id/textViewGetStartedSignUp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto_slab"
+        android:fontFamily="@font/inter_regular"
         android:gravity="end"
         android:lineSpacingExtra="4dp"
         android:text="Get Started"

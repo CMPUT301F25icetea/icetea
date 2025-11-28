@@ -23,7 +23,7 @@
         android:textSize="28sp"
         android:textColor="@android:color/white"
         android:gravity="center"
-        android:fontFamily="@font/roboto_slab"
+        android:fontFamily="@font/inter_regular"
         app:layout_constraintTop_toTopOf="@id/topHeaderBackgroundHistory"
         app:layout_constraintBottom_toBottomOf="@id/topHeaderBackgroundHistory"/>
 
