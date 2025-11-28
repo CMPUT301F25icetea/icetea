@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.fragment.testing)
     implementation(libs.firebase.messaging)
     implementation(libs.play.services.location)
+    implementation("org.osmdroid:osmdroid-android:6.1.14")
     implementation(libs.firebase.messaging)
     testImplementation(libs.junit)
     testImplementation(libs.junit)
