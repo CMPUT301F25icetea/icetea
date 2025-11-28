@@ -17,7 +17,6 @@ import android.widget.Toast;
 
 import com.example.icetea.R;
 import com.example.icetea.models.Waitlist;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 
 import java.util.ArrayList;

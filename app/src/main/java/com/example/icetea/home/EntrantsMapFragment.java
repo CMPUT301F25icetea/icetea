@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -97,12 +98,16 @@ public class EntrantsMapFragment extends Fragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        ImageButton backBtn = view.findViewById(R.id.buttonBackQR);
+        backBtn.setOnClickListener(v -> {
+            requireActivity().getSupportFragmentManager().popBackStack();
+        });
+
         mapView = view.findViewById(R.id.osmMap);
         mapView.setMultiTouchControls(true);
 
-        // Default zoom + center (e.g., Edmonton)
         mapView.getController().setZoom(10.0);
-        mapView.getController().setCenter(new GeoPoint(53.5461, -113.4938));
+        mapView.getController().setCenter(new GeoPoint(53.5462, -113.4937));
 
         if (eventId == null || eventId.isEmpty()) {
             Toast.makeText(getContext(), "No event ID provided", Toast.LENGTH_SHORT).show();
