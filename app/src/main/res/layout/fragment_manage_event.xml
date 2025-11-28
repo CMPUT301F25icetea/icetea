@@ -23,7 +23,7 @@
         android:textSize="28sp"
         android:textColor="@android:color/white"
         android:gravity="center"
-        android:fontFamily="@font/roboto_slab"
+        android:fontFamily="@font/inter_regular"
         app:layout_constraintTop_toTopOf="@id/topHeaderBackgroundManageEvent"
         app:layout_constraintBottom_toBottomOf="@id/topHeaderBackgroundManageEvent"/>
 
@@ -89,7 +89,7 @@
                 android:text="Event Name"
                 android:textSize="22sp"
                 android:textColor="@color/green"
-                android:fontFamily="@font/roboto_slab"
+                android:fontFamily="@font/inter_regular"
                 android:textStyle="bold"
                 android:gravity="center"
                 android:layout_marginTop="12dp"

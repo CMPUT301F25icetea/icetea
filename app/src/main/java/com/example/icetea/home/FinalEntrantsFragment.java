@@ -115,9 +115,9 @@ public class FinalEntrantsFragment extends Fragment {
 
                     for (QueryDocumentSnapshot doc : waitlistSnapshot) {
                         String userId = doc.getString("userId");
-                        Timestamp joinedAt = doc.getTimestamp("joinedAt");
+                        Timestamp joinedAt = doc.getTimestamp("timestamp");
 
-                        if (userId != null) {
+                          if (userId != null) {
                             userTasks.add(db.collection("users").document(userId).get());
                             joinedAtList.add(joinedAt);
                         }
