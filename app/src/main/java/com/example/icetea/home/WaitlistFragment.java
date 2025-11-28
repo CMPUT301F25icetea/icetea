@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.example.icetea.R;
 import com.example.icetea.models.Waitlist;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 
 import java.util.ArrayList;
@@ -67,6 +68,22 @@ public class WaitlistFragment extends Fragment {
         backButton.setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager().popBackStack()
         );
+
+        View showMapBtn = view.findViewById(R.id.buttonShowGeo);
+        showMapBtn.setOnClickListener(v -> {
+            if (eventId == null || eventId.isEmpty()) {
+                Toast.makeText(requireContext(), "No event selected", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            EntrantsMapFragment mapFrag = EntrantsMapFragment.newInstance(eventId);
+
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_fragment_container, mapFrag)
+                    .addToBackStack(null)
+                    .commit();
+        });
 
         Set<String> selectedStatuses = new HashSet<>();
         selectedStatuses.add(Waitlist.STATUS_WAITING);
