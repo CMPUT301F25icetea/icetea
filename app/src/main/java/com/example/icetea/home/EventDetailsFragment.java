@@ -36,6 +36,7 @@ import com.google.android.gms.location.Priority;
 
 import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.Timestamp;
 
 import java.util.Objects;
@@ -112,12 +113,11 @@ public class EventDetailsFragment extends Fragment {
 
         ImageView poster = view.findViewById(R.id.imageEventPosterDetail);
         TextView name = view.findViewById(R.id.textEventNameDetail);
-        TextView description = view.findViewById(R.id.textEventDescriptionDetail);
-        TextView criteria = view.findViewById(R.id.textEventCriteriaDetail);
-        TextView location = view.findViewById(R.id.textEventLocationDetail);
+        TextInputEditText description = view.findViewById(R.id.textEventDescriptionDetail);
+        TextInputEditText criteria = view.findViewById(R.id.textEventCriteriaDetail);
         TextView startDate = view.findViewById(R.id.textEventStartDateDetail);
-        TextView waitlistCount = view.findViewById(R.id.textWaitlistCountDetail);
-        TextView geolocation = view.findViewById(R.id.textGeolocationDetail);
+        TextView waitlist = view.findViewById(R.id.textWaitlist);
+        TextView geolocation = view.findViewById(R.id.textGeolocation);
 
         MaterialButton actionButton = view.findViewById(R.id.buttonEventDetailsAction);
         MaterialButton declineButton = view.findViewById(R.id.buttonDecline);
@@ -136,24 +136,39 @@ public class EventDetailsFragment extends Fragment {
 
                 name.setText(event.getName());
                 description.setText(event.getDescription());
-                criteria.setText(event.getCriteria());
-                location.setText(event.getLocation());
-
-                startDate.setText("Start: " + controller.timestampToString(event.getEventStartDate()));
-
-                geolocation.setText(event.getGeolocationRequirement() ? "Required" : "Not Required");
-
-                if (event.getMaxEntrants() == null || event.getMaxEntrants() == 0) {
-                    waitlistCount.setText("There are/is currently " + event.getCurrentEntrants() + " people on the waitlist");
-                    //todo: fix english and increment/decrement on joining/leaving? or just snapshot listener
+                if (event.getCriteria() == null || event.getCriteria().isEmpty()) {
+                    criteria.setText("No criteria specified; Anyone can join!");
                 } else {
-                    waitlistCount.setText(event.getCurrentEntrants() + " / " + event.getMaxEntrants());
+                    criteria.setText(event.getCriteria());
+                }
+
+                StringBuilder sb = new StringBuilder();
+
+                sb.append("\uD83D\uDCC5 Start: ").append(controller.timestampToString(event.getEventStartDate()));
+                if (event.getEventEndDate() != null) {
+                    sb.append("\n\uD83D\uDCC5 End: ").append(controller.timestampToString(event.getEventEndDate()));
+                }
+                if (event.getLocation() != null && !event.getLocation().isEmpty()) {
+                    sb.append("\n\uD83D\uDCCD Location: ").append(event.getLocation());
+                }
+
+                startDate.setText(sb.toString());
+
+
+                geolocation.setText(event.getGeolocationRequirement() ? "Geolocation Required" : "");
+
+                int current = event.getCurrentEntrants() != null ? event.getCurrentEntrants() : 0;
+                int max = event.getMaxEntrants() != null ? event.getMaxEntrants() : 0;
+
+                if (max == 0) {
+                    waitlist.setText("👤 " + current);
+                } else {
+                    waitlist.setText("👤 " + current + " / " + max);
                 }
 
                 controller.getEntrantStatus(CurrentUser.getInstance().getFid(), eventId, new Callback<String>() {
                     @Override
                     public void onSuccess(String result) {
-                        //todo: add more styling on each scenario
 
                         status = result;
                         boolean waitlistFull = event.getMaxEntrants() != null && event.getCurrentEntrants() != null
@@ -223,26 +238,31 @@ public class EventDetailsFragment extends Fragment {
             }
         });
 
-        //todo: verify somewhere that regEnd has not passed - possibly serverside
         actionButton.setOnClickListener(v -> {
             actionButton.setEnabled(false);
             declineButton.setEnabled(false);
             String userId = CurrentUser.getInstance().getFid();
 
             if (status == null && !event.getGeolocationRequirement()) {
-                Waitlist waitlist = new Waitlist();
-                waitlist.setUserId(userId);
-                waitlist.setEventId(eventId);
-                waitlist.setTimestamp(Timestamp.now());
-                waitlist.setLatitude(null);
-                waitlist.setLongitude(null);
-                waitlist.setStatus(Waitlist.STATUS_WAITING);
-                waitlist.setReplaced(false);
+                Waitlist waitlistObj = new Waitlist();
+                waitlistObj.setUserId(userId);
+                waitlistObj.setEventId(eventId);
+                waitlistObj.setTimestamp(Timestamp.now());
+                waitlistObj.setLatitude(null);
+                waitlistObj.setLongitude(null);
+                waitlistObj.setStatus(Waitlist.STATUS_WAITING);
+                waitlistObj.setReplaced(false);
 
-                controller.addToWaitlist(waitlist, new Callback<Void>() {
+                controller.addToWaitlist(waitlistObj, new Callback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
                                 actionButton.setText("Leave Waitlist");
+
+                                int current = (event.getCurrentEntrants() != null ? event.getCurrentEntrants() : 0) + 1;
+                                event.setCurrentEntrants(current);
+                                int max = event.getMaxEntrants() != null ? event.getMaxEntrants() : 0;
+                                waitlist.setText("👤 " + current + (max > 0 ? " / " + max : ""));
+
                                 actionButton.setEnabled(true);
                                 actionButton.setAlpha(1.0f);
                                 status = Waitlist.STATUS_WAITING;
@@ -263,19 +283,24 @@ public class EventDetailsFragment extends Fragment {
                 checkLocationPermission(new LocationCallback() {
                     @Override
                     public void onLocationResult(double latitude, double longitude) {
-                        Waitlist waitlist = new Waitlist();
-                        waitlist.setUserId(userId);
-                        waitlist.setEventId(eventId);
-                        waitlist.setTimestamp(Timestamp.now());
-                        waitlist.setLatitude(latitude);
-                        waitlist.setLongitude(longitude);
-                        waitlist.setStatus(Waitlist.STATUS_WAITING);
-                        waitlist.setReplaced(false);
+                        Waitlist waitlistObj = new Waitlist();
+                        waitlistObj.setUserId(userId);
+                        waitlistObj.setEventId(eventId);
+                        waitlistObj.setTimestamp(Timestamp.now());
+                        waitlistObj.setLatitude(latitude);
+                        waitlistObj.setLongitude(longitude);
+                        waitlistObj.setStatus(Waitlist.STATUS_WAITING);
+                        waitlistObj.setReplaced(false);
 
-                        controller.addToWaitlist(waitlist, new Callback<Void>() {
+                        controller.addToWaitlist(waitlistObj, new Callback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
                                 actionButton.setText("Leave Waitlist");
+                                int current = (event.getCurrentEntrants() != null ? event.getCurrentEntrants() : 0) + 1;
+                                event.setCurrentEntrants(current);
+                                int max = event.getMaxEntrants() != null ? event.getMaxEntrants() : 0;
+                                waitlist.setText("👤 " + current + (max > 0 ? " / " + max : ""));
+
                                 actionButton.setEnabled(true);
                                 actionButton.setAlpha(1.0f);
                                 status = Waitlist.STATUS_WAITING;
@@ -304,6 +329,11 @@ public class EventDetailsFragment extends Fragment {
                     @Override
                     public void onSuccess(Void result) {
                         actionButton.setText("Join Waitlist");
+                        int current = Math.max((event.getCurrentEntrants() != null ? event.getCurrentEntrants() : 0) - 1, 0);
+                        event.setCurrentEntrants(current);
+                        int max = event.getMaxEntrants() != null ? event.getMaxEntrants() : 0;
+                        waitlist.setText("👤 " + current + (max > 0 ? " / " + max : ""));
+
                         actionButton.setEnabled(true);
                         actionButton.setAlpha(1.0f);
                         status = null;

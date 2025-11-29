@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -84,6 +85,12 @@ public class EditEventFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         controller = new EditEventController();
+
+
+        ImageButton backButton = view.findViewById(R.id.buttonBack);
+        backButton.setOnClickListener(v -> {
+                    requireActivity().getSupportFragmentManager().popBackStack();
+        });
 
         String eventId = requireArguments().getString("eventId");
         if (eventId == null) {
