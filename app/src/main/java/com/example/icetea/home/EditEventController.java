@@ -1,103 +1,88 @@
 package com.example.icetea.home;
 
-import android.util.Log;
-
-import com.example.icetea.auth.CurrentUser;
 import com.example.icetea.models.Event;
 import com.example.icetea.models.EventDB;
 import com.example.icetea.util.Callback;
 import com.google.firebase.Timestamp;
 
 import java.text.ParseException;
-import java.util.Date;
-import java.util.Locale;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
-public class CreateEventController {
+public class EditEventController {
+
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault());
-    public void createEvent(String eventName, String eventDescription, String eventCriteria,
-                            String posterBase64, String regStart, String regEnd,
-                            String eventStart, String eventEnd, String eventLocation,
-                            String maxEntrants, boolean geolocationRequired, Callback<Void> callback) {
-
-        Timestamp regStartTs = textToTimestamp(regStart);
-        Timestamp regEndTs = textToTimestamp(regEnd);
-        Timestamp eventStartTs = textToTimestamp(eventStart);
-        Timestamp eventEndTs = textToTimestamp(eventEnd);
-
-        if (regEndTs == null) {
-            callback.onFailure(new Exception("Invalid registration close date format"));
-            return;
-        }
-
-        if (eventStartTs == null) {
-            callback.onFailure(new Exception("Invalid event start date format"));
-            return;
-        }
-
-        Integer maxEntrantsInt = null;
-        if (maxEntrants != null && !maxEntrants.trim().isEmpty()) {
-            try {
-                int value = Integer.parseInt(maxEntrants.trim());
-                if (value > 0) {
-                    maxEntrantsInt = value;
-                }
-            } catch (NumberFormatException ignored) {}
-        }
-
-        Event newEvent = new Event();
-        newEvent.setOrganizerId(CurrentUser.getInstance().getFid());
-        newEvent.setName(eventName);
-        newEvent.setDescription(eventDescription);
-        newEvent.setCriteria(eventCriteria);
-        newEvent.setPosterBase64(posterBase64);
-        newEvent.setRegistrationStartDate(regStartTs);
-        newEvent.setRegistrationEndDate(regEndTs);
-        newEvent.setEventStartDate(eventStartTs);
-        newEvent.setEventEndDate(eventEndTs);
-        newEvent.setLocation(eventLocation);
-        newEvent.setMaxEntrants(maxEntrantsInt);
-        newEvent.setCurrentEntrants(0);
-        newEvent.setGeolocationRequirement(geolocationRequired);
-        newEvent.setAlreadyDrew(false);
-
-        EventDB.getInstance().createEvent(newEvent, task -> {
-            if (task.isSuccessful()) {
-                callback.onSuccess(null);
-            } else {
-                Exception e = task.getException() != null
-                        ? task.getException()
-                        : new Exception("Failed to create event");
-                callback.onFailure(e);
-            }
-        });
-    }
 
     public Timestamp textToTimestamp(String text) {
         if (text == null || text.trim().isEmpty()) {
             return null;
         }
-
         try {
             Date date = sdf.parse(text);
-            if (date == null) return null;
-            return new Timestamp(date);
+            return (date != null) ? new Timestamp(date) : null;
         } catch (ParseException e) {
             return null;
         }
     }
-    public String validateName(String name) {
-        if (name == null || name.isEmpty()) {
-            return "Name cannot be empty";
+
+    public void updateEvent(
+            Event event,
+            String name,
+            String description,
+            String criteria,
+            String posterBase64,
+            String regStart,
+            String regEnd,
+            String eventStart,
+            String eventEnd,
+            String location,
+            String maxEntrants,
+            boolean geolocationRequired,
+            Callback<Void> callback
+    ) {
+        Timestamp regStartTs = textToTimestamp(regStart);
+        Timestamp regEndTs = textToTimestamp(regEnd);
+        Timestamp eventStartTs = textToTimestamp(eventStart);
+        Timestamp eventEndTs = textToTimestamp(eventEnd);
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("name", name);
+        updates.put("description", description);
+        updates.put("criteria", criteria);
+        if (posterBase64 != null) updates.put("posterBase64", posterBase64);
+        updates.put("registrationStartDate", regStartTs);
+        updates.put("registrationEndDate", regEndTs);
+        updates.put("eventStartDate", eventStartTs);
+        updates.put("eventEndDate", eventEndTs);
+        updates.put("location", location);
+
+        if (maxEntrants != null && !maxEntrants.trim().isEmpty()) {
+            try {
+                updates.put("maxEntrants", Integer.parseInt(maxEntrants.trim()));
+            } catch (NumberFormatException ignored) {}
         }
-        return null;
+
+        updates.put("geolocationRequirement", geolocationRequired);
+
+        EventDB.getInstance().updateEvent(event.getEventId(), updates, task -> {
+            if (task.isSuccessful()) {
+                callback.onSuccess(null);
+            } else {
+                callback.onFailure(task.getException());
+            }
+        });
+    }
+
+
+    public String validateName(String name) {
+        return (name == null || name.isEmpty()) ? "Name cannot be empty" : null;
     }
 
     public String validateDescription(String description) {
-        if (description == null || description.isEmpty()) {
-            return "Description cannot be empty";
-        }
-        return null;
+        return (description == null || description.isEmpty()) ? "Description cannot be empty" : null;
     }
 
     public String validateRegOpen(String regOpen, String regClose, String eventStart, String eventEnd) {
@@ -137,7 +122,6 @@ public class CreateEventController {
 
         return null;
     }
-
 
     public String validateRegClose(String regOpen, String regClose, String eventStart, String eventEnd) {
         if (regClose == null || regClose.isEmpty()) {
@@ -179,7 +163,6 @@ public class CreateEventController {
         return null;
     }
 
-
     public String validateEventStart(String regOpen, String regClose, String eventStart, String eventEnd) {
         if (eventStart == null || eventStart.isEmpty()) {
             return "Event start date must be set";
@@ -216,7 +199,6 @@ public class CreateEventController {
 
         return null;
     }
-
 
     public String validateEventEnd(String regOpen, String regClose, String eventStart, String eventEnd) {
         if (eventEnd == null || eventEnd.isEmpty()) return null;
@@ -267,5 +249,4 @@ public class CreateEventController {
 
         return null;
     }
-
 }

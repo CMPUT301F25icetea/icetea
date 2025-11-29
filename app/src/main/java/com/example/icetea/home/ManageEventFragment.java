@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.example.icetea.R;
 import com.example.icetea.models.Event;
+import com.example.icetea.models.EventDB;
 import com.example.icetea.util.Callback;
 import com.example.icetea.util.ImageUtil;
 import com.google.android.material.button.MaterialButton;
@@ -34,37 +35,10 @@ public class ManageEventFragment extends Fragment {
     private static final String ARG_EVENT_ID = "eventId";
     private Event event;
     private String eventId;
-
     private ImageView posterImageView;
     private MaterialButton changePosterButton;
-    private boolean posterChanged = false;
-    private String newPosterBase64 = null;
-
     private TextView eventNameTextView;
 
-    private final ActivityResultLauncher<String> pickPosterLauncher =
-            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
-                if (uri != null) {
-                    try {
-                        String base64 = ImageUtil.uriToBase64(requireContext(), uri);
-
-                        posterImageView.setImageURI(uri);
-                        posterChanged = true;
-                        newPosterBase64 = base64;
-
-                        updateEventPoster();
-
-                    } catch (ImageUtil.ImageTooLargeException e) {
-                        Toast.makeText(getContext(),
-                                "Image too large. Please select a smaller image.",
-                                Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) {
-                        Toast.makeText(getContext(),
-                                "Failed to process image.",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
 
     public ManageEventFragment() {
         // Required empty public constructor
@@ -104,16 +78,7 @@ public class ManageEventFragment extends Fragment {
         );
 
         posterImageView = view.findViewById(R.id.imageManageEventPoster);
-        changePosterButton = view.findViewById(R.id.buttonChangeEventPoster);
         eventNameTextView = view.findViewById(R.id.textManageEventName);
-
-        changePosterButton.setOnClickListener(v ->
-                pickPosterLauncher.launch("image/*")
-        );
-
-        posterImageView.setOnClickListener(v ->
-                pickPosterLauncher.launch("image/*")
-        );
 
         MaterialButton drawWinners = view.findViewById(R.id.buttonDrawWinners);
         MaterialButton viewWaitingListButton = view.findViewById(R.id.buttonViewWaitingList);
@@ -142,6 +107,22 @@ public class ManageEventFragment extends Fragment {
             transaction.commit();
         });
         //to here
+
+        MaterialButton editEventButton = view.findViewById(R.id.buttonEditEvent);
+        editEventButton.setOnClickListener(v -> {
+            FragmentManager fm = requireActivity().getSupportFragmentManager();
+            FragmentTransaction transaction = fm.beginTransaction();
+            transaction.setReorderingAllowed(true);
+            transaction.setCustomAnimations(
+                    R.anim.slide_in_right,
+                    R.anim.slide_out_left,
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
+            );
+            transaction.replace(R.id.main_fragment_container, EditEventFragment.newInstance(eventId));
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
 
         controller.getEventObject(eventId, new Callback<Event>() {
             @Override
@@ -259,30 +240,24 @@ public class ManageEventFragment extends Fragment {
             }
 
         });
-    }
 
-    private void updateEventPoster() {
-        if (!posterChanged || newPosterBase64 == null || eventId == null) {
-            return;
-        }
-
-        controller.updateEventPoster(eventId, newPosterBase64, new Callback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                Toast.makeText(getContext(), "Event poster updated", Toast.LENGTH_SHORT).show();
-                posterChanged = false;
-
-                if (event != null) {
-                    event.setPosterBase64(newPosterBase64);
-                }
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Toast.makeText(getContext(),
-                        "Failed to update poster: " + e.getMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
+        MaterialButton deleteEventButton = view.findViewById(R.id.buttonDeleteEvent);
+        deleteEventButton.setOnClickListener(v -> {
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Delete Event")
+                    .setMessage("Are you sure you want to delete this event? This action cannot be undone.")
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        EventDB.getInstance().deleteEvent(eventId, task -> {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(requireContext(), "Event deleted", Toast.LENGTH_SHORT).show();
+                                requireActivity().getSupportFragmentManager().popBackStack();
+                            } else {
+                                Toast.makeText(requireContext(), "Error deleting event: " + (task.getException() != null ? task.getException().getMessage() : ""), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    })
+                    .show();
         });
     }
 }
