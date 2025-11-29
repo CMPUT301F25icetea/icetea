@@ -100,40 +100,6 @@
             android:background="@null"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-<!--    <com.google.android.material.textfield.TextInputLayout-->
-<!--        android:id="@+id/inputLayoutPhoneSignUp"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:hint="Phone"-->
-<!--        app:boxBackgroundMode="outline"-->
-<!--        app:boxBackgroundColor="@color/darkerBeige"-->
-<!--        app:boxStrokeColor="@color/black"-->
-<!--        app:hintTextColor="@color/black"-->
-<!--        app:boxStrokeWidth="2dp"-->
-<!--        app:boxCornerRadiusTopStart="8dp"-->
-<!--        app:boxCornerRadiusTopEnd="8dp"-->
-<!--        app:boxCornerRadiusBottomStart="8dp"-->
-<!--        app:boxCornerRadiusBottomEnd="8dp"-->
-<!--        app:endIconMode="custom"-->
-<!--        app:layout_constraintVertical_bias="0.8"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintWidth_percent="0.85">-->
-
-<!--        <com.google.android.material.textfield.TextInputEditText-->
-<!--            android:id="@+id/inputEditTextPhoneSignUp"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:drawableStart="@drawable/phone_icon"-->
-<!--            android:drawablePadding="8dp"-->
-<!--            android:inputType="phone"-->
-<!--            android:paddingVertical="12dp"-->
-<!--            android:textColor="@android:color/black"-->
-<!--            android:background="@null"/>-->
-<!--    </com.google.android.material.textfield.TextInputLayout>-->
-
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonContinueSignUp"
         android:layout_width="347dp"

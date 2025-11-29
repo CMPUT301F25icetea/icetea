@@ -1,4 +1,4 @@
-package com.example.icetea.home;
+package com.example.icetea.scanner;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,7 +14,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.icetea.R;
+import com.example.icetea.home.EventDetailsFragment;
 import com.example.icetea.models.EventDB;
+import com.google.android.material.button.MaterialButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -44,18 +46,10 @@ public class QRScannerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ImageButton backButton = view.findViewById(R.id.buttonBackQRScanner);
         tvScanStatus = view.findViewById(R.id.tvScanStatus);
-        com.google.android.material.button.MaterialButton btnStartScan = view.findViewById(R.id.btnStartScan);
-
-        backButton.setOnClickListener(v ->
-                requireActivity().getSupportFragmentManager().popBackStack()
-        );
+        MaterialButton btnStartScan = view.findViewById(R.id.btnStartScan);
 
         btnStartScan.setOnClickListener(v -> startScanner());
-
-        // Auto-start scanner when fragment opens
-        startScanner();
     }
 
     /**

@@ -20,8 +20,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.example.icetea.models.Notification;
-import com.example.icetea.models.NotificationDB;
+import com.example.icetea.scanner.QRScannerFragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.example.icetea.R;
@@ -29,10 +28,8 @@ import com.example.icetea.models.Event;
 import com.example.icetea.models.EventDB;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 
-import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -76,23 +73,6 @@ public class AllEventsFragment extends Fragment {
         // Initialize views
         searchEditText = view.findViewById(R.id.editTextSearch);
         filterButton = view.findViewById(R.id.buttonFilter);
-        FloatingActionButton btnScanQR = view.findViewById(R.id.buttonGoToScanner);
-
-        // QR Scanner button click
-        btnScanQR.setOnClickListener(v -> {
-            FragmentManager fm = requireActivity().getSupportFragmentManager();
-            FragmentTransaction transaction = fm.beginTransaction();
-            transaction.setReorderingAllowed(true);
-            transaction.setCustomAnimations(
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_left,
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_right
-            );
-            transaction.replace(R.id.main_fragment_container, QRScannerFragment.newInstance());
-            transaction.addToBackStack(null);
-            transaction.commit();
-        });
 
         // Setup RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewAllEvents);

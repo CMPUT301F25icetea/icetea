@@ -6,18 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/beige">
 
-    <ImageButton
-        android:id="@+id/buttonBackQRScanner"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
-        android:contentDescription="Back"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
     <ImageView
         android:id="@+id/ivQRIcon"
         android:layout_width="120dp"
