@@ -138,8 +138,6 @@ public class EntrantsMapFragment extends Fragment {
                         return;
                     }
 
-                    List<GeoPoint> points = new ArrayList<>();
-
                     for (DocumentSnapshot doc : snap.getDocuments()) {
                         String docId = doc.getId();
                         String name = doc.getString("name");
@@ -157,7 +155,6 @@ public class EntrantsMapFragment extends Fragment {
                         }
 
                         GeoPoint pos = new GeoPoint(lat, lng);
-                        points.add(pos);
 
                         Marker marker = new Marker(mapView);
                         marker.setPosition(pos);
@@ -172,23 +169,10 @@ public class EntrantsMapFragment extends Fragment {
                         mapView.getOverlays().add(marker);
                     }
 
-                    if (!points.isEmpty()) {
-                        double north = -90, south = 90, east = -180, west = 180;
-                        for (GeoPoint p : points) {
-                            double lat = p.getLatitude();
-                            double lon = p.getLongitude();
-                            if (lat > north) north = lat;
-                            if (lat < south) south = lat;
-                            if (lon > east)  east  = lon;
-                            if (lon < west)  west  = lon;
-                        }
-                        BoundingBox box = new BoundingBox(north, east, south, west);
-                        mapView.zoomToBoundingBox(box, true);
-                    }
-
                     mapView.invalidate();
                 });
     }
+
 
     private void enableMyLocation() {
         boolean fine = ActivityCompat.checkSelfPermission(
