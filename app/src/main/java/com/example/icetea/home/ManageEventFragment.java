@@ -37,6 +37,7 @@ public class ManageEventFragment extends Fragment {
     private String eventId;
     private ImageView posterImageView;
     private TextView eventNameTextView;
+    private TextInputEditText descriptionEditText;
 
 
     public ManageEventFragment() {
@@ -106,7 +107,7 @@ public class ManageEventFragment extends Fragment {
             transaction.commit();
         });
         //to here
-
+        descriptionEditText = view.findViewById(R.id.textEventDescriptionDetail);
         MaterialButton editEventButton = view.findViewById(R.id.buttonEditEvent);
         editEventButton.setOnClickListener(v -> {
             FragmentManager fm = requireActivity().getSupportFragmentManager();
@@ -133,7 +134,11 @@ public class ManageEventFragment extends Fragment {
                 }
 
                 if (event.getAlreadyDrew()) {
-                    drawWinners.setText("View Final Entrants");
+                    drawWinners.setText("Final Entrants");
+                }
+
+                if (event.getDescription() != null) {
+                    descriptionEditText.setText(event.getDescription());
                 }
 
                 String posterBase64 = event.getPosterBase64();
@@ -210,7 +215,7 @@ public class ManageEventFragment extends Fragment {
                         public void onSuccess(Void result) {
                             Toast.makeText(getContext(), "Success", Toast.LENGTH_SHORT).show();
                             event.setAlreadyDrew(true);
-                            drawWinners.setText("View Final Entrants");
+                            drawWinners.setText("Final Entrants");
                             dialog.dismiss();
                         }
 

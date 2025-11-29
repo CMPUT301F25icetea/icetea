@@ -50,7 +50,7 @@ public class ViewQRcodeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ImageButton backButton = view.findViewById(R.id.buttonBackQR);
+        ImageButton backButton = view.findViewById(R.id.buttonBack);
         backButton.setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager().popBackStack()
         );
