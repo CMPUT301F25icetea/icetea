@@ -43,7 +43,8 @@ public class AllEventsFragment extends Fragment {
     private EventAdapter adapter;
     private TextInputEditText searchEditText;
     private ImageButton filterButton;
-    private Date selectedFilterDate = null;
+    private Date selectedStartDate = null;
+    private Date selectedEndDate = null;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
 
     public AllEventsFragment() {
@@ -62,7 +63,6 @@ public class AllEventsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_all_events, container, false);
     }
 
@@ -126,29 +126,29 @@ public class AllEventsFragment extends Fragment {
 
         List<Event> eventsToFilter = eventList;
 
-        // First apply date filter if selected
-        if (selectedFilterDate != null) {
-            List<Event> dateFilteredEvents = new ArrayList<>();
-            Calendar selectedCal = Calendar.getInstance();
-            selectedCal.setTime(selectedFilterDate);
-            selectedCal.set(Calendar.HOUR_OF_DAY, 0);
-            selectedCal.set(Calendar.MINUTE, 0);
-            selectedCal.set(Calendar.SECOND, 0);
-            selectedCal.set(Calendar.MILLISECOND, 0);
 
-            Calendar nextDayCal = Calendar.getInstance();
-            nextDayCal.setTime(selectedFilterDate);
-            nextDayCal.add(Calendar.DAY_OF_MONTH, 1);
-            nextDayCal.set(Calendar.HOUR_OF_DAY, 0);
-            nextDayCal.set(Calendar.MINUTE, 0);
-            nextDayCal.set(Calendar.SECOND, 0);
-            nextDayCal.set(Calendar.MILLISECOND, 0);
+        if (selectedStartDate != null && selectedEndDate != null) {
+            List<Event> dateFilteredEvents = new ArrayList<>();
+
+            Calendar startCal = Calendar.getInstance();
+            startCal.setTime(selectedStartDate);
+            startCal.set(Calendar.HOUR_OF_DAY, 0);
+            startCal.set(Calendar.MINUTE, 0);
+            startCal.set(Calendar.SECOND, 0);
+            startCal.set(Calendar.MILLISECOND, 0);
+
+            Calendar endCal = Calendar.getInstance();
+            endCal.setTime(selectedEndDate);
+            endCal.set(Calendar.HOUR_OF_DAY, 23);
+            endCal.set(Calendar.MINUTE, 59);
+            endCal.set(Calendar.SECOND, 59);
+            endCal.set(Calendar.MILLISECOND, 999);
 
             for (Event event : eventList) {
                 if (event.getEventStartDate() != null) {
                     Date eventDate = event.getEventStartDate().toDate();
-                    if (eventDate.compareTo(selectedCal.getTime()) >= 0 &&
-                            eventDate.compareTo(nextDayCal.getTime()) < 0) {
+                    if (eventDate.compareTo(startCal.getTime()) >= 0 &&
+                            eventDate.compareTo(endCal.getTime()) <= 0) {
                         dateFilteredEvents.add(event);
                     }
                 }
@@ -157,10 +157,8 @@ public class AllEventsFragment extends Fragment {
         }
 
         if (query.isEmpty()) {
-            // If search is empty, show filtered events
             filteredEventList.addAll(eventsToFilter);
         } else {
-            // Filter events based on search query
             String lowerCaseQuery = query.toLowerCase().trim();
 
             for (Event event : eventsToFilter) {
@@ -174,7 +172,6 @@ public class AllEventsFragment extends Fragment {
                     filteredEventList.add(event);
                     continue;
                 }
-
             }
         }
 
@@ -206,13 +203,13 @@ public class AllEventsFragment extends Fragment {
     }
 
     private void showFilterDialog() {
-        String[] options = {"Filter by Date", "Clear Filter"};
+        String[] options = {"Filter by Date Range", "Clear Filter"};
 
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Filter Events")
                 .setItems(options, (dialog, which) -> {
                     if (which == 0) {
-                        showDatePicker();
+                        showDateRangePicker();
                     } else {
                         clearDateFilter();
                     }
@@ -220,36 +217,66 @@ public class AllEventsFragment extends Fragment {
                 .show();
     }
 
-    private void showDatePicker() {
+    private void showDateRangePicker() {
         Calendar calendar = Calendar.getInstance();
-        if (selectedFilterDate != null) {
-            calendar.setTime(selectedFilterDate);
-        }
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
+
+        DatePickerDialog startDatePicker = new DatePickerDialog(
                 requireContext(),
                 (view, year, month, dayOfMonth) -> {
-                    Calendar selectedCal = Calendar.getInstance();
-                    selectedCal.set(year, month, dayOfMonth);
-                    selectedFilterDate = selectedCal.getTime();
-                    String currentQuery = searchEditText.getText() != null ?
-                            searchEditText.getText().toString() : "";
-                    filterEvents(currentQuery);
+                    Calendar startCal = Calendar.getInstance();
+                    startCal.set(year, month, dayOfMonth);
+                    selectedStartDate = startCal.getTime();
 
-                    Toast.makeText(getContext(),
-                            "Showing events on " + dateFormat.format(selectedFilterDate),
-                            Toast.LENGTH_SHORT).show();
+
+                    Calendar endCalendar = Calendar.getInstance();
+                    endCalendar.set(year, month, dayOfMonth);
+
+                    DatePickerDialog endDatePicker = new DatePickerDialog(
+                            requireContext(),
+                            (v, y, m, d) -> {
+                                Calendar endCal = Calendar.getInstance();
+                                endCal.set(y, m, d);
+                                selectedEndDate = endCal.getTime();
+
+                                // Ensure start date is before end date
+                                if (selectedStartDate.after(selectedEndDate)) {
+                                    Toast.makeText(getContext(),
+                                            "Start date must be before end date",
+                                            Toast.LENGTH_SHORT).show();
+                                    selectedStartDate = null;
+                                    selectedEndDate = null;
+                                    return;
+                                }
+
+                                String currentQuery = searchEditText.getText() != null ?
+                                        searchEditText.getText().toString() : "";
+                                filterEvents(currentQuery);
+
+                                Toast.makeText(getContext(),
+                                        "Showing events from " + dateFormat.format(selectedStartDate) +
+                                                " to " + dateFormat.format(selectedEndDate),
+                                        Toast.LENGTH_SHORT).show();
+                            },
+                            endCalendar.get(Calendar.YEAR),
+                            endCalendar.get(Calendar.MONTH),
+                            endCalendar.get(Calendar.DAY_OF_MONTH)
+                    );
+                    endDatePicker.setTitle("Select End Date");
+                    endDatePicker.show();
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
         );
 
-        datePickerDialog.show();
+        startDatePicker.setTitle("Select Start Date");
+        startDatePicker.show();
     }
 
     private void clearDateFilter() {
-        selectedFilterDate = null;
+        selectedStartDate = null;
+        selectedEndDate = null;
         String currentQuery = searchEditText.getText() != null ?
                 searchEditText.getText().toString() : "";
         filterEvents(currentQuery);
