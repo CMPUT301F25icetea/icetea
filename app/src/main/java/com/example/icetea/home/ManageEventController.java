@@ -4,6 +4,7 @@ import com.example.icetea.models.Event;
 import com.example.icetea.models.EventDB;
 import com.example.icetea.models.Notification;
 import com.example.icetea.models.NotificationDB;
+import com.example.icetea.models.NotificationLog;
 import com.example.icetea.models.UserDB;
 import com.example.icetea.models.Waitlist;
 import com.example.icetea.models.WaitlistDB;
@@ -250,16 +251,21 @@ public class ManageEventController {
         });
     }
 
-    public void updateEventPoster(String eventId, String posterBase64, Callback<Void> callback) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+    public void addNotificationLogForEvent(String eventId,
+                                           String title,
+                                           String message,
+                                           List<String> recipients,
+                                           List<String> statuses) {
+        NotificationLog log = new NotificationLog();
+        log.setEventId(eventId);
+        log.setTitle(title);
+        log.setMessage(message);
+        log.setRecipients(recipients);
+        log.setStatuses(statuses);
+        log.setTimestamp(Timestamp.now());
 
-        HashMap<String, Object> updates = new HashMap<>();
-        updates.put("posterBase64", posterBase64);
-
-        db.collection("events")
-                .document(eventId)
-                .update(updates)
-                .addOnSuccessListener(unused -> callback.onSuccess(null))
-                .addOnFailureListener(callback::onFailure);
+        FirebaseFirestore.getInstance()
+                .collection("notificationsLog")
+                .add(log);
     }
 }

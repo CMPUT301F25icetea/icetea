@@ -173,14 +173,36 @@ public class WaitlistFragment extends Fragment {
 
         Set<String> selectedStatuses = new HashSet<>();
         for (Chip chip : new Chip[]{chipWaiting, chipSelected, chipAccepted, chipDeclined, chipCancelled}) {
-            if (chip.isChecked()) selectedStatuses.add(chip.getText().toString().toLowerCase(Locale.ROOT));
+            if (chip.isChecked()) {
+                selectedStatuses.add(chip.getText().toString().toLowerCase(Locale.ROOT));
+            }
+        }
+
+        if (selectedStatuses.isEmpty()) {
+            Toast.makeText(requireContext(), "No statuses selected.", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         ManageEventController controller = new ManageEventController();
+
+        List<String> recipients = new ArrayList<>();
+
         for (Waitlist entry : entries) {
             if (selectedStatuses.contains(entry.getStatus())) {
-                controller.sendNotificationIfEnabled(entry.getUserId(), title, message, eventId);
+                String uid = entry.getUserId();
+                if (uid != null && !recipients.contains(uid)) {
+                    recipients.add(uid);
+                }
+                controller.sendNotificationIfEnabled(uid, title, message, eventId);
             }
+        }
+
+        if (!recipients.isEmpty()) {
+            List<String> statusesList = new ArrayList<>(selectedStatuses);
+            controller.addNotificationLogForEvent(eventId, title, message, recipients, statusesList);
+        } else {
+            Toast.makeText(requireContext(), "No entrants found for selected statuses.", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         Toast.makeText(requireContext(), "Notifications sent!", Toast.LENGTH_SHORT).show();
