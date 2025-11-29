@@ -18,7 +18,7 @@
         android:id="@+id/headerText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="CREATE EVENT"
+        android:text="Create Event"
         android:fontFamily="@font/inter_regular"
         android:textSize="30sp"
         android:textColor="@android:color/white"

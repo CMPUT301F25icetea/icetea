@@ -46,7 +46,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         Event event = events.get(position);
         holder.textEventName.setText(event.getName());
         holder.textEventDescription.setText(event.getDescription());
-        holder.textEventLocation.setText(event.getLocation());
 
         if (event.getEventStartDate() != null) {
             holder.textEventDate.setText(
@@ -62,6 +61,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                                     .format(event.getRegistrationEndDate().toDate())
             );
         }
+        int entrants = event.getCurrentEntrants() != null ? event.getCurrentEntrants() : 0;
+        holder.textCurrentEntrants.setText("👤 " + entrants);
 
         Bitmap posterBitmap = ImageUtil.base64ToBitmap(event.getPosterBase64());
         if (posterBitmap != null) {
@@ -79,7 +80,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
     public static class EventViewHolder extends RecyclerView.ViewHolder {
         ImageView imageEventPoster;
-        TextView textEventName, textEventDescription, textEventDate, textEventLocation, textRegEnd;
+        TextView textEventName, textEventDescription, textEventDate, textEventLocation, textRegEnd, textCurrentEntrants;
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -87,7 +88,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             textEventName = itemView.findViewById(R.id.textEventName);
             textEventDescription = itemView.findViewById(R.id.textEventDescription);
             textEventDate = itemView.findViewById(R.id.textEventDate);
-            textEventLocation = itemView.findViewById(R.id.textEventLocation);
+            textCurrentEntrants = itemView.findViewById(R.id.textCurrentEntrants);
             textRegEnd = itemView.findViewById(R.id.textRegEnd);
         }
 
