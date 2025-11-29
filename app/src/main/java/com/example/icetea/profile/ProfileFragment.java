@@ -7,7 +7,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -18,14 +21,18 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.icetea.R;
+import com.example.icetea.admin.AdminHomeFragment;
 import com.example.icetea.auth.AuthActivity;
 import com.example.icetea.auth.CurrentUser;
+import com.example.icetea.models.UserDB;
 import com.example.icetea.util.Callback;
 import com.example.icetea.util.ImageUtil;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 
@@ -89,6 +96,34 @@ public class ProfileFragment extends Fragment {
             pickImageLauncher.launch("image/*");
         });
 
+        MaterialButton adminPanelButton = view.findViewById(R.id.buttonAdminPanel);
+        adminPanelButton.setVisibility(View.GONE);
+        FirebaseFirestore.getInstance().collection("admin")
+                .whereEqualTo("userId", CurrentUser.getInstance().getFid())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot result = task.getResult();
+                        if (result != null && !result.isEmpty()) {
+                            adminPanelButton.setVisibility(View.VISIBLE);
+                            adminPanelButton.setOnClickListener(v -> {
+                                FragmentManager fm = requireActivity().getSupportFragmentManager();
+                                FragmentTransaction transaction = fm.beginTransaction();
+                                transaction.setReorderingAllowed(true);
+                                transaction.setCustomAnimations(
+                                        R.anim.slide_in_right,
+                                        R.anim.slide_out_left,
+                                        R.anim.slide_in_left,
+                                        R.anim.slide_out_right
+                                );
+                                transaction.replace(R.id.main_fragment_container, AdminHomeFragment.newInstance());
+                                transaction.addToBackStack(null);
+                                transaction.commit();
+                            });
+                        }
+                    }
+                });
+
 
         TextInputLayout nameTextLayout = view.findViewById(R.id.inputLayoutNameProfile);
         TextInputLayout emailTextLayout = view.findViewById(R.id.inputLayoutEmailProfile);
@@ -109,11 +144,10 @@ public class ProfileFragment extends Fragment {
             avatarImageView.setImageBitmap(CurrentUser.getInstance().getAvatar());
         }
 
-        // Initially disable buttons
         saveButton.setEnabled(false);
         cancelButton.setEnabled(false);
-        saveButton.setAlpha(0.5f);
-        cancelButton.setAlpha(0.5f);
+        saveButton.setAlpha(0.0f);
+        cancelButton.setAlpha(0.0f);
 
         checkInputChanged = () -> {
             boolean changed =
@@ -124,8 +158,8 @@ public class ProfileFragment extends Fragment {
 
             saveButton.setEnabled(changed);
             cancelButton.setEnabled(changed);
-            saveButton.setAlpha(changed ? 1f : 0.5f);
-            cancelButton.setAlpha(changed ? 1f : 0.5f);
+            saveButton.setAlpha(changed ? 1f : 0.0f);
+            cancelButton.setAlpha(changed ? 1f : 0.0f);
         };
 
         TextWatcher watcher = new TextWatcher() {
@@ -215,8 +249,8 @@ public class ProfileFragment extends Fragment {
                     }
                     saveButton.setEnabled(false);
                     cancelButton.setEnabled(false);
-                    saveButton.setAlpha(0.5f);
-                    cancelButton.setAlpha(0.5f);
+                    saveButton.setAlpha(0.0f);
+                    cancelButton.setAlpha(0.0f);
                 }
 
                 @Override
@@ -250,8 +284,8 @@ public class ProfileFragment extends Fragment {
             }
             saveButton.setEnabled(false);
             cancelButton.setEnabled(false);
-            saveButton.setAlpha(0.5f);
-            cancelButton.setAlpha(0.5f);
+            saveButton.setAlpha(0.0f);
+            cancelButton.setAlpha(0.0f);
         });
 
         deleteButton.setOnClickListener(v -> {
@@ -265,7 +299,6 @@ public class ProfileFragment extends Fragment {
                         controller.deleteProfile(userId, new Callback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
-                                CurrentUser.getInstance().clearSession();
                                 Toast.makeText(requireContext(), "Account deleted", Toast.LENGTH_SHORT).show();
 
                                 Intent intent = new Intent(requireActivity(), AuthActivity.class);
@@ -281,6 +314,26 @@ public class ProfileFragment extends Fragment {
                         });
                     })
                     .show();
+        });
+
+        SwitchCompat notificationsSwitch = view.findViewById(R.id.switchNotifications);
+
+        notificationsSwitch.setChecked(CurrentUser.getInstance().getNotifications());
+
+        notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+
+            HashMap<String, Object> updates = new HashMap<>();
+            updates.put("notifications", isChecked);
+
+            UserDB.getInstance().updateUser(CurrentUser.getInstance().getFid(), updates, task -> {
+                if (task.isSuccessful()) {
+                    CurrentUser.getInstance().setNotifications(isChecked);
+                    String message = isChecked ? "Notifications enabled" : "Notifications disabled";
+                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "Failed to update notifications", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
     }

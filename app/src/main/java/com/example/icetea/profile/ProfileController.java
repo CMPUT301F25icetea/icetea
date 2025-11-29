@@ -72,7 +72,6 @@ public class ProfileController {
     }
 
     // batched deletions
-    //todo: edge case - subtract 1 from event's currentEntrants if they were on the waitlist?
     public void deleteProfile(String userId, Callback<Void> callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -81,25 +80,12 @@ public class ProfileController {
         DocumentReference userDocRef = db.collection("users").document(userId);
 
         Task<QuerySnapshot> userEventsTask = eventsCollection.whereEqualTo("organizerId", userId).get();
-        //removed deleting waitlist entries on an event they owned cuz was bugging - tbh it isnt needed but leaving this code anyways
-
-//        Task<QuerySnapshot> waitlistsForUserEventsTask = eventsCollection.whereEqualTo("organizerId", userId)
-//                .get()
-//                .continueWithTask(eventsSnap -> {
-//                    List<String> eventIds = new ArrayList<>();
-//                    for (DocumentSnapshot doc : eventsSnap.getResult()) {
-//                        eventIds.add(doc.getId());
-//                    }
-//                    return waitlistCollection.whereIn("eventId", eventIds).get();
-//                });
 
         Task<QuerySnapshot> waitlistsForUserTask = waitlistCollection.whereEqualTo("userId", userId).get();
 
-        Tasks.whenAllSuccess(userEventsTask, waitlistsForUserTask)  //        Tasks.whenAllSuccess(userEventsTask, waitlistsForUserEventsTask, waitlistsForUserTask)
-
+        Tasks.whenAllSuccess(userEventsTask, waitlistsForUserTask)
                 .addOnSuccessListener(results -> {
                     QuerySnapshot eventsSnap = (QuerySnapshot) results.get(0);
-                    //QuerySnapshot waitlistsForEventsSnap = (QuerySnapshot) results.get(1);
                     QuerySnapshot waitlistsForUserSnap = (QuerySnapshot) results.get(1);
 
                     WriteBatch batch = db.batch();
@@ -108,9 +94,6 @@ public class ProfileController {
                         batch.delete(doc.getReference());
                     }
 
-//                    for (DocumentSnapshot doc : waitlistsForEventsSnap.getDocuments()) {
-//                        batch.delete(doc.getReference());
-//                    }
 
                     for (DocumentSnapshot doc : waitlistsForUserSnap.getDocuments()) {
                         batch.delete(doc.getReference());

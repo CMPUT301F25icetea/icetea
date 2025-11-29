@@ -20,7 +20,6 @@ public class CurrentUser {
     public String getFid() {
         return fid;
     }
-
     public void setFid(String fid) {
         this.fid = fid;
     }
@@ -40,11 +39,9 @@ public class CurrentUser {
     public void setEmail(String email) {
         this.email = email;
     }
-
     public String getPhone() {
         return phone;
     }
-
     public void setPhone(String phone) {
         this.phone = phone;
     }
@@ -56,16 +53,11 @@ public class CurrentUser {
     public void setNotifications(boolean notifications) {
         this.notifications = notifications;
     }
-
     public Bitmap getAvatar() {
         return avatar;
     }
-
     public void setAvatar(Bitmap avatar) {
         this.avatar = avatar;
     }
 
-    public void clearSession() {
-
-    }
 }
