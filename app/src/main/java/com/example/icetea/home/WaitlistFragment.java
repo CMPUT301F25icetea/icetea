@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.example.icetea.R;
 import com.example.icetea.models.Waitlist;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 
 import java.util.ArrayList;
@@ -31,6 +32,11 @@ public class WaitlistFragment extends Fragment {
     private WaitlistViewModel viewModel;
     private WaitlistAdapter adapter;
     private String eventId;
+    Chip chipWaiting;
+    Chip chipSelected;
+    Chip chipAccepted;
+    Chip chipDeclined;
+    Chip chipCancelled;
 
     public WaitlistFragment() {
         // Required empty public constructor
@@ -87,11 +93,11 @@ public class WaitlistFragment extends Fragment {
         Set<String> selectedStatuses = new HashSet<>();
         selectedStatuses.add(Waitlist.STATUS_WAITING);
 
-        Chip chipWaiting = view.findViewById(R.id.chipWaiting);
-        Chip chipSelected = view.findViewById(R.id.chipSelected);
-        Chip chipAccepted = view.findViewById(R.id.chipAccepted);
-        Chip chipDeclined = view.findViewById(R.id.chipDeclined);
-        Chip chipCancelled = view.findViewById(R.id.chipCancelled);
+        chipWaiting = view.findViewById(R.id.chipWaiting);
+        chipSelected = view.findViewById(R.id.chipSelected);
+        chipAccepted = view.findViewById(R.id.chipAccepted);
+        chipDeclined = view.findViewById(R.id.chipDeclined);
+        chipCancelled = view.findViewById(R.id.chipCancelled);
 
         Chip[] chips = {chipWaiting, chipSelected, chipAccepted, chipDeclined, chipCancelled};
 
@@ -136,6 +142,12 @@ public class WaitlistFragment extends Fragment {
                 Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
             }
         });
+        MaterialButton sendBtn = view.findViewById(R.id.buttonSendNotifications);
+        sendBtn.setOnClickListener(v -> {
+            SendNotificationDialog dialog = new SendNotificationDialog();
+            dialog.setListener((title, message) -> sendNotificationsToSelectedStatuses(title, message));
+            dialog.show(getParentFragmentManager(), "SendNotificationDialog");
+        });
 
     }
 
@@ -154,5 +166,24 @@ public class WaitlistFragment extends Fragment {
         adapter.updateList(filtered);
     }
 
+    private void sendNotificationsToSelectedStatuses(String title, String message) {
+        if (viewModel.getWaitlist().getValue() == null) return;
+
+        List<Waitlist> entries = viewModel.getWaitlist().getValue();
+
+        Set<String> selectedStatuses = new HashSet<>();
+        for (Chip chip : new Chip[]{chipWaiting, chipSelected, chipAccepted, chipDeclined, chipCancelled}) {
+            if (chip.isChecked()) selectedStatuses.add(chip.getText().toString().toLowerCase(Locale.ROOT));
+        }
+
+        ManageEventController controller = new ManageEventController();
+        for (Waitlist entry : entries) {
+            if (selectedStatuses.contains(entry.getStatus())) {
+                controller.sendNotificationIfEnabled(entry.getUserId(), title, message, eventId);
+            }
+        }
+
+        Toast.makeText(requireContext(), "Notifications sent!", Toast.LENGTH_SHORT).show();
+    }
 
 }
