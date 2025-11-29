@@ -36,7 +36,6 @@ public class ManageEventFragment extends Fragment {
     private Event event;
     private String eventId;
     private ImageView posterImageView;
-    private MaterialButton changePosterButton;
     private TextView eventNameTextView;
 
 
@@ -206,7 +205,7 @@ public class ManageEventFragment extends Fragment {
 
                     inputLayout.setError(null);
 
-                    controller.drawWinners(eventId, count, new Callback<Void>() {
+                    controller.drawWinners(event, count, new Callback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             Toast.makeText(getContext(), "Success", Toast.LENGTH_SHORT).show();

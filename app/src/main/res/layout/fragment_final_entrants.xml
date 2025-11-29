@@ -1,14 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".home.FinalEntrantsFragment">
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <View
+        android:id="@+id/topHeaderBackgroundFinalEntrants"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/yellow"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.1"/>
 
-    <Button
-        android:id="@+id/buttonDownloadCsv"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/textNotificationsHeader"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Button" />
-</FrameLayout>
+        android:text="Final Entrants"
+        android:textSize="28sp"
+        android:textColor="@android:color/white"
+        android:gravity="center"
+        android:fontFamily="@font/inter_regular"
+        app:layout_constraintTop_toTopOf="@id/topHeaderBackgroundFinalEntrants"
+        app:layout_constraintBottom_toBottomOf="@id/topHeaderBackgroundFinalEntrants"/>
+
+    <ImageButton
+        android:id="@+id/buttonBack"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_arrow_back"
+        android:contentDescription="Back"
+        app:layout_constraintTop_toTopOf="@id/topHeaderBackgroundFinalEntrants"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/topHeaderBackgroundFinalEntrants"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerFinalEntrants"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/beige"
+        app:layout_constraintTop_toBottomOf="@id/topHeaderBackgroundFinalEntrants"
+        app:layout_constraintBottom_toTopOf="@id/buttonDownloadCsv"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/item_waitlist_card"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonDownloadCsv"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:text="Download Final Entrants"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        app:backgroundTint="@color/green"
+        android:layout_margin="16dp"
+        app:cornerRadius="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:iconPadding="8dp"
+        app:iconGravity="textStart"
+        app:iconTint="@android:color/white"
+        android:elevation="4dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

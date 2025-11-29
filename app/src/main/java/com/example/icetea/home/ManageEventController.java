@@ -37,7 +37,7 @@ public class ManageEventController {
         });
     }
 
-    public void drawWinners(String eventId, int count, Callback<Void> callback) {
+    public void drawWinners(Event event, int count, Callback<Void> callback) {
         if (count <= 0) {
             callback.onFailure(new IllegalArgumentException("Count must be greater than 0"));
             return;
@@ -46,7 +46,7 @@ public class ManageEventController {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         WaitlistDB waitlistDB = WaitlistDB.getInstance();
 
-        waitlistDB.getEntrantsByStatus(eventId, Waitlist.STATUS_WAITING, task -> {
+        waitlistDB.getEntrantsByStatus(event.getEventId(), Waitlist.STATUS_WAITING, task -> {
             if (!task.isSuccessful()) {
                 callback.onFailure(task.getException() != null ? task.getException() :
                         new Exception("Failed to fetch waiting entrants"));
@@ -75,7 +75,7 @@ public class ManageEventController {
                 batch.update(doc.getReference(), "status", Waitlist.STATUS_SELECTED);
             }
 
-            DocumentReference eventRef = db.collection("events").document(eventId);
+            DocumentReference eventRef = db.collection("events").document(event.getEventId());
             batch.update(eventRef, "alreadyDrew", true);
 
 
@@ -86,8 +86,8 @@ public class ManageEventController {
                             sendNotificationIfEnabled(
                                     userId,
                                     "You're a winner!",
-                                    "You have been selected for the event_name <-- ill fix.",
-                                    eventId
+                                    "You have been selected for the event: " + event.getName(),
+                                    event.getEventId()
                             );
                         }
                         callback.onSuccess(null);
@@ -131,17 +131,10 @@ public class ManageEventController {
                             "status", Waitlist.STATUS_CANCELLED,
                             "replaced", true
                     );
-                    sendNotificationIfEnabled(
-                            userId,
-                            "You were replaced",
-                            "Your spot in the event_name has been cancelled and a new winner was selected.",
-                            eventId
-                    );
                 } else if (Waitlist.STATUS_DECLINED.equals(currentStatus)) {
                     batch.update(currentEntry.getReference(),
                             "replaced", true
                     );
-
                 } else {
                     callback.onFailure(new Exception("Cannot replace a user with status: " + currentStatus));
                     return;
@@ -151,19 +144,33 @@ public class ManageEventController {
                         "status", Waitlist.STATUS_SELECTED
                 );
 
+                batch.commit().addOnSuccessListener(aVoid -> {
+                    EventDB.getInstance().getEvent(eventId, eventTask -> {
+                        String eventName = "the event"; // fallback
+                        if (eventTask.isSuccessful() && eventTask.getResult() != null && eventTask.getResult().exists()) {
+                            DocumentSnapshot doc = eventTask.getResult();
+                            String name = doc.getString("name");
+                            if (name != null) eventName = name;
+                        }
 
-                batch.commit()
-                        .addOnSuccessListener(aVoid -> {
-                            String newWinnerId = replacementEntry.getString("userId");
-                            sendNotificationIfEnabled(
-                                    newWinnerId,
-                                    "You're a winner!",
-                                    "You have been selected for the event_name<- add event name.",
-                                    eventId
-                            );
-                            callback.onSuccess(null);
-                        })
-                        .addOnFailureListener(callback::onFailure);
+                        sendNotificationIfEnabled(
+                                userId,
+                                "You were replaced",
+                                "Your spot in " + eventName + " has been cancelled and a new winner was selected.",
+                                eventId
+                        );
+
+                        String newWinnerId = replacementEntry.getString("userId");
+                        sendNotificationIfEnabled(
+                                newWinnerId,
+                                "You're a winner!",
+                                "You have been selected for " + eventName + ".",
+                                eventId
+                        );
+
+                        callback.onSuccess(null);
+                    });
+                }).addOnFailureListener(callback::onFailure);
             });
         });
     }
@@ -187,20 +194,31 @@ public class ManageEventController {
 
             waitlistDB.updateWaitlistStatus(userId, eventId, Waitlist.STATUS_CANCELLED, statusTask -> {
                 if (statusTask.isSuccessful()) {
-                    sendNotificationIfEnabled(
-                            userId,
-                            "Your spot was revoked",
-                            "Your winning spot in the event_name has been cancelled.",
-                            eventId
-                    );
-                    callback.onSuccess(null);                } else {
+                    EventDB.getInstance().getEvent(eventId, eventTask -> {
+                        String eventName = "the event";
+                        if (eventTask.isSuccessful() && eventTask.getResult() != null && eventTask.getResult().exists()) {
+                            DocumentSnapshot doc = eventTask.getResult();
+                            String name = doc.getString("name");
+                            if (name != null) eventName = name;
+                        }
+
+                        sendNotificationIfEnabled(
+                                userId,
+                                "Your spot was revoked",
+                                "Your winning spot in " + eventName + " has been cancelled.",
+                                eventId
+                        );
+
+                        callback.onSuccess(null);
+                    });
+                } else {
                     callback.onFailure(statusTask.getException() != null ? statusTask.getException() : new Exception("Failed to update status"));
                 }
             });
         });
     }
 
-    private void sendNotificationIfEnabled(String userId, String title, String message, String eventId) {
+    public void sendNotificationIfEnabled(String userId, String title, String message, String eventId) {
         UserDB userDB = UserDB.getInstance();
         userDB.getUser(userId, task -> {
             if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
