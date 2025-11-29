@@ -1,11 +1,14 @@
 package com.example.icetea.models;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.Map;
 
@@ -85,17 +88,47 @@ public class EventDB {
                 .addOnCompleteListener(listener);
     }
 
-    /**
-     * Deletes an Event from Firestore.
-     *
-     * @param event The Event to delete
-     * @param listener Listener to handle completion
-     */
-    public void deleteEvent(Event event, OnCompleteListener<Void> listener) {
-        eventsCollection.document(event.getEventId())
-                .delete()
-                .addOnCompleteListener(listener);
+    public void deleteEvent(String eventId, OnCompleteListener<Void> listener) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference eventsCol = db.collection("events");
+        CollectionReference waitlistCol = db.collection("waitlist");
+
+        Task<QuerySnapshot> eventQuery =
+                eventsCol.whereEqualTo("eventId", eventId).get();
+
+        Task<QuerySnapshot> waitlistQuery =
+                waitlistCol.whereEqualTo("eventId", eventId).get();
+
+        Tasks.whenAllSuccess(eventQuery, waitlistQuery)
+                .addOnCompleteListener(task -> {
+
+                    if (!task.isSuccessful()) {
+                        listener.onComplete(Tasks.forException(task.getException() != null ? task.getException() : new Exception("Error deleting event")));
+                        return;
+                    }
+
+                    QuerySnapshot eventDocs = eventQuery.getResult();
+                    QuerySnapshot waitlistDocs = waitlistQuery.getResult();
+
+                    if (eventDocs.isEmpty()) {
+                        listener.onComplete(Tasks.forResult(null));
+                        return;
+                    }
+
+                    WriteBatch batch = db.batch();
+
+                    for (DocumentSnapshot doc : eventDocs.getDocuments()) {
+                        batch.delete(doc.getReference());
+                    }
+
+                    for (DocumentSnapshot doc : waitlistDocs.getDocuments()) {
+                        batch.delete(doc.getReference());
+                    }
+
+                    batch.commit().addOnCompleteListener(listener);
+                });
     }
+
 
     public void getActiveEvents(OnCompleteListener<QuerySnapshot> listener) {
         Timestamp now = Timestamp.now();
