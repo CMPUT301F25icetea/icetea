@@ -146,11 +146,6 @@ public class EntrantsMapFragment extends Fragment {
                         Double lng = doc.getDouble("longitude");
 
                         if (lat == null || lng == null) {
-                            Toast.makeText(
-                                    getContext(),
-                                    "No lat/lng for doc " + docId,
-                                    Toast.LENGTH_SHORT
-                            ).show();
                             continue;
                         }
 

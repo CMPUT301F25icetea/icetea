@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Map FIRST -->
     <org.osmdroid.views.MapView
         android:id="@+id/osmMap"
         android:layout_width="0dp"
