@@ -22,13 +22,20 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Controller responsible for managing the user's profile data.
+ * Controller responsible for managing user profile operations.
  *
- * Handles loading, updating, and deleting user information from both
- * Firebase Authentication and Firestore database.
+ * <p>Handles validation, updating, and deletion of user profile data
+ * from Firestore and optionally Firebase Authentication.</p>
  */
 public class ProfileController {
 
+    /**
+     * Updates a user's profile data in Firestore.
+     *
+     * @param fid      The Firebase ID of the user to update.
+     * @param updates  A map of field-value pairs to update.
+     * @param callback A callback invoked with success or failure of the operation.
+     */
     public void updateProfile(String fid, HashMap<String, Object> updates, Callback<Void> callback) {
 
         UserDB.getInstance().updateUser(fid, updates, task -> {
@@ -43,6 +50,12 @@ public class ProfileController {
         });
     }
 
+    /**
+     * Validates a user's name.
+     *
+     * @param name The name to validate.
+     * @return A validation error message if invalid, or null if valid.
+     */
     public String validateName(String name) {
         if (name.isEmpty()) {
             return "Name cannot be empty";
@@ -50,6 +63,12 @@ public class ProfileController {
         return null;
     }
 
+    /**
+     * Validates a user's email.
+     *
+     * @param email The email to validate.
+     * @return A validation error message if invalid, or null if valid.
+     */
     public String validateEmail(String email) {
         if (email.isEmpty()) {
             return "Email cannot be empty";
@@ -61,6 +80,14 @@ public class ProfileController {
         return null;
     }
 
+    /**
+     * Validates a user's phone number.
+     *
+     * <p>Empty strings are considered valid (optional field).</p>
+     *
+     * @param phone The phone number to validate.
+     * @return A validation error message if invalid, or null if valid.
+     */
     public String validatePhone(String phone) {
         if (phone.isEmpty()) {
             return null;
@@ -71,7 +98,20 @@ public class ProfileController {
         return null;
     }
 
-    // batched deletions
+    /**
+     * Deletes a user's profile along with their associated events and waitlist entries.
+     *
+     * <p>Performs batched deletion across the following collections:
+     * <ul>
+     *     <li>events (organized by the user)</li>
+     *     <li>waitlist entries (owned by the user)</li>
+     *     <li>user document itself</li>
+     * </ul>
+     * </p>
+     *
+     * @param userId   The ID of the user to delete.
+     * @param callback A callback invoked upon success or failure of the deletion.
+     */
     public void deleteProfile(String userId, Callback<Void> callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -93,7 +133,6 @@ public class ProfileController {
                     for (DocumentSnapshot doc : eventsSnap.getDocuments()) {
                         batch.delete(doc.getReference());
                     }
-
 
                     for (DocumentSnapshot doc : waitlistsForUserSnap.getDocuments()) {
                         batch.delete(doc.getReference());

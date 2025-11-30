@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,16 +20,26 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 /**
- * Fragment for scanning QR codes to join event waitlists
+ * Fragment for scanning QR codes to join event waitlists.
+ *
+ * <p>Uses ZXing library to scan QR codes and validates them against the database
+ * to ensure the event exists before navigating to the event details page.</p>
  */
 public class QRScannerFragment extends Fragment {
 
     private TextView tvScanStatus;
 
+    /**
+     * Required empty public constructor.
+     */
     public QRScannerFragment() {
-        // Required empty public constructor
     }
 
+    /**
+     * Factory method to create a new instance of QRScannerFragment.
+     *
+     * @return A new instance of QRScannerFragment.
+     */
     public static QRScannerFragment newInstance() {
         return new QRScannerFragment();
     }
@@ -42,6 +51,13 @@ public class QRScannerFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_qr_scanner, container, false);
     }
 
+    /**
+     * Called immediately after onCreateView(). Initializes UI elements and sets up
+     * the scan button click listener.
+     *
+     * @param view The view returned by onCreateView.
+     * @param savedInstanceState Saved state bundle.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -53,25 +69,27 @@ public class QRScannerFragment extends Fragment {
     }
 
     /**
-     * Initialize and start the QR code scanner
+     * Initializes and starts the QR code scanner using ZXing IntentIntegrator.
      */
     private void startScanner() {
         IntentIntegrator integrator = IntentIntegrator.forSupportFragment(this);
 
-        // Configure scanner
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
         integrator.setPrompt("Scan an Event QR Code");
-        integrator.setCameraId(0);  // Use back camera
+        integrator.setCameraId(0);
         integrator.setBeepEnabled(true);
         integrator.setBarcodeImageEnabled(false);
         integrator.setOrientationLocked(false);
 
-        // Start scanning
         integrator.initiateScan();
     }
 
     /**
-     * Handle the result from the QR code scanner
+     * Handles the result from the QR code scanner.
+     *
+     * @param requestCode Request code.
+     * @param resultCode Result code.
+     * @param data Intent data.
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -79,15 +97,11 @@ public class QRScannerFragment extends Fragment {
 
         if (result != null) {
             if (result.getContents() == null) {
-                // User cancelled the scan
                 Toast.makeText(getContext(), "Scan cancelled", Toast.LENGTH_SHORT).show();
                 updateScanStatus("Scan cancelled");
             } else {
-                // Successfully scanned a QR code
                 String scannedData = result.getContents();
                 updateScanStatus("Verifying event...");
-
-                // Verify it's a valid event ID and navigate
                 verifyAndOpenEvent(scannedData);
             }
         } else {
@@ -96,7 +110,9 @@ public class QRScannerFragment extends Fragment {
     }
 
     /**
-     * Verify the scanned data is a valid event ID before navigating
+     * Verifies that the scanned data corresponds to a valid event in the database.
+     *
+     * @param eventId The scanned event ID.
      */
     private void verifyAndOpenEvent(String eventId) {
         if (eventId == null || eventId.trim().isEmpty()) {
@@ -108,23 +124,22 @@ public class QRScannerFragment extends Fragment {
             return;
         }
 
-        // Verify event exists in database
         EventDB.getInstance().getEvent(eventId.trim(), task -> {
             if (!isAdded()) return;
 
             if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
-                // Valid event - navigate to details
                 updateScanStatus("Event found! Opening...");
                 openEventDetails(eventId.trim());
             } else {
-                // Invalid event ID
                 showInvalidQRCode();
             }
         });
     }
 
     /**
-     * Navigate to the event details page
+     * Navigates to the event details fragment for a valid event.
+     *
+     * @param eventId The event ID to open.
      */
     private void openEventDetails(String eventId) {
         if (!isAdded() || getActivity() == null) {
@@ -145,7 +160,7 @@ public class QRScannerFragment extends Fragment {
     }
 
     /**
-     * Show invalid QR code error
+     * Shows a Toast indicating that the scanned QR code is invalid.
      */
     private void showInvalidQRCode() {
         Toast.makeText(getContext(), "Invalid QR code - not a valid event", Toast.LENGTH_LONG).show();
@@ -153,7 +168,9 @@ public class QRScannerFragment extends Fragment {
     }
 
     /**
-     * Update the status text view
+     * Updates the scan status TextView with the given message.
+     *
+     * @param message Status message to display.
      */
     private void updateScanStatus(String message) {
         if (tvScanStatus != null) {

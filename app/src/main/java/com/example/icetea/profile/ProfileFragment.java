@@ -36,11 +36,33 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 
+/**
+ * Fragment for displaying and editing the current user's profile.
+ *
+ * <p>Allows the user to:
+ * <ul>
+ *   <li>Update name, email, phone number</li>
+ *   <li>Upload and change avatar</li>
+ *   <li>Enable or disable notifications</li>
+ *   <li>Access admin panel if the user has admin privileges</li>
+ *   <li>Delete their account with confirmation</li>
+ * </ul>
+ * </p>
+ *
+ * <p>Uses {@link ProfileController} for database operations
+ * and {@link CurrentUser} as a singleton for storing the current user's session data.</p>
+ */
 public class ProfileFragment extends Fragment {
+
     private Runnable checkInputChanged;
     private ImageView avatarImageView;
     private boolean avatarChanged = false;
     private String newAvatarBase64;
+
+    /**
+     * Activity result launcher for picking an image from the device.
+     * Converts the selected image to Base64 and updates the avatar preview.
+     */
     private final ActivityResultLauncher<String> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
                 if (uri != null) {
@@ -58,12 +80,21 @@ public class ProfileFragment extends Fragment {
                     }
                 }
             });
+
     private ProfileController controller;
 
+    /**
+     * Default empty constructor.
+     */
     public ProfileFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Factory method to create a new instance of this fragment.
+     *
+     * @return A new instance of ProfileFragment.
+     */
     public static ProfileFragment newInstance() {
         return new ProfileFragment();
     }
@@ -76,7 +107,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        // Inflate the fragment layout
         return inflater.inflate(R.layout.fragment_profile, container, false);
     }
 
@@ -86,16 +117,12 @@ public class ProfileFragment extends Fragment {
 
         controller = new ProfileController();
         avatarImageView = view.findViewById(R.id.imageViewAvatar);
+
         MaterialButton uploadButton = view.findViewById(R.id.buttonChangeAvatar);
+        uploadButton.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
+        avatarImageView.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
 
-        uploadButton.setOnClickListener(v -> {
-            pickImageLauncher.launch("image/*");
-        });
-
-        avatarImageView.setOnClickListener(v -> {
-            pickImageLauncher.launch("image/*");
-        });
-
+        // Admin panel button visibility
         MaterialButton adminPanelButton = view.findViewById(R.id.buttonAdminPanel);
         adminPanelButton.setVisibility(View.GONE);
         FirebaseFirestore.getInstance().collection("admin")
@@ -124,7 +151,6 @@ public class ProfileFragment extends Fragment {
                     }
                 });
 
-
         TextInputLayout nameTextLayout = view.findViewById(R.id.inputLayoutNameProfile);
         TextInputLayout emailTextLayout = view.findViewById(R.id.inputLayoutEmailProfile);
         TextInputLayout phoneTextLayout = view.findViewById(R.id.inputLayoutPhoneProfile);
@@ -137,6 +163,7 @@ public class ProfileFragment extends Fragment {
         MaterialButton cancelButton = view.findViewById(R.id.buttonCancelProfile);
         MaterialButton deleteButton = view.findViewById(R.id.buttonDeleteAccount);
 
+        // Initialize fields with current user data
         nameEditText.setText(CurrentUser.getInstance().getName());
         emailEditText.setText(CurrentUser.getInstance().getEmail());
         phoneEditText.setText(CurrentUser.getInstance().getPhone());
@@ -149,11 +176,12 @@ public class ProfileFragment extends Fragment {
         saveButton.setAlpha(0.0f);
         cancelButton.setAlpha(0.0f);
 
+        // Runnable to check if input fields changed
         checkInputChanged = () -> {
             boolean changed =
                     !String.valueOf(nameEditText.getText()).trim().equals(CurrentUser.getInstance().getName()) ||
-                    !String.valueOf(emailEditText.getText()).trim().equals(CurrentUser.getInstance().getEmail()) ||
-                    !String.valueOf(phoneEditText.getText()).trim().equals(CurrentUser.getInstance().getPhone() != null ? CurrentUser.getInstance().getPhone() : "") ||
+                            !String.valueOf(emailEditText.getText()).trim().equals(CurrentUser.getInstance().getEmail()) ||
+                            !String.valueOf(phoneEditText.getText()).trim().equals(CurrentUser.getInstance().getPhone() != null ? CurrentUser.getInstance().getPhone() : "") ||
                             avatarChanged;
 
             saveButton.setEnabled(changed);
@@ -164,23 +192,18 @@ public class ProfileFragment extends Fragment {
 
         TextWatcher watcher = new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                checkInputChanged.run();
-            }
-
+            public void onTextChanged(CharSequence s, int start, int before, int count) { checkInputChanged.run(); }
             @Override
-            public void afterTextChanged(Editable s) {
-            }
+            public void afterTextChanged(Editable s) {}
         };
 
         nameEditText.addTextChangedListener(watcher);
         emailEditText.addTextChangedListener(watcher);
         phoneEditText.addTextChangedListener(watcher);
 
+        // Save profile changes
         saveButton.setOnClickListener(v -> {
 
             nameTextLayout.setError(null);
@@ -197,20 +220,9 @@ public class ProfileFragment extends Fragment {
 
             boolean hasError = false;
 
-            if (nameError != null) {
-                nameTextLayout.setError(nameError);
-                hasError = true;
-            }
-
-            if (emailError != null) {
-                emailTextLayout.setError(emailError);
-                hasError = true;
-            }
-
-            if (phoneError != null) {
-                phoneTextLayout.setError(phoneError);
-                hasError = true;
-            }
+            if (nameError != null) { nameTextLayout.setError(nameError); hasError = true; }
+            if (emailError != null) { emailTextLayout.setError(emailError); hasError = true; }
+            if (phoneError != null) { phoneTextLayout.setError(phoneError); hasError = true; }
 
             HashMap<String, Object> updates = new HashMap<>();
 
@@ -229,7 +241,6 @@ public class ProfileFragment extends Fragment {
             controller.updateProfile(CurrentUser.getInstance().getFid(), updates, new Callback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
-                    // better UI response
                     CurrentUser.getInstance().setName(name);
                     CurrentUser.getInstance().setEmail(email);
                     CurrentUser.getInstance().setPhone(phone);
@@ -260,6 +271,7 @@ public class ProfileFragment extends Fragment {
             });
         });
 
+        // Cancel profile changes
         cancelButton.setOnClickListener(v -> {
             nameEditText.setText(CurrentUser.getInstance().getName());
             emailEditText.setText(CurrentUser.getInstance().getEmail());
@@ -278,16 +290,16 @@ public class ProfileFragment extends Fragment {
             View root = getView();
             if (root != null) {
                 View currentFocus = root.findFocus();
-                if (currentFocus != null) {
-                    currentFocus.clearFocus();
-                }
+                if (currentFocus != null) currentFocus.clearFocus();
             }
+
             saveButton.setEnabled(false);
             cancelButton.setEnabled(false);
             saveButton.setAlpha(0.0f);
             cancelButton.setAlpha(0.0f);
         });
 
+        // Delete user account
         deleteButton.setOnClickListener(v -> {
             new MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Delete Account")
@@ -295,18 +307,15 @@ public class ProfileFragment extends Fragment {
                     .setNegativeButton("Cancel", null)
                     .setPositiveButton("Delete", (dialog, which) -> {
                         String userId = CurrentUser.getInstance().getFid();
-
                         controller.deleteProfile(userId, new Callback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
                                 Toast.makeText(requireContext(), "Account deleted", Toast.LENGTH_SHORT).show();
-
                                 Intent intent = new Intent(requireActivity(), AuthActivity.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent);
                                 requireActivity().finish();
                             }
-
                             @Override
                             public void onFailure(Exception e) {
                                 Toast.makeText(requireContext(), "Delete failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -316,15 +325,12 @@ public class ProfileFragment extends Fragment {
                     .show();
         });
 
+        // Notifications toggle
         SwitchCompat notificationsSwitch = view.findViewById(R.id.switchNotifications);
-
         notificationsSwitch.setChecked(CurrentUser.getInstance().getNotifications());
-
         notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
             HashMap<String, Object> updates = new HashMap<>();
             updates.put("notifications", isChecked);
-
             UserDB.getInstance().updateUser(CurrentUser.getInstance().getFid(), updates, task -> {
                 if (task.isSuccessful()) {
                     CurrentUser.getInstance().setNotifications(isChecked);
@@ -335,8 +341,5 @@ public class ProfileFragment extends Fragment {
                 }
             });
         });
-
     }
-
 }
-
