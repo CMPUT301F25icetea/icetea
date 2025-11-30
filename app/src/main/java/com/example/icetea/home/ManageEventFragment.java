@@ -1,16 +1,12 @@
 package com.example.icetea.home;
 
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,21 +25,46 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+/**
+ * Fragment responsible for managing a single event in the app.
+ * Allows viewing event details, editing, drawing winners, viewing QR codes,
+ * deleting the event, and navigating to the waiting list or final entrants.
+ */
 public class ManageEventFragment extends Fragment {
 
+    /** Controller to handle event-related logic */
     private ManageEventController controller;
+
+    /** Argument key for passing the event ID */
     private static final String ARG_EVENT_ID = "eventId";
+
+    /** Current event object being managed */
     private Event event;
+
+    /** Event ID used to load the event */
     private String eventId;
+
+    /** ImageView showing the event poster */
     private ImageView posterImageView;
+
+    /** TextView showing the event name */
     private TextView eventNameTextView;
+
+    /** EditText for displaying/editing the event description */
     private TextInputEditText descriptionEditText;
 
-
+    /**
+     * Required empty public constructor.
+     */
     public ManageEventFragment() {
-        // Required empty public constructor
     }
 
+    /**
+     * Creates a new instance of this fragment for a specific event.
+     *
+     * @param eventId ID of the event to manage
+     * @return A new instance of ManageEventFragment
+     */
     public static ManageEventFragment newInstance(String eventId) {
         ManageEventFragment fragment = new ManageEventFragment();
         Bundle args = new Bundle();
@@ -52,6 +73,13 @@ public class ManageEventFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Called to do initial creation of the fragment.
+     * Retrieves the event ID from arguments if available.
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,18 +88,34 @@ public class ManageEventFragment extends Fragment {
         }
     }
 
+    /**
+     * Inflates the fragment layout.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate any views
+     * @param container If non-null, this is the parent view that the fragment's UI should be attached to.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state
+     * @return The inflated view
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_manage_event, container, false);
     }
 
+    /**
+     * Called immediately after onCreateView.
+     * Sets up all UI components, click listeners, and fetches event data.
+     *
+     * @param view The View returned by onCreateView
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         controller = new ManageEventController();
 
+        // Back button navigates to the previous fragment
         ImageButton backButton = view.findViewById(R.id.buttonBackManageEvent);
         backButton.setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager().popBackStack()
@@ -83,7 +127,7 @@ public class ManageEventFragment extends Fragment {
         MaterialButton drawWinners = view.findViewById(R.id.buttonDrawWinners);
         MaterialButton viewWaitingListButton = view.findViewById(R.id.buttonViewWaitingList);
 
-        //jimmy edit from here
+        // View QR Code button listener
         MaterialButton viewQrCodeButton = view.findViewById(R.id.buttonViewQrCode);
         viewQrCodeButton.setOnClickListener(v -> {
             if (eventId == null) {
@@ -106,8 +150,10 @@ public class ManageEventFragment extends Fragment {
             transaction.addToBackStack(null);
             transaction.commit();
         });
-        //to here
+
         descriptionEditText = view.findViewById(R.id.textEventDescriptionDetail);
+
+        // Edit Event button listener
         MaterialButton editEventButton = view.findViewById(R.id.buttonEditEvent);
         editEventButton.setOnClickListener(v -> {
             FragmentManager fm = requireActivity().getSupportFragmentManager();
@@ -124,6 +170,7 @@ public class ManageEventFragment extends Fragment {
             transaction.commit();
         });
 
+        // Load event object from database
         controller.getEventObject(eventId, new Callback<Event>() {
             @Override
             public void onSuccess(Event result) {
@@ -155,6 +202,7 @@ public class ManageEventFragment extends Fragment {
             }
         });
 
+        // Waiting list button listener
         viewWaitingListButton.setOnClickListener(v -> {
             FragmentManager fm = requireActivity().getSupportFragmentManager();
             FragmentTransaction transaction = fm.beginTransaction();
@@ -170,6 +218,7 @@ public class ManageEventFragment extends Fragment {
             transaction.commit();
         });
 
+        // Draw winners button listener
         drawWinners.setOnClickListener(v -> {
             if (event != null && !event.getAlreadyDrew()) {
                 View dialogView = LayoutInflater.from(getContext())
@@ -245,6 +294,7 @@ public class ManageEventFragment extends Fragment {
 
         });
 
+        // Delete event button listener
         MaterialButton deleteEventButton = view.findViewById(R.id.buttonDeleteEvent);
         deleteEventButton.setOnClickListener(v -> {
             new MaterialAlertDialogBuilder(requireContext())

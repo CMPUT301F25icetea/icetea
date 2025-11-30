@@ -1,28 +1,26 @@
 package com.example.icetea.home;
 
-import com.example.icetea.models.Event;
-import com.example.icetea.models.EventDB;
-import com.example.icetea.models.Notification;
-import com.example.icetea.models.NotificationDB;
-import com.example.icetea.models.NotificationLog;
-import com.example.icetea.models.UserDB;
-import com.example.icetea.models.Waitlist;
-import com.example.icetea.models.WaitlistDB;
+import com.example.icetea.models.*;
 import com.example.icetea.util.Callback;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.firestore.*;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Controller class responsible for handling all event-related logic for ManageEventFragment.
+ * Includes fetching events, drawing winners, replacing winners, revoking winners,
+ * and sending notifications.
+ */
 public class ManageEventController {
 
+    /**
+     * Retrieves an {@link Event} object from the database given an event ID.
+     *
+     * @param eventId  ID of the event to fetch
+     * @param callback Callback invoked with the fetched Event or an Exception on failure
+     */
     public void getEventObject(String eventId, Callback<Event> callback) {
         EventDB.getInstance().getEvent(eventId, task -> {
             if (!task.isSuccessful() || task.getResult() == null || !task.getResult().exists()) {
@@ -38,6 +36,13 @@ public class ManageEventController {
         });
     }
 
+    /**
+     * Draws winners from the waiting list for a given event and notifies users accordingly.
+     *
+     * @param event    The event for which winners are being drawn
+     * @param count    Number of winners to draw
+     * @param callback Callback invoked on success or failure
+     */
     public void drawWinners(Event event, int count, Callback<Void> callback) {
         if (count <= 0) {
             callback.onFailure(new IllegalArgumentException("Count must be greater than 0"));
@@ -79,9 +84,9 @@ public class ManageEventController {
             DocumentReference eventRef = db.collection("events").document(event.getEventId());
             batch.update(eventRef, "alreadyDrew", true);
 
-
             batch.commit()
                     .addOnSuccessListener(aVoid -> {
+                        // Send notifications to winners and non-winners
                         for (DocumentSnapshot doc : selectedList) {
                             String userId = doc.getString("userId");
                             sendNotificationIfEnabled(
@@ -109,6 +114,14 @@ public class ManageEventController {
                     .addOnFailureListener(callback::onFailure);
         });
     }
+
+    /**
+     * Replaces a winner with a new entrant from the waiting list.
+     *
+     * @param userId   ID of the current winner to be replaced
+     * @param eventId  ID of the event
+     * @param callback Callback invoked on success or failure
+     */
     public void replaceWinner(String userId, String eventId, Callback<Void> callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         WaitlistDB waitlistDB = WaitlistDB.getInstance();
@@ -160,7 +173,7 @@ public class ManageEventController {
 
                 batch.commit().addOnSuccessListener(aVoid -> {
                     EventDB.getInstance().getEvent(eventId, eventTask -> {
-                        String eventName = "the event"; // fallback
+                        String eventName = "the event";
                         if (eventTask.isSuccessful() && eventTask.getResult() != null && eventTask.getResult().exists()) {
                             DocumentSnapshot doc = eventTask.getResult();
                             String name = doc.getString("name");
@@ -189,6 +202,13 @@ public class ManageEventController {
         });
     }
 
+    /**
+     * Revokes a winner's spot for an event and notifies the user.
+     *
+     * @param userId   ID of the winner to revoke
+     * @param eventId  ID of the event
+     * @param callback Callback invoked on success or failure
+     */
     public void revokeWinner(String userId, String eventId, Callback<Void> callback) {
         WaitlistDB waitlistDB = WaitlistDB.getInstance();
 
@@ -232,6 +252,14 @@ public class ManageEventController {
         });
     }
 
+    /**
+     * Sends a notification to a user if their notifications are enabled.
+     *
+     * @param userId  ID of the user
+     * @param title   Notification title
+     * @param message Notification message
+     * @param eventId ID of the event related to the notification
+     */
     public void sendNotificationIfEnabled(String userId, String title, String message, String eventId) {
         UserDB userDB = UserDB.getInstance();
         userDB.getUser(userId, task -> {
@@ -248,6 +276,14 @@ public class ManageEventController {
         });
     }
 
+    /**
+     * Sends a notification to a user without checking settings.
+     *
+     * @param userId  ID of the user
+     * @param title   Notification title
+     * @param message Notification message
+     * @param eventId ID of the related event
+     */
     private void sendNotification(String userId, String title, String message, String eventId) {
         NotificationDB notificationDB = NotificationDB.getInstance();
         Notification notification = new Notification();
@@ -264,6 +300,15 @@ public class ManageEventController {
         });
     }
 
+    /**
+     * Adds a log entry for notifications sent regarding an event.
+     *
+     * @param eventId    ID of the event
+     * @param title      Notification title
+     * @param message    Notification message
+     * @param recipients List of user IDs who received the notification
+     * @param statuses   List of status strings corresponding to recipients
+     */
     public void addNotificationLogForEvent(String eventId,
                                            String title,
                                            String message,

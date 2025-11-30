@@ -26,22 +26,45 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * Fragment that displays the waitlist for a specific event.
+ * Allows organizers to view entrants, filter by status,
+ * replace or revoke winners, and send notifications to selected entrants.
+ *
+ * <p>This fragment is lifecycle-aware and uses {@link WaitlistViewModel} to observe
+ * real-time updates from Firestore.</p>
+ */
 public class WaitlistFragment extends Fragment {
 
+    /** Argument key used to pass the event ID to this fragment */
     private static final String ARG_EVENT_ID = "eventId";
+
+    /** ViewModel responsible for managing waitlist data */
     private WaitlistViewModel viewModel;
+
+    /** Adapter for displaying waitlist entries in a RecyclerView */
     private WaitlistAdapter adapter;
+
+    /** ID of the event whose waitlist is being displayed */
     private String eventId;
+
+    /** Filter chips for selecting waitlist statuses */
     Chip chipWaiting;
     Chip chipSelected;
     Chip chipAccepted;
     Chip chipDeclined;
     Chip chipCancelled;
 
-    public WaitlistFragment() {
-        // Required empty public constructor
-    }
+    /** Required empty public constructor */
+    public WaitlistFragment() {}
 
+    /**
+     * Factory method to create a new instance of this fragment
+     * using the provided event ID.
+     *
+     * @param eventId the ID of the event
+     * @return A new instance of fragment WaitlistFragment
+     */
     public static WaitlistFragment newInstance(String eventId) {
         WaitlistFragment fragment = new WaitlistFragment();
         Bundle args = new Bundle();
@@ -50,6 +73,12 @@ public class WaitlistFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Called to do initial creation of the fragment. Retrieves
+     * the event ID from fragment arguments if available.
+     *
+     * @param savedInstanceState The saved instance state
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,31 +87,45 @@ public class WaitlistFragment extends Fragment {
         }
     }
 
+    /**
+     * Inflates the fragment layout.
+     *
+     * @param inflater LayoutInflater object
+     * @param container ViewGroup container
+     * @param savedInstanceState Saved instance state
+     * @return The root View of the inflated layout
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_waitlist, container, false);
     }
 
+    /**
+     * Called immediately after {@link #onCreateView}. Sets up UI components,
+     * RecyclerView, observers, and event handlers.
+     *
+     * @param view The fragment's root view
+     * @param savedInstanceState Saved instance state
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Setup back button
         ImageButton backButton = view.findViewById(R.id.buttonBack);
         backButton.setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager().popBackStack()
         );
 
+        // Setup show map button
         View showMapBtn = view.findViewById(R.id.buttonShowGeo);
         showMapBtn.setOnClickListener(v -> {
             if (eventId == null || eventId.isEmpty()) {
                 Toast.makeText(requireContext(), "No event selected", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             EntrantsMapFragment mapFrag = EntrantsMapFragment.newInstance(eventId);
-
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.main_fragment_container, mapFrag)
@@ -90,6 +133,7 @@ public class WaitlistFragment extends Fragment {
                     .commit();
         });
 
+        // Initialize status filters
         Set<String> selectedStatuses = new HashSet<>();
         selectedStatuses.add(Waitlist.STATUS_WAITING);
 
@@ -113,6 +157,7 @@ public class WaitlistFragment extends Fragment {
             });
         }
 
+        // Setup RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.recyclerWaitlist);
 
         viewModel = new ViewModelProvider(this).get(WaitlistViewModel.class);
@@ -131,26 +176,35 @@ public class WaitlistFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
+        // Observe changes to waitlist entries
         viewModel.getWaitlist().observe(getViewLifecycleOwner(), entries -> {
             filterWaitlist(selectedStatuses);
         });
 
+        // Start listening for real-time updates
         viewModel.startListening(eventId);
 
+        // Observe toast messages
         viewModel.getToastMessage().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null) {
                 Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
             }
         });
+
+        // Setup send notifications button
         MaterialButton sendBtn = view.findViewById(R.id.buttonSendNotifications);
         sendBtn.setOnClickListener(v -> {
             SendNotificationDialog dialog = new SendNotificationDialog();
             dialog.setListener((title, message) -> sendNotificationsToSelectedStatuses(title, message));
             dialog.show(getParentFragmentManager(), "SendNotificationDialog");
         });
-
     }
 
+    /**
+     * Filters the waitlist based on the currently selected statuses.
+     *
+     * @param selectedStatuses Set of statuses to filter by
+     */
     private void filterWaitlist(Set<String> selectedStatuses) {
         if (viewModel.getWaitlist().getValue() == null) return;
 
@@ -166,6 +220,13 @@ public class WaitlistFragment extends Fragment {
         adapter.updateList(filtered);
     }
 
+    /**
+     * Sends notifications to all waitlist entrants whose statuses are currently selected.
+     * Updates Firestore and logs notifications for the event.
+     *
+     * @param title   The notification title
+     * @param message The notification message
+     */
     private void sendNotificationsToSelectedStatuses(String title, String message) {
         if (viewModel.getWaitlist().getValue() == null) return;
 
