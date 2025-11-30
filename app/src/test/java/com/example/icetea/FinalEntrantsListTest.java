@@ -18,7 +18,7 @@ import java.util.List;
  * whose status is "accepted".
  *
  * This test checks that from a mixed list of waitlist entries,
- * we can correctly pick out only the accepted ones.
+ * we can correctly pick out only the accepted ones
  */
 public class FinalEntrantsListTest {
 
