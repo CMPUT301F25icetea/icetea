@@ -78,5 +78,10 @@ public class UserDB {
         usersCollection.get()
                 .addOnCompleteListener(listener);
     }
-
+    public void getAllUsersWithAvatar(OnCompleteListener<QuerySnapshot> listener) {
+        usersCollection
+                .whereGreaterThan("avatar", "")
+                .get()
+                .addOnCompleteListener(listener);
+    }
 }
