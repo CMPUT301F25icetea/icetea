@@ -18,9 +18,22 @@ import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.List;
 
+/**
+ * RecyclerView Adapter for displaying user profiles in the Admin section.
+ * Each profile shows the user's name, email, and avatar.
+ * Admins can delete users via a delete button.
+ */
 public class AdminProfilesAdapter extends RecyclerView.Adapter<AdminProfilesAdapter.UserViewHolder> {
 
+    /**
+     * Interface to handle actions on user items, such as deletion.
+     */
     public interface ActionListener {
+        /**
+         * Called when the delete button of a user is clicked.
+         *
+         * @param user the User object associated with the clicked delete button
+         */
         void onDelete(User user);
     }
 
@@ -28,12 +41,26 @@ public class AdminProfilesAdapter extends RecyclerView.Adapter<AdminProfilesAdap
     private final List<User> users;
     private final ActionListener listener;
 
+    /**
+     * Constructor for AdminProfilesAdapter.
+     *
+     * @param context  the context in which the adapter is used
+     * @param users    the list of User objects to display
+     * @param listener the listener to handle delete actions
+     */
     public AdminProfilesAdapter(Context context, List<User> users, ActionListener listener) {
         this.context = context;
         this.users = users;
         this.listener = listener;
     }
 
+    /**
+     * Inflates the item layout and creates the ViewHolder.
+     *
+     * @param parent   the parent ViewGroup
+     * @param viewType the view type of the new View
+     * @return a new UserViewHolder instance
+     */
     @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -41,6 +68,12 @@ public class AdminProfilesAdapter extends RecyclerView.Adapter<AdminProfilesAdap
         return new UserViewHolder(view);
     }
 
+    /**
+     * Binds the user data to the ViewHolder and sets the delete button listener.
+     *
+     * @param holder   the UserViewHolder to bind data to
+     * @param position the position of the item in the dataset
+     */
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = users.get(position);
@@ -62,16 +95,29 @@ public class AdminProfilesAdapter extends RecyclerView.Adapter<AdminProfilesAdap
         holder.buttonDelete.setOnClickListener(v -> listener.onDelete(user));
     }
 
+    /**
+     * Returns the number of items in the dataset.
+     *
+     * @return the size of the users list
+     */
     @Override
     public int getItemCount() {
         return users.size();
     }
 
+    /**
+     * ViewHolder class for holding and caching views for each user item.
+     */
     public static class UserViewHolder extends RecyclerView.ViewHolder {
         ShapeableImageView imageProfile;
         TextView textName, textEmail;
         ImageButton buttonDelete;
 
+        /**
+         * Constructor for UserViewHolder.
+         *
+         * @param itemView the root view of the user item layout
+         */
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
             imageProfile = itemView.findViewById(R.id.imageProfile);

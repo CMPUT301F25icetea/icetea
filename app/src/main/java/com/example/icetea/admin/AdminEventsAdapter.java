@@ -20,9 +20,22 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * RecyclerView Adapter for displaying a list of events in the Admin section.
+ * Each event is displayed in a card layout with details like name, description, poster image,
+ * current entrants, event date, and registration end date.
+ */
 public class AdminEventsAdapter extends RecyclerView.Adapter<AdminEventsAdapter.EventViewHolder> {
 
+    /**
+     * Interface to handle click actions on an event item.
+     */
     public interface ActionListener {
+        /**
+         * Called when an event item is clicked.
+         *
+         * @param event the Event object associated with the clicked item
+         */
         void onEventClick(Event event);
     }
 
@@ -32,12 +45,26 @@ public class AdminEventsAdapter extends RecyclerView.Adapter<AdminEventsAdapter.
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy @ h:mm a", Locale.getDefault());
     private final SimpleDateFormat regDateFormat = new SimpleDateFormat("MMM d, yyyy @ h:mm a", Locale.getDefault());
 
+    /**
+     * Constructor for AdminEventsAdapter.
+     *
+     * @param context  the context in which the adapter is used
+     * @param events   the list of Event objects to display
+     * @param listener the listener to handle event clicks
+     */
     public AdminEventsAdapter(Context context, List<Event> events, ActionListener listener) {
         this.context = context;
         this.events = events;
         this.listener = listener;
     }
 
+    /**
+     * Inflates the item layout and creates the ViewHolder.
+     *
+     * @param parent   the parent ViewGroup
+     * @param viewType the view type of the new View
+     * @return a new EventViewHolder instance
+     */
     @NonNull
     @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -45,6 +72,12 @@ public class AdminEventsAdapter extends RecyclerView.Adapter<AdminEventsAdapter.
         return new EventViewHolder(view);
     }
 
+    /**
+     * Binds the event data to the ViewHolder.
+     *
+     * @param holder   the EventViewHolder to bind data to
+     * @param position the position of the item in the dataset
+     */
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
@@ -66,33 +99,50 @@ public class AdminEventsAdapter extends RecyclerView.Adapter<AdminEventsAdapter.
             holder.textRegEnd.setText("Registration end TBD");
         }
 
+        // Decode Base64 poster image
         Bitmap posterBitmap = null;
         if (event.getPosterBase64() != null && !event.getPosterBase64().isEmpty()) {
             try {
                 byte[] decodedBytes = Base64.decode(event.getPosterBase64(), Base64.DEFAULT);
                 posterBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
             } catch (IllegalArgumentException e) {
-                e.printStackTrace();
+                e.printStackTrace(); // Could log this properly in production
             }
         }
+
+        // Set image or default
         if (posterBitmap != null) {
             holder.imageEventPoster.setImageBitmap(posterBitmap);
         } else {
             holder.imageEventPoster.setImageResource(R.drawable.default_poster);
         }
 
+        // Set click listener
         holder.itemView.setOnClickListener(v -> listener.onEventClick(event));
     }
 
+    /**
+     * Returns the number of items in the dataset.
+     *
+     * @return the size of the events list
+     */
     @Override
     public int getItemCount() {
         return events.size();
     }
 
+    /**
+     * ViewHolder class for holding and caching views for each event item.
+     */
     public static class EventViewHolder extends RecyclerView.ViewHolder {
         ShapeableImageView imageEventPoster;
         TextView textEventName, textEventDescription, textCurrentEntrants, textEventDate, textRegEnd;
 
+        /**
+         * Constructor for EventViewHolder.
+         *
+         * @param itemView the root view of the event item layout
+         */
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
             imageEventPoster = itemView.findViewById(R.id.imageEventPoster);

@@ -23,31 +23,66 @@ import com.example.icetea.models.EventDB;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment used in the Admin section to display a list of all events.
+ * <p>
+ * Events are displayed in a RecyclerView using AdminEventsAdapter. Clicking an event
+ * opens the ManageEventFragment for that specific event.
+ */
 public class AdminEventsFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private AdminEventsAdapter adapter;
     private List<Event> events;
 
+    /**
+     * Default public constructor (required).
+     */
     public AdminEventsFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Factory method to create a new instance of AdminEventsFragment.
+     *
+     * @return a new instance of AdminEventsFragment
+     */
     public static AdminEventsFragment newInstance() {
         return new AdminEventsFragment();
     }
 
+    /**
+     * Called to do initial creation of the fragment.
+     *
+     * @param savedInstanceState the saved state of the fragment
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     *
+     * @param inflater           LayoutInflater object to inflate views
+     * @param container          parent view that the fragment's UI should attach to
+     * @param savedInstanceState saved state of the fragment
+     * @return the root view for the fragment's UI
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_admin_events, container, false);
     }
+
+    /**
+     * Called immediately after onCreateView() has returned.
+     * Initializes the RecyclerView, adapter, and loads events from the database.
+     *
+     * @param view               the View returned by onCreateView
+     * @param savedInstanceState saved state of the fragment
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -57,6 +92,7 @@ public class AdminEventsFragment extends Fragment {
 
         events = new ArrayList<>();
         adapter = new AdminEventsAdapter(requireContext(), events, event -> {
+            // Navigate to ManageEventFragment on event click
             FragmentManager fm = requireActivity().getSupportFragmentManager();
             FragmentTransaction transaction = fm.beginTransaction();
             transaction.setReorderingAllowed(true);
@@ -71,12 +107,15 @@ public class AdminEventsFragment extends Fragment {
             transaction.commit();
         });
 
-
         recyclerView.setAdapter(adapter);
 
         loadEvents();
     }
 
+    /**
+     * Loads all events from the EventDB and updates the RecyclerView adapter.
+     * Displays a Toast if loading fails.
+     */
     private void loadEvents() {
         EventDB.getInstance().getAllEvents(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
@@ -91,5 +130,4 @@ public class AdminEventsFragment extends Fragment {
             }
         });
     }
-
 }
