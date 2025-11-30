@@ -142,4 +142,11 @@ public class EventDB {
                 .get()
                 .addOnCompleteListener(listener);
     }
+    public void getAllEventsWithPoster(OnCompleteListener<QuerySnapshot> listener) {
+        eventsCollection
+                .whereGreaterThan("posterBase64", "")
+                .get()
+                .addOnCompleteListener(listener);
+    }
+
 }
