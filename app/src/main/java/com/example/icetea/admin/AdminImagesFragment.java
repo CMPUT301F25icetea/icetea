@@ -22,24 +22,53 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment used in the Admin section to display a grid of images.
+ * <p>
+ * Images include user avatars and event posters. Admins can delete images directly
+ * from this fragment via a confirmation dialog.
+ */
 public class AdminImagesFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private AdminImagesAdapter adapter;
     private List<ImageItem> images;
 
+    /**
+     * Default constructor.
+     */
     public AdminImagesFragment() { }
 
+    /**
+     * Factory method to create a new instance of AdminImagesFragment.
+     *
+     * @return a new instance of AdminImagesFragment
+     */
     public static AdminImagesFragment newInstance() {
         return new AdminImagesFragment();
     }
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     *
+     * @param inflater           LayoutInflater object to inflate views
+     * @param container          parent view that the fragment's UI should attach to
+     * @param savedInstanceState saved state of the fragment
+     * @return the root view for the fragment's UI
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_admin_images, container, false);
     }
 
+    /**
+     * Called immediately after onCreateView() has returned.
+     * Initializes the RecyclerView, adapter, and loads images from UserDB and EventDB.
+     *
+     * @param view               the View returned by onCreateView
+     * @param savedInstanceState saved state of the fragment
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -48,6 +77,7 @@ public class AdminImagesFragment extends Fragment {
         recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2)); // 2 columns
         images = new ArrayList<>();
 
+        // Adapter with delete action
         adapter = new AdminImagesAdapter(requireContext(), images, item -> {
             new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Delete Image")
@@ -87,12 +117,15 @@ public class AdminImagesFragment extends Fragment {
                     .show();
         });
 
-
         recyclerView.setAdapter(adapter);
 
         loadImages();
     }
 
+    /**
+     * Loads all images from UserDB (avatars) and EventDB (posters) and updates the adapter.
+     * Displays only images that have a non-empty Base64 string.
+     */
     private void loadImages() {
         images.clear();
 

@@ -6,7 +6,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -14,17 +13,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.example.icetea.MainActivity;
-import com.example.icetea.util.Callback;
 import com.example.icetea.R;
 
 /**
  * Fragment representing the landing page of the app.
- *
- * Shows login and sign-up buttons for users who are not logged in.
- * If the user is already logged in, navigates directly to the MainActivity.
+ * <p>
+ * Displays login and sign-up buttons for users who are not authenticated.
+ * If a user is already logged in, the fragment can redirect them to {@link MainActivity}.
+ * <p>
+ * Provides navigation to the sign-up screen with animated fragment transitions.
  */
 public class LandingPageFragment extends Fragment {
 
@@ -32,13 +31,13 @@ public class LandingPageFragment extends Fragment {
      * Required empty public constructor.
      */
     public LandingPageFragment() {
-        // req
+        // Required empty constructor
     }
 
     /**
      * Factory method to create a new instance of this fragment.
      *
-     * @return A new instance of LandingPageFragment.
+     * @return A new instance of {@link LandingPageFragment}.
      */
     public static LandingPageFragment newInstance() {
         return new LandingPageFragment();
@@ -52,10 +51,10 @@ public class LandingPageFragment extends Fragment {
     /**
      * Inflates the layout for this fragment.
      *
-     * @param inflater The LayoutInflater object.
-     * @param container The parent ViewGroup.
+     * @param inflater           The LayoutInflater object that can be used to inflate any views.
+     * @param container          The parent view that the fragment's UI should be attached to.
      * @param savedInstanceState Saved state bundle.
-     * @return The inflated View.
+     * @return The inflated {@link View}.
      */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -64,13 +63,13 @@ public class LandingPageFragment extends Fragment {
     }
 
     /**
-     * Called immediately after onCreateView().
+     * Called immediately after {@link #onCreateView}.
+     * <p>
+     * Sets up button click listeners for navigation to other authentication fragments.
+     * Specifically, clicking the sign-up button navigates to {@link SignUpFragment}
+     * using animated fragment transitions.
      *
-     * Checks if the user is logged in and navigates to MainActivity if so.
-     * Otherwise, sets up the login and sign-up buttons to navigate to the
-     * appropriate fragments.
-     *
-     * @param view The View returned by onCreateView.
+     * @param view               The View returned by {@link #onCreateView}.
      * @param savedInstanceState Saved state bundle.
      */
     @Override
@@ -90,9 +89,7 @@ public class LandingPageFragment extends Fragment {
                     R.anim.slide_out_right
             );
             transaction.replace(R.id.auth_fragment_container, SignUpFragment.newInstance());
-
             transaction.addToBackStack(null);
-
             transaction.commit();
         });
     }

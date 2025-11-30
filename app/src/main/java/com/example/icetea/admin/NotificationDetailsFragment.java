@@ -13,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.icetea.R;
-import com.example.icetea.models.NotificationItemAdmin;
 import com.google.firebase.Timestamp;
 
 import java.text.SimpleDateFormat;
@@ -22,6 +21,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Fragment that displays the details of a notification in the admin section.
+ * <p>
+ * Shows the title, message, event ID, recipients, statuses, and timestamp.
+ * Provides a back button to return to the previous fragment.
+ */
 public class NotificationDetailsFragment extends Fragment {
 
     private static final String ARG_EVENT_ID = "event_id";
@@ -38,10 +43,25 @@ public class NotificationDetailsFragment extends Fragment {
     private ArrayList<String> statuses;
     private long timestampMillis;
 
+    /**
+     * Default constructor.
+     */
     public NotificationDetailsFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Factory method to create a new instance of NotificationDetailsFragment with all
+     * notification details.
+     *
+     * @param eventId    the ID of the related event
+     * @param title      the notification title
+     * @param message    the notification message/content
+     * @param recipients list of recipient user IDs
+     * @param statuses   list of status strings corresponding to recipients
+     * @param timestamp  the notification timestamp
+     * @return a new instance of NotificationDetailsFragment
+     */
     public static NotificationDetailsFragment newInstance(String eventId,
                                                           String title,
                                                           String message,
@@ -62,7 +82,11 @@ public class NotificationDetailsFragment extends Fragment {
         return fragment;
     }
 
-
+    /**
+     * Initializes fragment arguments.
+     *
+     * @param savedInstanceState saved state of the fragment
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,12 +100,27 @@ public class NotificationDetailsFragment extends Fragment {
         }
     }
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     *
+     * @param inflater           LayoutInflater object to inflate views
+     * @param container          parent view that the fragment's UI should attach to
+     * @param savedInstanceState saved state of the fragment
+     * @return the root view for the fragment's UI
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_notification_details, container, false);
     }
 
+    /**
+     * Initializes all views and populates them with the notification details.
+     * Sets up the back button to pop the fragment from the back stack.
+     *
+     * @param view               the View returned by onCreateView
+     * @param savedInstanceState saved state of the fragment
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);

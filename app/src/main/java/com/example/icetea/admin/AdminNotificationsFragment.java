@@ -22,24 +22,53 @@ import com.google.firebase.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment used in the Admin section to display a list of all notifications.
+ * <p>
+ * Notifications are displayed in a RecyclerView using AdminNotificationsAdapter.
+ * Clicking a notification opens NotificationDetailsFragment with the full details.
+ */
 public class AdminNotificationsFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private AdminNotificationsAdapter adapter;
     private List<NotificationItemAdmin> notifications;
 
+    /**
+     * Default constructor.
+     */
     public AdminNotificationsFragment() { }
 
+    /**
+     * Factory method to create a new instance of AdminNotificationsFragment.
+     *
+     * @return a new instance of AdminNotificationsFragment
+     */
     public static AdminNotificationsFragment newInstance() {
         return new AdminNotificationsFragment();
     }
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     *
+     * @param inflater           LayoutInflater object to inflate views
+     * @param container          parent view that the fragment's UI should attach to
+     * @param savedInstanceState saved state of the fragment
+     * @return the root view for the fragment's UI
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_admin_notifications, container, false);
     }
 
+    /**
+     * Called immediately after onCreateView() has returned.
+     * Initializes the RecyclerView, adapter, and loads notifications from the database.
+     *
+     * @param view               the View returned by onCreateView
+     * @param savedInstanceState saved state of the fragment
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -54,6 +83,10 @@ public class AdminNotificationsFragment extends Fragment {
         loadNotifications();
     }
 
+    /**
+     * Loads all notifications from NotificationsLogDB and updates the adapter.
+     * Converts raw Firestore lists to typed lists and passes timestamps to NotificationItemAdmin.
+     */
     private void loadNotifications() {
         NotificationsLogDB.getInstance().getAllNotifications(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
@@ -89,7 +122,12 @@ public class AdminNotificationsFragment extends Fragment {
         });
     }
 
-
+    /**
+     * Opens NotificationDetailsFragment for a selected notification.
+     * Uses fragment transaction with slide animations and adds to back stack.
+     *
+     * @param item the NotificationItemAdmin to view details of
+     */
     private void openNotificationDetails(NotificationItemAdmin item) {
         FragmentManager fm = requireActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();

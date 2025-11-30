@@ -24,32 +24,65 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment used in the Admin section to display a list of user profiles.
+ * <p>
+ * Admins can view all users in a RecyclerView and delete individual profiles
+ * via a confirmation dialog.
+ */
 public class AdminProfilesFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private AdminProfilesAdapter adapter;
     private List<User> users;
 
+    /**
+     * Default constructor.
+     */
     public AdminProfilesFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Factory method to create a new instance of AdminProfilesFragment.
+     *
+     * @return a new instance of AdminProfilesFragment
+     */
     public static AdminProfilesFragment newInstance() {
         return new AdminProfilesFragment();
     }
 
+    /**
+     * Called to initialize the fragment.
+     *
+     * @param savedInstanceState saved state of the fragment
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     *
+     * @param inflater           LayoutInflater object to inflate views
+     * @param container          parent view that the fragment's UI should attach to
+     * @param savedInstanceState saved state of the fragment
+     * @return the root view for the fragment's UI
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_admin_profiles, container, false);
     }
 
+    /**
+     * Called immediately after onCreateView() has returned.
+     * Initializes the RecyclerView, adapter, and loads users from the database.
+     *
+     * @param view               the View returned by onCreateView
+     * @param savedInstanceState saved state of the fragment
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -89,6 +122,10 @@ public class AdminProfilesFragment extends Fragment {
         loadUsers();
     }
 
+    /**
+     * Loads all users from UserDB and updates the adapter.
+     * Displays a toast if loading fails.
+     */
     private void loadUsers() {
         UserDB.getInstance().getAllUsers(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
@@ -104,5 +141,4 @@ public class AdminProfilesFragment extends Fragment {
             }
         });
     }
-
 }

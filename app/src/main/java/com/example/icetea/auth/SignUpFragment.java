@@ -11,7 +11,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +25,21 @@ import com.example.icetea.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+/**
+ * Fragment representing the sign-up screen for new users.
+ * <p>
+ * Provides input fields for name and email, validates user input,
+ * and creates a new user account using {@link AuthController}.
+ * <p>
+ * On successful sign-up, navigates the user to {@link MainActivity}.
+ * The fragment also handles back navigation and adjusts the back button
+ * position to account for the status bar using edge-to-edge insets.
+ */
 public class SignUpFragment extends Fragment {
+
+    /**
+     * Controller responsible for handling authentication logic.
+     */
     private AuthController controller;
 
     /**
@@ -39,7 +52,7 @@ public class SignUpFragment extends Fragment {
     /**
      * Factory method to create a new instance of this fragment.
      *
-     * @return A new instance of SignUpFragment.
+     * @return A new instance of {@link SignUpFragment}.
      */
     public static SignUpFragment newInstance() {
         return new SignUpFragment();
@@ -50,18 +63,40 @@ public class SignUpFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Inflates the layout for this fragment.
+     *
+     * @param inflater           LayoutInflater object used to inflate views.
+     * @param container          Parent ViewGroup.
+     * @param savedInstanceState Saved instance state bundle.
+     * @return Inflated {@link View}.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_sign_up, container, false);
     }
 
+    /**
+     * Called immediately after {@link #onCreateView}.
+     * <p>
+     * Initializes input fields, buttons, and authentication controller.
+     * <p>
+     * Sets up:
+     * <ul>
+     *     <li>Back button navigation with status bar insets handling</li>
+     *     <li>Continue button click listener to validate input and perform sign-up</li>
+     *     <li>Error display for invalid name or email</li>
+     *     <li>Navigation to {@link MainActivity} on successful sign-up</li>
+     * </ul>
+     *
+     * @param view               The {@link View} returned by {@link #onCreateView}.
+     * @param savedInstanceState Saved state bundle.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Initialize the controller
         controller = new AuthController();
 
         ImageButton backButton = view.findViewById(R.id.imageButtonSignUpBack);
@@ -71,8 +106,7 @@ public class SignUpFragment extends Fragment {
         TextInputEditText nameEditText = view.findViewById(R.id.inputEditTextNameSignUp);
         TextInputEditText emailEditText = view.findViewById(R.id.inputEditTextEmailSignUp);
 
-
-        // Back button bounds
+        // Adjust back button for status bar height
         ViewCompat.setOnApplyWindowInsetsListener(backButton, (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) v.getLayoutParams();
@@ -81,6 +115,7 @@ public class SignUpFragment extends Fragment {
             return insets;
         });
 
+        // Handle back navigation
         backButton.setOnClickListener(v -> {
             FragmentManager fm = getParentFragmentManager();
             if (fm.getBackStackEntryCount() > 0) {
@@ -88,8 +123,7 @@ public class SignUpFragment extends Fragment {
             }
         });
 
-
-
+        // Handle continue button click
         continueButton.setOnClickListener(v -> {
             nameInputLayout.setError(null);
             emailInputLayout.setError(null);
@@ -97,7 +131,6 @@ public class SignUpFragment extends Fragment {
             String name = nameEditText.getText() != null ? nameEditText.getText().toString().trim() : "";
             String email = emailEditText.getText() != null ? emailEditText.getText().toString().trim() : "";
 
-            // Validate
             String nameError = controller.validateName(name);
             String emailError = controller.validateEmail(email);
 
@@ -118,7 +151,6 @@ public class SignUpFragment extends Fragment {
             controller.signUp(name, email, new Callback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
-
                     FragmentActivity activity = getActivity();
                     if (activity != null) {
                         startActivity(new Intent(activity, MainActivity.class));
