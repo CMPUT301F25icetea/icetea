@@ -16,14 +16,15 @@ import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-/**
+*
  * Tests NotificationDB behaviour for entrant notifications.
  * Covers:
  *  - US 01.04.01: Entrant receives win notification
  *  - US 01.04.02: Entrant receives loss notification
  *  - US 01.05.02: Entrant accepts invitation
  *  - US 01.05.03: Entrant declines invitation
- */
+
+
 public class NotificationDBTest {
 
     private NotificationDB notificationDB;

@@ -1,106 +1,115 @@
 package com.example.icetea;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import com.example.icetea.auth.CurrentUser;
+import com.example.icetea.home.CreateEventController;
 import com.example.icetea.models.Event;
-import com.example.icetea.event.EventController;
 import com.example.icetea.models.EventDB;
 import com.example.icetea.util.Callback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentSnapshot;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
-import java.util.ArrayList;
+import java.util.Locale;
 
 /**
- * Mocked test for registration period
+ * Mocked test for event capacity (max entrants)
  * US 02.03.01
- * As an organizer I want to OPTIONALLY limit the number of entrants who can join my waiting list.
+ * As an organizer I want to OPTIONALLY limit the number of entrants
+ * who can join my waiting list.
  */
 public class EventCapacityTest {
 
-    private EventController controller;
+    private CreateEventController controller;
     private EventDB mockEventDB;
+    private MockedStatic<EventDB> staticMockEventDB;
+    private MockedStatic<CurrentUser> staticMockCurrentUser;
 
     @Before
     public void setUp() {
-        // Mock EventDB singleton
-        mockEventDB = mock(EventDB.class);
-        MockedStatic<EventDB> staticMock = mockStatic(EventDB.class);
-        staticMock.when(EventDB::getInstance).thenReturn(mockEventDB);
+        Locale.setDefault(Locale.US);
 
-        controller = new EventController();
+        mockEventDB = mock(EventDB.class);
+        staticMockEventDB = mockStatic(EventDB.class);
+        staticMockEventDB.when(EventDB::getInstance).thenReturn(mockEventDB);
+
+        CurrentUser mockUser = mock(CurrentUser.class);
+        when(mockUser.getFid()).thenReturn("organizer_id");
+
+        staticMockCurrentUser = mockStatic(CurrentUser.class);
+        staticMockCurrentUser.when(CurrentUser::getInstance).thenReturn(mockUser);
+
+        controller = new CreateEventController();
     }
 
     @Test
-    public void testEventCapacitySavedAndFetched() {
-        // Create the event
-        Event event = new Event();
-        event.setId("event_capacity_123");
-        event.setName("Capacity Test Event");
-        event.setCapacity(10);
-        event.setWaitingList(new ArrayList<>());
-        long now = System.currentTimeMillis() / 1000;
-        event.setStartDate(new Timestamp(now, 0));
-        event.setEndDate(new Timestamp(now + 3600, 0));
+    public void testEventCapacityIsSavedInEventObject() {
+        String eventName = "Capacity Test Event";
+        String eventDescription = "Testing optional capacity";
+        String eventCriteria = "criteria";
+        String posterBase64 = "poster_data";
+        String regStart = "2025-01-01 10:00 AM";
+        String regEnd   = "2025-01-02 10:00 AM";
+        String eventStart = "2025-01-03 10:00 AM";
+        String eventEnd   = "2025-01-03 12:00 PM";
+        String eventLocation = "Sample location";
 
-        // Mock saveEvent() to immediately succeed
+        String maxEntrants = "10";
+        boolean geolocationRequired = false;
+
+        @SuppressWarnings("unchecked")
+        Task<Void> mockTask = mock(Task.class);
+        when(mockTask.isSuccessful()).thenReturn(true);
+
         doAnswer(invocation -> {
+            Event savedEvent = invocation.getArgument(0);
             @SuppressWarnings("unchecked")
-            OnCompleteListener<Void> listener = (OnCompleteListener<Void>) invocation.getArgument(1);
-            Task<Void> mockTask = mock(Task.class);
-            when(mockTask.isSuccessful()).thenReturn(true);
-            listener.onComplete(mockTask);
-            return null;
-        }).when(mockEventDB).createEvent(eq(event), any(OnCompleteListener.class));
+            OnCompleteListener<Void> listener =
+                    (OnCompleteListener<Void>) invocation.getArgument(1);
 
-        // Mock getEvent() to return the event as if fetched from Firestore
-        doAnswer(invocation -> {
-            String eventId = invocation.getArgument(0);
-            @SuppressWarnings("unchecked")
-            OnCompleteListener<DocumentSnapshot> listener = (OnCompleteListener<DocumentSnapshot>) invocation.getArgument(1);
-
-            DocumentSnapshot mockDoc = mock(DocumentSnapshot.class);
-            when(mockDoc.exists()).thenReturn(true);
-            when(mockDoc.toObject(Event.class)).thenReturn(event);
-            when(mockDoc.getId()).thenReturn(eventId);
-
-            Task<DocumentSnapshot> mockTask = mock(Task.class);
-            when(mockTask.isSuccessful()).thenReturn(true);
-            when(mockTask.getResult()).thenReturn(mockDoc);
+            assertNotNull(savedEvent);
+            assertEquals("Capacity (maxEntrants) should be 10",
+                    Integer.valueOf(10), savedEvent.getMaxEntrants());
 
             listener.onComplete(mockTask);
             return null;
-        }).when(mockEventDB).getEvent(eq(event.getId()), any(OnCompleteListener.class));
+        }).when(mockEventDB).createEvent(any(Event.class), any(OnCompleteListener.class));
 
-        // Use EventController to create the event
-        final boolean[] created = {false};
-        controller.createEvent(event, new Callback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                created[0] = true;
-            }
+        final boolean[] successCalled = {false};
 
-            @Override
-            public void onFailure(Exception e) {
-                fail("Event creation failed: " + e.getMessage());
-            }
-        });
-        assertTrue("Event should have been created", created[0]);
+        controller.createEvent(
+                eventName,
+                eventDescription,
+                eventCriteria,
+                posterBase64,
+                regStart,
+                regEnd,
+                eventStart,
+                eventEnd,
+                eventLocation,
+                maxEntrants,
+                geolocationRequired,
+                new Callback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        successCalled[0] = true;
+                    }
 
-        // Fetch the event and verify capacity
-        EventDB.getInstance().getEvent(event.getId(), task -> {
-            DocumentSnapshot fetchedDoc = task.getResult();
-            assertNotNull(fetchedDoc);
-            Event fetchedEvent = fetchedDoc.toObject(Event.class);
-            assertNotNull(fetchedEvent);
-            assertEquals("Capacity should match", 10, fetchedEvent.getCapacity().intValue());
-        });
+                    @Override
+                    public void onFailure(Exception e) {
+                        fail("Event creation should not fail: " + e.getMessage());
+                    }
+                }
+        );
+
+        assertTrue("onSuccess should have been called", successCalled[0]);
+        verify(mockEventDB, times(1)).createEvent(any(Event.class), any());
     }
 }

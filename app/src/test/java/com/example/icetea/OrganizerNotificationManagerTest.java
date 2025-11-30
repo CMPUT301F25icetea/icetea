@@ -1,89 +1,108 @@
 package com.example.icetea;
 
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import com.example.icetea.organizer.OrganizerNotificationManager;
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.icetea.home.ManageEventController;
+import com.example.icetea.models.Notification;
+import com.example.icetea.models.NotificationDB;
+import com.example.icetea.models.UserDB;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
-
-import java.util.Map;
 
 /**
  * Mocked test for sending notifications to entrants
  * US 02.07.01 US 02.07.02 US 02.07.03
- * As an organizer I want to send notifications to all entrants on the waiting list.
- * As an organizer I want to send notifications to all selected entrants.
- * As an organizer I want to send a notification to all cancelled entrants.
- * All 3 of these user stories utilize the same notification method, unsure else I'd test them
+ * As an organizer I want to send notifications to:
+ * - all entrants on the waiting list,
+ * - all selected entrants,
+ * - all cancelled entrants.
+ *
+ * All of these user stories use the same notification method underneath,
+ * so here we verify that sending a notification builds the correct Notification
+ * object and passes it to NotificationDB.
  */
-
 public class OrganizerNotificationManagerTest {
 
-    private OrganizerNotificationManager manager;
-    private CollectionReference mockCollection;
-    private Task<DocumentReference> mockTask;
+    private ManageEventController controller;
+    private NotificationDB mockNotificationDB;
+    private UserDB mockUserDB;
 
     @Before
     public void setUp() {
-        // Mock CollectionReference
-        mockCollection = mock(CollectionReference.class);
+        controller = new ManageEventController();
 
-        // Mock Task<DocumentReference>
-        mockTask = mock(Task.class);
-        when(mockTask.addOnSuccessListener(any())).thenAnswer(invocation -> {
-            // call the success listener immediately
-            ((com.google.android.gms.tasks.OnSuccessListener<DocumentReference>) invocation.getArgument(0))
-                    .onSuccess(mock(DocumentReference.class));
-            return mockTask; // allow chaining
-        });
-        when(mockTask.addOnFailureListener(any())).thenReturn(mockTask); // allow chaining
-        when(mockTask.isSuccessful()).thenReturn(true);
-        when(mockTask.getResult()).thenReturn(mock(DocumentReference.class));
+        mockNotificationDB = mock(NotificationDB.class);
+        mockUserDB = mock(UserDB.class);
 
-        // Make add() return the mocked Task
-        when(mockCollection.add(any(Map.class))).thenReturn(mockTask);
+        MockedStatic<NotificationDB> notificationStatic = mockStatic(NotificationDB.class);
+        notificationStatic.when(NotificationDB::getInstance).thenReturn(mockNotificationDB);
 
-        // Mock FirebaseFirestore.getInstance().collection("Notification")
-        MockedStatic<FirebaseFirestore> firestoreMock = mockStatic(FirebaseFirestore.class);
-        FirebaseFirestore mockFirestore = mock(FirebaseFirestore.class);
-        firestoreMock.when(FirebaseFirestore::getInstance).thenReturn(mockFirestore);
-        when(mockFirestore.collection("Notification")).thenReturn(mockCollection);
+        MockedStatic<UserDB> userStatic = mockStatic(UserDB.class);
+        userStatic.when(UserDB::getInstance).thenReturn(mockUserDB);
 
-        // Create the manager (it uses mocked Firestore)
-        manager = new OrganizerNotificationManager();
+        doAnswer(invocation -> {
+            String userId = invocation.getArgument(0);
+            @SuppressWarnings("unchecked")
+            OnCompleteListener<DocumentSnapshot> listener =
+                    (OnCompleteListener<DocumentSnapshot>) invocation.getArgument(1);
+
+            DocumentSnapshot mockDoc = mock(DocumentSnapshot.class);
+            when(mockDoc.exists()).thenReturn(true);
+            when(mockDoc.getBoolean("notifications")).thenReturn(true);
+
+            @SuppressWarnings("unchecked")
+            Task<DocumentSnapshot> mockTask = mock(Task.class);
+            when(mockTask.isSuccessful()).thenReturn(true);
+            when(mockTask.getResult()).thenReturn(mockDoc);
+
+            listener.onComplete(mockTask);
+            return null;
+        }).when(mockUserDB).getUser(eq("user123"), any());
+
+        doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            OnCompleteListener<Void> listener =
+                    (OnCompleteListener<Void>) invocation.getArgument(1);
+
+            @SuppressWarnings("unchecked")
+            Task<Void> mockTask = mock(Task.class);
+            when(mockTask.isSuccessful()).thenReturn(true);
+
+            listener.onComplete(mockTask);
+            return null;
+        }).when(mockNotificationDB).addNotification(any(Notification.class), any());
     }
 
     @Test
-    public void testSendNotification_CallsAddWithCorrectData() {
+    public void testSendNotification_BuildsCorrectNotificationObject() {
         String userId = "user123";
         String eventId = "event456";
-        String eventName = "Test Event";
-        String type = "generic";
-        String message = "You have a new notification!";
+        String title = "Status update";
+        String message = "This is a test notification.";
 
-        // Call sendNotification
-        manager.sendNotification(userId, eventId, eventName, type, message);
+        controller.sendNotificationIfEnabled(userId, title, message, eventId);
 
-        // Verify add() was called with a Map containing the correct values
-        verify(mockCollection, times(1)).add(argThat((Map<String, Object> map) ->
-                userId.equals(map.get("userId")) &&
-                        eventId.equals(map.get("eventId")) &&
-                        eventName.equals(map.get("eventName")) &&
-                        type.equals(map.get("type")) &&
-                        message.equals(map.get("message")) &&
-                        map.get("timestamp") instanceof Timestamp
-        ));
+        ArgumentCaptor<Notification> notificationCaptor =
+                ArgumentCaptor.forClass(Notification.class);
 
-        verify(mockTask, times(1)).addOnSuccessListener(any());
-        verify(mockTask, times(1)).addOnFailureListener(any());
+        verify(mockNotificationDB, times(1))
+                .addNotification(notificationCaptor.capture(), any());
+
+        Notification sent = notificationCaptor.getValue();
+        assertNotNull(sent);
+        assertEquals(userId, sent.getUserId());
+        assertEquals(eventId, sent.getEventId());
+        assertEquals(title, sent.getTitle());
+        assertEquals(message, sent.getMessage());
+        assertNotNull("Timestamp should be set on notification", sent.getTimestamp());
     }
 }
