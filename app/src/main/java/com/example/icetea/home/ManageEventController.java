@@ -91,6 +91,19 @@ public class ManageEventController {
                                     event.getEventId()
                             );
                         }
+
+                        for (DocumentSnapshot doc : waitingList) {
+                            if (!selectedList.contains(doc)) {
+                                String userId = doc.getString("userId");
+                                sendNotificationIfEnabled(
+                                        userId,
+                                        "Event Results",
+                                        "You were not selected for the event: " + event.getName() + ". However you can still be selected if someone else declines their offer.",
+                                        event.getEventId()
+                                );
+                            }
+                        }
+
                         callback.onSuccess(null);
                     })
                     .addOnFailureListener(callback::onFailure);
