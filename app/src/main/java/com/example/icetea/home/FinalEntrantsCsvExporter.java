@@ -20,8 +20,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Utility class for exporting the list of final entrants of an event
+ * to a CSV file in the device's Downloads folder.
+ * <p>
+ * The CSV contains the following columns:
+ * <ul>
+ *     <li>Name</li>
+ *     <li>Email</li>
+ *     <li>Registration Date</li>
+ * </ul>
+ * <p>
+ * This class fetches the accepted entrants from Firestore's "waitlist" collection,
+ * retrieves their user details from the "users" collection, and writes them to a CSV file.
+ */
 public class FinalEntrantsCsvExporter {
 
+    /**
+     * Exports the final entrants of a given event to a CSV file in the Downloads folder.
+     * Shows Toast messages to indicate success or failure.
+     *
+     * @param context Context used to access ContentResolver and show Toasts
+     * @param eventId The ID of the event whose final entrants should be exported
+     */
     public static void export(Context context, String eventId) {
         if (eventId == null) {
             Toast.makeText(context, "No event selected.", Toast.LENGTH_SHORT).show();
@@ -67,6 +88,14 @@ public class FinalEntrantsCsvExporter {
                 });
     }
 
+    /**
+     * Writes the fetched user data to a CSV file in the Downloads folder.
+     *
+     * @param context Context used to access ContentResolver and show Toasts
+     * @param eventId The ID of the event (used to name the CSV file)
+     * @param userDocs List of Firestore user documents corresponding to entrants
+     * @param joinedAtList List of timestamps indicating when each entrant joined
+     */
     private static void writeCsv(Context context, String eventId, List<Object> userDocs, List<Timestamp> joinedAtList) {
         try {
             String fileName = "final_entrants_" + eventId + ".csv";
