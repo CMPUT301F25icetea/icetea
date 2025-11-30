@@ -4,6 +4,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 
@@ -70,6 +71,11 @@ public class UserDB {
     public void updateUser(String fid, HashMap<String, Object> updates, OnCompleteListener<Void> listener) {
         usersCollection.document(fid)
                 .update(updates)
+                .addOnCompleteListener(listener);
+    }
+
+    public void getAllUsers(OnCompleteListener<QuerySnapshot> listener) {
+        usersCollection.get()
                 .addOnCompleteListener(listener);
     }
 
