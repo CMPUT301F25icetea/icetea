@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.icetea.R;
+import com.example.icetea.models.Waitlist;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -30,6 +31,7 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class EntrantsMapFragment extends Fragment {
@@ -121,6 +123,11 @@ public class EntrantsMapFragment extends Fragment {
     private void loadEntrantsForEvent(String eventId) {
         db.collection("waitlist")
                 .whereEqualTo("eventId", eventId)
+                .whereIn("status", Arrays.asList(
+                        Waitlist.STATUS_WAITING,
+                        Waitlist.STATUS_SELECTED,
+                        Waitlist.STATUS_ACCEPTED
+                ))
                 .get()
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
@@ -167,6 +174,8 @@ public class EntrantsMapFragment extends Fragment {
                     mapView.invalidate();
                 });
     }
+
+
 
 
     private void enableMyLocation() {
