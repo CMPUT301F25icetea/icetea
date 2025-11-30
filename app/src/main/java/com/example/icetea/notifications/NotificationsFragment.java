@@ -14,28 +14,36 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.example.icetea.R;
-import com.example.icetea.auth.CurrentUser;
 import com.example.icetea.home.EventDetailsFragment;
-import com.example.icetea.models.Notification;
-import com.example.icetea.models.NotificationDB;
-import com.google.firebase.Timestamp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.List;
 
-
+/**
+ * Fragment that displays a list of notifications for the current user.
+ *
+ * <p>Uses a {@link RecyclerView} with {@link NotificationsAdapter} to show notifications.
+ * Clicking a notification navigates to the related event details.</p>
+ *
+ * <p>Observes {@link NotificationsViewModel} to update the list in real-time.</p>
+ */
 public class NotificationsFragment extends Fragment {
 
     private NotificationsAdapter adapter;
+
+    /**
+     * Required empty public constructor.
+     */
     public NotificationsFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Factory method to create a new instance of this fragment.
+     *
+     * @return A new instance of NotificationsFragment.
+     */
     public static NotificationsFragment newInstance() {
         return new NotificationsFragment();
     }
@@ -45,13 +53,31 @@ public class NotificationsFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Inflates the fragment layout.
+     *
+     * @param inflater           The LayoutInflater object.
+     * @param container          The parent ViewGroup.
+     * @param savedInstanceState Saved instance state bundle.
+     * @return The inflated View.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_notifications, container, false);
     }
 
+    /**
+     * Called immediately after onCreateView().
+     *
+     * <p>Sets up the RecyclerView, adapter, and observes the {@link NotificationsViewModel}
+     * to update notifications in real-time.</p>
+     *
+     * <p>Handles navigation to {@link EventDetailsFragment} when a notification is clicked.</p>
+     *
+     * @param view               The root view of the fragment.
+     * @param savedInstanceState Saved instance state bundle.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -78,10 +104,8 @@ public class NotificationsFragment extends Fragment {
 
         NotificationsViewModel viewModel = new ViewModelProvider(requireActivity()).get(NotificationsViewModel.class);
 
-
         viewModel.getNotifications().observe(getViewLifecycleOwner(), notifications -> {
             adapter.updateList(notifications);
         });
-
     }
 }

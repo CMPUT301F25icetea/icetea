@@ -10,11 +10,19 @@ import java.util.HashMap;
 
 /**
  * Singleton class that provides database access for User objects using Firebase Firestore.
- * Handles CRUD operations for users and provides helper methods to retrieve user-specific data.
+ * <p>
+ * Provides methods to create, read, update, and query User documents.
+ * All operations are asynchronous and use {@link OnCompleteListener} callbacks to handle results.
+ * </p>
+ *
+ * <p>Firestore Collection Path: /users/{userId}</p>
  */
 public class UserDB {
 
+    /** Singleton instance of UserDB */
     private static UserDB instance;
+
+    /** Reference to the 'users' collection in Firestore */
     private final CollectionReference usersCollection;
 
     /**
@@ -38,10 +46,10 @@ public class UserDB {
     }
 
     /**
-     * Saves a User object to Firestore.
+     * Creates a new user in Firestore.
      *
-     * @param user The User to save
-     * @param listener Listener to handle completion
+     * @param user     The {@link User} object to save
+     * @param listener {@link OnCompleteListener} called when the operation completes
      */
     public void createUser(User user, OnCompleteListener<Void> listener) {
         usersCollection.document(user.getId())
@@ -50,10 +58,10 @@ public class UserDB {
     }
 
     /**
-     * Retrieves a User document by ID from Firestore.
+     * Retrieves a user document by user ID.
      *
-     * @param fid User ID
-     * @param listener Listener to handle the retrieved document
+     * @param fid      The user ID to fetch
+     * @param listener {@link OnCompleteListener} called with the {@link DocumentSnapshot} result
      */
     public void getUser(String fid, OnCompleteListener<DocumentSnapshot> listener) {
         usersCollection.document(fid)
@@ -62,11 +70,11 @@ public class UserDB {
     }
 
     /**
-     * Updates fields of a User document in Firestore.
+     * Updates fields of an existing user document.
      *
-     * @param fid User ID
-     * @param updates HashMap of fields to update
-     * @param listener Listener to handle completion
+     * @param fid      The user ID to update
+     * @param updates  {@link HashMap} of field names and values to update
+     * @param listener {@link OnCompleteListener} called when the update completes
      */
     public void updateUser(String fid, HashMap<String, Object> updates, OnCompleteListener<Void> listener) {
         usersCollection.document(fid)
@@ -74,10 +82,21 @@ public class UserDB {
                 .addOnCompleteListener(listener);
     }
 
+    /**
+     * Retrieves all user documents in the Firestore 'users' collection.
+     *
+     * @param listener {@link OnCompleteListener} called with the {@link QuerySnapshot} result
+     */
     public void getAllUsers(OnCompleteListener<QuerySnapshot> listener) {
         usersCollection.get()
                 .addOnCompleteListener(listener);
     }
+
+    /**
+     * Retrieves all users who have a non-empty avatar field.
+     *
+     * @param listener {@link OnCompleteListener} called with the {@link QuerySnapshot} result
+     */
     public void getAllUsersWithAvatar(OnCompleteListener<QuerySnapshot> listener) {
         usersCollection
                 .whereGreaterThan("avatar", "")

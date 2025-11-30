@@ -2,134 +2,175 @@ package com.example.icetea.models;
 
 import com.google.firebase.Timestamp;
 
-import java.sql.Time;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 /**
- * Waitlist model representing a user's waitlist entry in Firestore.
+ * Represents a single waitlist entry for a user in an event.
  * This class maps to documents in the Firestore 'waitlist' collection.
- * Firestore Collection Path: /waitlist/{eventId}_{userId}
  *
- * Database Schema:
- * - eventId: String (reference to event)
- * - userId: String (user who joined)
- * - joinedAt: long (timestamp in milliseconds)
- * - status: String (waiting/selected/cancelled)
+ * <p>Firestore Collection Path: /waitlist/{userId}_{eventId}</p>
+ *
+ * <p>Database Schema:</p>
+ * <ul>
+ *     <li>eventId: String – reference to the event</li>
+ *     <li>userId: String – ID of the user who joined the waitlist</li>
+ *     <li>timestamp: Timestamp – when the user joined the waitlist</li>
+ *     <li>status: String – status of the waitlist entry (waiting/selected/cancelled/etc.)</li>
+ *     <li>latitude, longitude: Double – optional geolocation of the user</li>
+ *     <li>replaced: boolean – whether the user was replaced in the waitlist</li>
+ * </ul>
  */
 public class Waitlist {
 
-    /** The user is currently on the waitlist. */
+    /** User is currently on the waitlist and awaiting selection. */
     public static final String STATUS_WAITING = "waiting";
-    /** The user has been selected from the waitlist by the organizer. */
+
+    /** User has been selected by the event organizer from the waitlist. */
     public static final String STATUS_SELECTED = "selected";
-    /** The user has voluntarily left the waitlist or event. */
+
+    /** User voluntarily left the waitlist or event. */
     public static final String STATUS_CANCELLED = "cancelled";
-    /** The user was selected and has accepted the spot. */
+
+    /** User was selected and accepted the spot. */
     public static final String STATUS_ACCEPTED = "accepted";
-    /** The user was selected and has declined the spot. */
+
+    /** User was selected but declined the spot. */
     public static final String STATUS_DECLINED = "declined";
 
-    /** The ID of the user on the waitlist. */
+    /** User ID of the waitlist entry. */
     private String userId;
-    /** The ID of the event this waitlist entry belongs to. */
+
+    /** Event ID associated with this waitlist entry. */
     private String eventId;
-    /** The timestamp (in milliseconds) when the user joined the waitlist. */
+
+    /** Timestamp of when the user joined the waitlist. */
     private Timestamp timestamp;
-    /** The current status of the waitlist entry (e.g., "waiting", "selected"). */
+
+    /** Current status of the waitlist entry. */
     private String status;
+
+    /** Optional latitude of the user. */
     private Double latitude;
+
+    /** Optional longitude of the user. */
     private Double longitude;
+
+    /** Indicates whether the user was replaced by another in the waitlist. */
     private boolean replaced;
 
-
     /**
-     * Required empty constructor for Firestore deserialization
+     * Default constructor required for Firestore deserialization.
      */
     public Waitlist() {
         // Firestore requires this
     }
 
     /**
-     * @return The ID of the event.
+     * @return The ID of the event associated with this waitlist entry.
      */
     public String getEventId() {
         return eventId;
     }
 
     /**
-     * @param eventId The ID of the event.
+     * Sets the event ID for this waitlist entry.
+     * @param eventId Event ID.
      */
     public void setEventId(String eventId) {
         this.eventId = eventId;
     }
 
     /**
-     * @return The ID of the user.
+     * @return The ID of the user in this waitlist entry.
      */
     public String getUserId() {
         return userId;
     }
 
     /**
-     * @param userId The ID of the user.
+     * Sets the user ID for this waitlist entry.
+     * @param userId User ID.
      */
     public void setUserId(String userId) {
         this.userId = userId;
     }
 
     /**
-     * @return The join timestamp (in milliseconds).
+     * @return Timestamp representing when the user joined the waitlist.
      */
     public Timestamp getTimestamp() {
         return timestamp;
     }
 
     /**
-     * @param timestamp The join timestamp (in milliseconds).
+     * Sets the timestamp for when the user joined the waitlist.
+     * @param timestamp Timestamp object.
      */
     public void setTimestamp(Timestamp timestamp) {
         this.timestamp = timestamp;
     }
 
     /**
-     * @return The current status string (e.g., "waiting").
+     * @return Current status of this waitlist entry (e.g., "waiting").
      */
     public String getStatus() {
         return status;
     }
 
     /**
-     * @param status The current status string (e.g., "waiting").
+     * Sets the status of this waitlist entry.
+     * @param status Status string.
      */
     public void setStatus(String status) {
         this.status = status;
     }
 
+    /**
+     * @return Latitude of the user's location, or null if not set.
+     */
     public Double getLatitude() {
         return latitude;
     }
 
+    /**
+     * Sets the latitude of the user's location.
+     * @param latitude Latitude value.
+     */
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
+    /**
+     * @return Longitude of the user's location, or null if not set.
+     */
     public Double getLongitude() {
         return longitude;
     }
+
+    /**
+     * Sets the longitude of the user's location.
+     * @param longitude Longitude value.
+     */
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
+    /**
+     * @return True if the user was replaced in the waitlist; false otherwise.
+     */
     public boolean getReplaced() {
         return replaced;
     }
 
+    /**
+     * Sets the replaced status of this waitlist entry.
+     * @param replaced True if replaced, false otherwise.
+     */
     public void setReplaced(boolean replaced) {
         this.replaced = replaced;
     }
 
+    /**
+     * @return A unique ID for this waitlist entry in the format "{userId}_{eventId}".
+     */
     public String getId() {
         return userId + "_" + eventId;
     }
