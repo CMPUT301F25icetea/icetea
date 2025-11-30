@@ -1,73 +1,67 @@
 package com.example.icetea;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
-import com.example.icetea.models.Event;
-import com.example.icetea.models.EventDB;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockedStatic;
 
-import java.util.Arrays;
+import com.example.icetea.models.Waitlist;
+
+import java.util.ArrayList;
 import java.util.List;
+
 /**
  * Mocked test for seeing applicants that are invited
  * US 02.06.01
- * As an organizer I want to view a list of all chosen entrants who are invited to apply.
+ * As an organizer I want to view a list of all chosen entrants
+ * who are invited to apply.
+ *
+ * In the app, "invited" entrants are waitlist entries whose status is "selected".
  */
 public class EventInvitedEntrantsTest {
 
-    private EventDB mockEventDB;
-
-    @Before
-    public void setUp() {
-        mockEventDB = mock(EventDB.class);
-        MockedStatic<EventDB> staticMock = mockStatic(EventDB.class);
-        staticMock.when(EventDB::getInstance).thenReturn(mockEventDB);
-    }
-
     @Test
-    public void testFetchInvitedEntrants() {
-        Event event = new Event();
-        event.setId("event_invited_test");
-        event.setName("Invited Entrants Event");
-        event.setAttendees(Arrays.asList("user1", "user2", "user3"));
+    public void testFilterInvitedEntrantsBySelectedStatus() {
+        String eventId = "event_invited_test";
 
-        // user1 and user2 are "invited", user3 is "pending"
-        List<String> invitedUsers = Arrays.asList("user1", "user2");
+        List<Waitlist> allEntries = new ArrayList<>();
 
-        // Mock DocumentSnapshot to return the event
-        DocumentSnapshot mockDoc = mock(DocumentSnapshot.class);
-        when(mockDoc.toObject(Event.class)).thenReturn(event);
+        Waitlist w1 = new Waitlist();
+        w1.setEventId(eventId);
+        w1.setUserId("user1");
+        w1.setStatus(Waitlist.STATUS_SELECTED);
+        allEntries.add(w1);
 
-        // Mock getEvent() call
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            OnCompleteListener<DocumentSnapshot> listener =
-                    (OnCompleteListener<DocumentSnapshot>) invocation.getArgument(1);
+        Waitlist w2 = new Waitlist();
+        w2.setEventId(eventId);
+        w2.setUserId("user2");
+        w2.setStatus(Waitlist.STATUS_SELECTED);
+        allEntries.add(w2);
 
-            Task<DocumentSnapshot> mockTask = mock(Task.class);
-            when(mockTask.isSuccessful()).thenReturn(true);
-            when(mockTask.getResult()).thenReturn(mockDoc);
+        Waitlist w3 = new Waitlist();
+        w3.setEventId(eventId);
+        w3.setUserId("user3");
+        w3.setStatus(Waitlist.STATUS_WAITING);
+        allEntries.add(w3);
 
-            listener.onComplete(mockTask);
-            return null;
-        }).when(mockEventDB).getEvent(eq(event.getId()), any(OnCompleteListener.class));
+        Waitlist w4 = new Waitlist();
+        w4.setEventId(eventId);
+        w4.setUserId("user4");
+        w4.setStatus(Waitlist.STATUS_CANCELLED);
+        allEntries.add(w4);
 
-        // "Fetch" invited entrants
-        EventDB.getInstance().getEvent(event.getId(), task -> {
-            DocumentSnapshot doc = (DocumentSnapshot) task.getResult();
-            Event fetchedEvent = doc.toObject(Event.class);
-            assertNotNull(fetchedEvent);
+        List<Waitlist> invitedEntrants = new ArrayList<>();
+        for (Waitlist entry : allEntries) {
+            if (Waitlist.STATUS_SELECTED.equals(entry.getStatus())) {
+                invitedEntrants.add(entry);
+            }
+        }
 
-            // Normally your system would check some "status" map; we'll simulate it
-            List<String> fetchedInvited = Arrays.asList("user1", "user2"); // mock logic
-            assertEquals(invitedUsers.size(), fetchedInvited.size());
-            assertTrue(fetchedInvited.containsAll(invitedUsers));
-        });
+        assertEquals("There should be exactly 2 invited entrants", 2, invitedEntrants.size());
+        assertEquals("user1", invitedEntrants.get(0).getUserId());
+        assertEquals("user2", invitedEntrants.get(1).getUserId());
+
+        for (Waitlist entry : invitedEntrants) {
+            assertEquals(Waitlist.STATUS_SELECTED, entry.getStatus());
+        }
     }
 }

@@ -1,22 +1,24 @@
 package com.example.icetea;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.example.icetea.auth.CurrentUser;
+import com.example.icetea.home.CreateEventController;
 import com.example.icetea.models.Event;
-import com.example.icetea.event.EventController;
 import com.example.icetea.models.EventDB;
 import com.example.icetea.util.Callback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentSnapshot;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
-import java.util.ArrayList;
+import java.util.Locale;
+
 /**
  * Mocked test for registration period
  * US 02.01.04
@@ -24,93 +26,85 @@ import java.util.ArrayList;
  */
 public class CreateRegistrationPeriodTest {
 
-    private EventController controller;
+    private CreateEventController controller;
     private EventDB mockEventDB;
 
     @Before
     public void setUp() {
+        Locale.setDefault(Locale.US);
+
         mockEventDB = mock(EventDB.class);
-        MockedStatic<EventDB> staticMock = mockStatic(EventDB.class);
-        staticMock.when(EventDB::getInstance).thenReturn(mockEventDB);
-        controller = new EventController();
+        MockedStatic<EventDB> staticMockEventDB = mockStatic(EventDB.class);
+        staticMockEventDB.when(EventDB::getInstance).thenReturn(mockEventDB);
+
+        CurrentUser mockUser = mock(CurrentUser.class);
+        when(mockUser.getFid()).thenReturn("organizer_id");
+        MockedStatic<CurrentUser> staticMockUser = mockStatic(CurrentUser.class);
+        staticMockUser.when(CurrentUser::getInstance).thenReturn(mockUser);
+
+        controller = new CreateEventController();
     }
 
     @Test
     public void testRegistrationPeriodStoredCorrectly_Mocked() {
-        long now = System.currentTimeMillis() / 1000;
-        Timestamp rStart = new Timestamp(now, 0);
-        Timestamp rEnd = new Timestamp(now + 3600, 0);
-        Timestamp start = new Timestamp(now + 7200, 0);
-        Timestamp end = new Timestamp(now + 10800, 0);
+        // Use string inputs just like the UI
+        String regStart = "2025-01-01 10:00 AM";
+        String regEnd   = "2025-01-01 11:00 AM";
+        String eventStart = "2025-01-02 10:00 AM";
+        String eventEnd   = "2025-01-02 12:00 PM";
 
-        Event newEvent = new Event(
-                "test_event_reg_period",
-                "organizer_id",
-                "RegistrationPeriodEvent",
-                "Testing registration date fields",
-                "Sample location",
-                40,
-                start,
-                end,
-                rStart,
-                rEnd,
-                "test_poster_url",
-                new ArrayList<>(),
-                new ArrayList<>()
-        );
+        Timestamp expectedRStart = controller.textToTimestamp(regStart);
+        Timestamp expectedREnd   = controller.textToTimestamp(regEnd);
 
-        // Mock saveEvent() to call listener with success
+        @SuppressWarnings("unchecked")
+        Task<Void> mockTask = mock(Task.class);
+        when(mockTask.isSuccessful()).thenReturn(true);
+
         doAnswer(invocation -> {
+            Event savedEvent = invocation.getArgument(0);
             @SuppressWarnings("unchecked")
-            OnCompleteListener<Void> listener = (OnCompleteListener<Void>) invocation.getArgument(1);
-            Task<Void> mockTask = mock(Task.class);
-            when(mockTask.isSuccessful()).thenReturn(true);
+            OnCompleteListener<Void> listener =
+                    (OnCompleteListener<Void>) invocation.getArgument(1);
+
+            assertNotNull(savedEvent.getRegistrationStartDate());
+            assertNotNull(savedEvent.getRegistrationEndDate());
+            assertEquals(expectedRStart.getSeconds(),
+                    savedEvent.getRegistrationStartDate().getSeconds());
+            assertEquals(expectedREnd.getSeconds(),
+                    savedEvent.getRegistrationEndDate().getSeconds());
+
             listener.onComplete(mockTask);
             return null;
-        }).when(mockEventDB).createEvent(eq(newEvent), any(OnCompleteListener.class));
-
-        // Mock getEvent() to call listener with a fake DocumentSnapshot
-        doAnswer(invocation -> {
-            String eventId = invocation.getArgument(0);
-            @SuppressWarnings("unchecked")
-            OnCompleteListener<DocumentSnapshot> listener = (OnCompleteListener<DocumentSnapshot>) invocation.getArgument(1);
-
-            DocumentSnapshot mockDoc = mock(DocumentSnapshot.class);
-            when(mockDoc.exists()).thenReturn(true);
-            when(mockDoc.toObject(Event.class)).thenReturn(newEvent);
-            when(mockDoc.getId()).thenReturn(eventId);
-
-            Task<DocumentSnapshot> fakeTask = mock(Task.class);
-            when(fakeTask.isSuccessful()).thenReturn(true);
-            when(fakeTask.getResult()).thenReturn(mockDoc);
-
-            listener.onComplete(fakeTask);
-            return null;
-        }).when(mockEventDB).getEvent(eq(newEvent.getId()), any(OnCompleteListener.class));
+        }).when(mockEventDB).createEvent(any(Event.class), any(OnCompleteListener.class));
 
         final boolean[] successCalled = {false};
 
-        controller.createEvent(newEvent, new Callback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                EventDB.getInstance().getEvent(newEvent.getId(), task -> {
-                    DocumentSnapshot doc = task.getResult();
-                    Event fetchedEvent = doc.toObject(Event.class);
+        controller.createEvent(
+                "RegistrationPeriodEvent",
+                "Testing registration date fields",
+                "criteria",
+                "test_poster_base64",
+                regStart,
+                regEnd,
+                eventStart,
+                eventEnd,
+                "Sample location",
+                "40",
+                false,
+                new Callback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        successCalled[0] = true;
+                    }
 
-                    assertNotNull(fetchedEvent);
-                    assertEquals(rStart.getSeconds(), fetchedEvent.getRegistrationStartDate().getSeconds());
-                    assertEquals(rEnd.getSeconds(), fetchedEvent.getRegistrationEndDate().getSeconds());
-
-                    successCalled[0] = true;
-                });
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                fail("Event creation failed: " + e.getMessage());
-            }
-        });
+                    @Override
+                    public void onFailure(Exception e) {
+                        fail("Event creation failed: " + e.getMessage());
+                    }
+                }
+        );
 
         assertTrue("onSuccess should have been called", successCalled[0]);
+        verify(mockEventDB, times(1)).createEvent(any(Event.class), any());
     }
 }
