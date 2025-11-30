@@ -137,5 +137,9 @@ public class EventDB {
                 .get()
                 .addOnCompleteListener(listener);
     }
-
+    public void getAllEvents(OnCompleteListener<QuerySnapshot> listener) {
+        eventsCollection
+                .get()
+                .addOnCompleteListener(listener);
+    }
 }
