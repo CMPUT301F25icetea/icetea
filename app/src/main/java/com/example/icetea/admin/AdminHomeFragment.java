@@ -69,7 +69,7 @@ public class AdminHomeFragment extends Fragment {
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) -> {
                     switch (position) {
-                        case 0: tab.setText("Users"); break;
+                        case 0: tab.setText("Profiles"); break;
                         case 1: tab.setText("Events"); break;
                         case 2: tab.setText("Images"); break;
                         case 3: tab.setText("Notifications"); break;
