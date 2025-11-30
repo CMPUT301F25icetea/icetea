@@ -9,6 +9,8 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.icetea.auth.CurrentUser;
@@ -87,10 +89,19 @@ public class MainActivity extends AppCompatActivity {
         viewModel.stopListening();
     }
     private void loadFragment(Fragment fragment) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.main_fragment_container, fragment)
-                .commit();
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+        transaction.setReorderingAllowed(true);
+
+        transaction.setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.slide_out_left,
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+        );
+
+        transaction.replace(R.id.main_fragment_container, fragment);
+        transaction.commit();
     }
 
     private void showBanner(String message) {
