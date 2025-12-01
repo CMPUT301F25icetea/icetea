@@ -22,10 +22,8 @@ import org.mockito.MockedStatic;
 import java.util.List;
 
 /**
- * US 02.05.02 – As an organizer, I want to set the system
- * to sample a specified number of attendees to register for the event.
- *
- * Tests ManageEventController.drawWinners(...) behaviour.
+ * US 02.05.02
+ * As an organizer, I want to select a specific number of winners.
  */
 public class SelectNumberOfWinnersTest {
 
@@ -40,6 +38,7 @@ public class SelectNumberOfWinnersTest {
         final boolean[] failureCalled = {false};
         final Exception[] captured = {null};
 
+        // Try to draw 0 winners
         controller.drawWinners(event, 0, new Callback<Void>() {
             @Override
             public void onSuccess(Void result) {
@@ -53,6 +52,7 @@ public class SelectNumberOfWinnersTest {
             }
         });
 
+        // Verify expected failure
         assertTrue("onFailure should have been called for count <= 0", failureCalled[0]);
         assertTrue("Exception should be IllegalArgumentException",
                 captured[0] instanceof IllegalArgumentException);
@@ -67,18 +67,21 @@ public class SelectNumberOfWinnersTest {
         event.setEventId("event456");
         event.setName("Not Enough Entrants Event");
 
-        int requestedCount = 5;
+        int requestedCount = 5;  // Asking for 5 but only 2 entries exist
 
         WaitlistDB mockWaitlistDB = mock(WaitlistDB.class);
 
+        // Mock static getInstance() for WaitlistDB and FirebaseFirestore
         try (MockedStatic<WaitlistDB> waitlistStatic = mockStatic(WaitlistDB.class);
              MockedStatic<FirebaseFirestore> firestoreStatic = mockStatic(FirebaseFirestore.class)) {
 
+            // Return mocked DB instances
             waitlistStatic.when(WaitlistDB::getInstance).thenReturn(mockWaitlistDB);
 
             FirebaseFirestore mockDb = mock(FirebaseFirestore.class);
             firestoreStatic.when(FirebaseFirestore::getInstance).thenReturn(mockDb);
 
+            // only TWO waiting entrants returned
             doAnswer(invocation -> {
                 String eventId = invocation.getArgument(0);
                 String status = invocation.getArgument(1);
@@ -87,9 +90,11 @@ public class SelectNumberOfWinnersTest {
                 OnCompleteListener<QuerySnapshot> listener =
                         (OnCompleteListener<QuerySnapshot>) invocation.getArgument(2);
 
+                // Verify correct params passed to DB
                 assertEquals("event456", eventId);
                 assertEquals(Waitlist.STATUS_WAITING, status);
 
+                // Fake Firestore response
                 QuerySnapshot mockSnapshot = mock(QuerySnapshot.class);
                 DocumentSnapshot doc1 = mock(DocumentSnapshot.class);
                 DocumentSnapshot doc2 = mock(DocumentSnapshot.class);
@@ -98,11 +103,13 @@ public class SelectNumberOfWinnersTest {
                 when(mockSnapshot.getDocuments()).thenReturn(docs);
                 when(mockSnapshot.isEmpty()).thenReturn(false);
 
+                // Fake successful Firestore task
                 @SuppressWarnings("unchecked")
                 Task<QuerySnapshot> mockTask = mock(Task.class);
                 when(mockTask.isSuccessful()).thenReturn(true);
                 when(mockTask.getResult()).thenReturn(mockSnapshot);
 
+                // Trigger callback
                 listener.onComplete(mockTask);
                 return null;
             }).when(mockWaitlistDB)
@@ -111,6 +118,7 @@ public class SelectNumberOfWinnersTest {
             final boolean[] failureCalled = {false};
             final Exception[] captured = {null};
 
+            // should failed
             controller.drawWinners(event, requestedCount, new Callback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
@@ -124,6 +132,7 @@ public class SelectNumberOfWinnersTest {
                 }
             });
 
+            // failure
             assertTrue("onFailure should have been called when entrants < count", failureCalled[0]);
             assertNotNull(captured[0]);
             assertTrue(
