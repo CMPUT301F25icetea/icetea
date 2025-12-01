@@ -20,7 +20,6 @@ import org.mockito.MockedStatic;
 import java.util.Locale;
 
 /**
- * Mocked test for event capacity (max entrants)
  * US 02.03.01
  * As an organizer I want to OPTIONALLY limit the number of entrants
  * who can join my waiting list.
@@ -34,23 +33,28 @@ public class EventCapacityTest {
 
     @Before
     public void setUp() {
+        // Use US locale for consistent date parsing/formatting
         Locale.setDefault(Locale.US);
 
+        // Mock EventDB.getInstance() so we don't hit real Firestore
         mockEventDB = mock(EventDB.class);
         staticMockEventDB = mockStatic(EventDB.class);
         staticMockEventDB.when(EventDB::getInstance).thenReturn(mockEventDB);
 
+        // Mock CurrentUser.getInstance() so the controller has an organizer ID
         CurrentUser mockUser = mock(CurrentUser.class);
         when(mockUser.getFid()).thenReturn("organizer_id");
 
         staticMockCurrentUser = mockStatic(CurrentUser.class);
         staticMockCurrentUser.when(CurrentUser::getInstance).thenReturn(mockUser);
 
+        // Create the controller we are testing
         controller = new CreateEventController();
     }
 
     @Test
     public void testEventCapacityIsSavedInEventObject() {
+        // Sample event data as if coming from the UI
         String eventName = "Capacity Test Event";
         String eventDescription = "Testing optional capacity";
         String eventCriteria = "criteria";
@@ -61,29 +65,38 @@ public class EventCapacityTest {
         String eventEnd   = "2025-01-03 12:00 PM";
         String eventLocation = "Sample location";
 
+        // Capacity entered as a string in the UI
         String maxEntrants = "10";
         boolean geolocationRequired = false;
 
+        // Mock Task<Void> to simulate a successful Firestore write
         @SuppressWarnings("unchecked")
         Task<Void> mockTask = mock(Task.class);
         when(mockTask.isSuccessful()).thenReturn(true);
 
+        // Intercept EventDB.createEvent() and check the Event passed in
         doAnswer(invocation -> {
             Event savedEvent = invocation.getArgument(0);
+
             @SuppressWarnings("unchecked")
             OnCompleteListener<Void> listener =
                     (OnCompleteListener<Void>) invocation.getArgument(1);
 
             assertNotNull(savedEvent);
+
+            // Check that maxEntrants was parsed and stored as 10
             assertEquals("Capacity (maxEntrants) should be 10",
                     Integer.valueOf(10), savedEvent.getMaxEntrants());
 
+            // Simulate Firebase calling onComplete() after success
             listener.onComplete(mockTask);
             return null;
         }).when(mockEventDB).createEvent(any(Event.class), any(OnCompleteListener.class));
 
+        // Track that the success callback was invoked
         final boolean[] successCalled = {false};
 
+        // Call the controller method under test
         controller.createEvent(
                 eventName,
                 eventDescription,
@@ -99,17 +112,22 @@ public class EventCapacityTest {
                 new Callback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
+                        // Mark that we got a success callback
                         successCalled[0] = true;
                     }
 
                     @Override
                     public void onFailure(Exception e) {
+                        // Test should fail if creation fails
                         fail("Event creation should not fail: " + e.getMessage());
                     }
                 }
         );
 
+        // make sure the success callback really happened
         assertTrue("onSuccess should have been called", successCalled[0]);
+
+        // make sure EventDB.createEvent was called  one time
         verify(mockEventDB, times(1)).createEvent(any(Event.class), any());
     }
 }

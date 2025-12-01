@@ -20,7 +20,8 @@ import java.util.Locale;
 /**
  * Mocked test for CreateEventController.createEvent().
  * US 02.01.01
- * As an organizer I want to create a new event and generate a unique promotional QR code that links to the event description and event poster in the app.
+ * Tests that an organizer can create an event and the controller
+ * properly calls EventDB.createEvent() and triggers success callback.
  */
 public class CreateEventTest {
 
@@ -31,25 +32,29 @@ public class CreateEventTest {
 
     @Before
     public void setUp() {
+        // Ensures date parsing uses US format
         Locale.setDefault(Locale.US);
 
+        // Mock EventDB.getInstance()
         mockEventDB = mock(EventDB.class);
         staticMockEventDB = mockStatic(EventDB.class);
         staticMockEventDB.when(EventDB::getInstance).thenReturn(mockEventDB);
 
+        // Mock CurrentUser.getInstance()
         CurrentUser mockUser = mock(CurrentUser.class);
         when(mockUser.getFid()).thenReturn("organizer_id");
 
         staticMockCurrentUser = mockStatic(CurrentUser.class);
         staticMockCurrentUser.when(CurrentUser::getInstance).thenReturn(mockUser);
 
+        // Controller under test
         controller = new CreateEventController();
     }
 
     @Test
     public void testCreateEvent_MockedFirebase() {
 
-        // Strings passed exactly like real UI
+        // Fake inputs like from UI
         String eventName = "event_name";
         String eventDescription = "event_description";
         String eventCriteria = "criteria";
@@ -62,20 +67,24 @@ public class CreateEventTest {
         String maxEntrants = "40";
         boolean geolocationRequired = false;
 
+        // Mock Firebase Task that returns "success"
         @SuppressWarnings("unchecked")
         Task<Void> mockTask = mock(Task.class);
         when(mockTask.isSuccessful()).thenReturn(true);
 
+        // Simulate EventDB.createEvent() calling the OnCompleteListener immediately
         doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
             OnCompleteListener<Void> listener =
                     (OnCompleteListener<Void>) invocation.getArgument(1);
-            listener.onComplete(mockTask);
+            listener.onComplete(mockTask);   // pretend Firebase finished successfully
             return null;
         }).when(mockEventDB).createEvent(any(Event.class), any(OnCompleteListener.class));
 
+        // Track if onSuccess() was called
         final boolean[] successCalled = { false };
 
+        // Call the controller method
         controller.createEvent(
                 eventName,
                 eventDescription,
@@ -91,7 +100,7 @@ public class CreateEventTest {
                 new Callback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
-                        successCalled[0] = true;
+                        successCalled[0] = true; // mark success
                     }
 
                     @Override
@@ -102,6 +111,7 @@ public class CreateEventTest {
         );
 
         assertTrue("onSuccess() should have been called", successCalled[0]);
+
         verify(mockEventDB, times(1)).createEvent(any(Event.class), any());
     }
 }

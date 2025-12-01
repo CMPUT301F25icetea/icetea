@@ -11,10 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Mocked test for seeing applicants that have cancelled
  * US 02.06.02
  * As an organizer I want to see a list of all the cancelled entrants.
- *
  */
 public class CancelledEntrantsTest {
 
