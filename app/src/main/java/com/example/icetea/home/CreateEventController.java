@@ -13,8 +13,36 @@ import java.util.Date;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
 
+/**
+ * Controller responsible for creating new events and validating
+ * event input fields such as dates, names, descriptions, and limits.
+ * <p>
+ * This class performs input validation, converts text dates into
+ * {@link Timestamp} objects, and sends the finalized {@link Event}
+ * object to Firestore via {@link EventDB}.
+ */
 public class CreateEventController {
+
+    /** Formatter for parsing date/time strings provided by the user. */
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault());
+
+    /**
+     * Creates an event using the provided fields, validates conversions,
+     * and sends the event to Firestore.
+     *
+     * @param eventName           The name of the event.
+     * @param eventDescription    The description of the event.
+     * @param eventCriteria       The criteria for selecting entrants.
+     * @param posterBase64        The Base64-encoded event poster image.
+     * @param regStart            Registration open date (text).
+     * @param regEnd              Registration close date (text).
+     * @param eventStart          Event start date (text).
+     * @param eventEnd            Event end date (text).
+     * @param eventLocation       The location of the event.
+     * @param maxEntrants         Maximum number of entrants allowed.
+     * @param geolocationRequired Whether entrants must provide location.
+     * @param callback            Callback for success or failure.
+     */
     public void createEvent(String eventName, String eventDescription, String eventCriteria,
                             String posterBase64, String regStart, String regEnd,
                             String eventStart, String eventEnd, String eventLocation,
@@ -73,6 +101,12 @@ public class CreateEventController {
         });
     }
 
+    /**
+     * Converts a user-provided date string into a Firestore {@link Timestamp}.
+     *
+     * @param text The date string to parse.
+     * @return The parsed {@link Timestamp}, or {@code null} if parsing failed.
+     */
     public Timestamp textToTimestamp(String text) {
         if (text == null || text.trim().isEmpty()) {
             return null;
@@ -86,6 +120,13 @@ public class CreateEventController {
             return null;
         }
     }
+
+    /**
+     * Validates an event name.
+     *
+     * @param name The event name.
+     * @return Error message if invalid, otherwise {@code null}.
+     */
     public String validateName(String name) {
         if (name == null || name.isEmpty()) {
             return "Name cannot be empty";
@@ -93,6 +134,12 @@ public class CreateEventController {
         return null;
     }
 
+    /**
+     * Validates an event description.
+     *
+     * @param description The event description.
+     * @return Error message if invalid, otherwise {@code null}.
+     */
     public String validateDescription(String description) {
         if (description == null || description.isEmpty()) {
             return "Description cannot be empty";
@@ -100,6 +147,15 @@ public class CreateEventController {
         return null;
     }
 
+    /**
+     * Validates the registration opening date against other date constraints.
+     *
+     * @param regOpen    Registration open date.
+     * @param regClose   Registration close date.
+     * @param eventStart Event start date.
+     * @param eventEnd   Event end date.
+     * @return Error message if invalid, otherwise {@code null}.
+     */
     public String validateRegOpen(String regOpen, String regClose, String eventStart, String eventEnd) {
         if (regOpen == null || regOpen.isEmpty()) return null;
 
@@ -138,7 +194,15 @@ public class CreateEventController {
         return null;
     }
 
-
+    /**
+     * Validates the registration closing date against other event dates.
+     *
+     * @param regOpen    Registration open date.
+     * @param regClose   Registration close date.
+     * @param eventStart Event start date.
+     * @param eventEnd   Event end date.
+     * @return Error message if invalid, otherwise {@code null}.
+     */
     public String validateRegClose(String regOpen, String regClose, String eventStart, String eventEnd) {
         if (regClose == null || regClose.isEmpty()) {
             return "Registration close date must be set";
@@ -179,7 +243,15 @@ public class CreateEventController {
         return null;
     }
 
-
+    /**
+     * Validates the event start date against other important dates.
+     *
+     * @param regOpen    Registration open date.
+     * @param regClose   Registration close date.
+     * @param eventStart Event start date.
+     * @param eventEnd   Event end date.
+     * @return Error message if invalid, otherwise {@code null}.
+     */
     public String validateEventStart(String regOpen, String regClose, String eventStart, String eventEnd) {
         if (eventStart == null || eventStart.isEmpty()) {
             return "Event start date must be set";
@@ -217,7 +289,15 @@ public class CreateEventController {
         return null;
     }
 
-
+    /**
+     * Validates the event end date against registration dates and event start.
+     *
+     * @param regOpen    Registration open date.
+     * @param regClose   Registration close date.
+     * @param eventStart Event start date.
+     * @param eventEnd   Event end date.
+     * @return Error message if invalid, otherwise {@code null}.
+     */
     public String validateEventEnd(String regOpen, String regClose, String eventStart, String eventEnd) {
         if (eventEnd == null || eventEnd.isEmpty()) return null;
 
@@ -253,6 +333,12 @@ public class CreateEventController {
         return null;
     }
 
+    /**
+     * Validates the "max entrants" input.
+     *
+     * @param maxEntrants Text input for maximum entrants.
+     * @return Error message if invalid, otherwise {@code null}.
+     */
     public String validateMaxEntrants(String maxEntrants) {
         if (maxEntrants == null || maxEntrants.isEmpty()) return null;
 

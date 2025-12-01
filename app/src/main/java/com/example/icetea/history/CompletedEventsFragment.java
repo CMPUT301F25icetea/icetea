@@ -29,17 +29,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Fragment displaying a list of completed events that the current user participated in.
+ * Each event is shown with the user's waitlist status.
+ */
 public class CompletedEventsFragment extends Fragment {
 
+    /** RecyclerView for displaying the list of completed events. */
     private RecyclerView recyclerView;
+
+    /** Adapter for binding event data to the RecyclerView. */
     private HistoryEventAdapter adapter;
+
+    /** List of HistoryEventItems representing completed events. */
     private List<HistoryEventItem> eventList;
+
+    /** TextView shown when there are no completed events to display. */
     private TextView emptyTextView;
 
+    /**
+     * Default constructor.
+     */
     public CompletedEventsFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Factory method to create a new instance of this fragment.
+     *
+     * @return A new instance of CompletedEventsFragment
+     */
     public static CompletedEventsFragment newInstance() {
         return new CompletedEventsFragment();
     }
@@ -52,6 +71,7 @@ public class CompletedEventsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Inflate the fragment layout
         return inflater.inflate(R.layout.fragment_completed_events, container, false);
     }
 
@@ -59,11 +79,13 @@ public class CompletedEventsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Initialize views
         recyclerView = view.findViewById(R.id.recyclerCompletedEvents);
         emptyTextView = view.findViewById(R.id.textEmptyCompletedEvents);
 
         eventList = new ArrayList<>();
 
+        // Initialize adapter with click listener to open event details
         adapter = new HistoryEventAdapter(eventList, event -> {
             FragmentManager fm = requireActivity().getSupportFragmentManager();
             FragmentTransaction transaction = fm.beginTransaction();
@@ -83,9 +105,14 @@ public class CompletedEventsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
+        // Load completed events for the current user
         loadCompletedEvents();
     }
 
+    /**
+     * Loads all waitlisted events for the current user and filters
+     * them to include only completed events.
+     */
     private void loadCompletedEvents() {
         String userId = CurrentUser.getInstance().getFid();
 
@@ -104,6 +131,7 @@ public class CompletedEventsFragment extends Fragment {
             Map<String, String> eventStatusMap = new HashMap<>();
             List<String> eventIds = new ArrayList<>();
 
+            // Collect event IDs and waitlist status for the user
             for (DocumentSnapshot doc : waitlistDocs) {
                 Waitlist waitlist = doc.toObject(Waitlist.class);
                 if (waitlist != null) {
@@ -117,10 +145,18 @@ public class CompletedEventsFragment extends Fragment {
                 return;
             }
 
+            // Load event objects with their statuses
             loadEventsWithStatus(eventIds, eventStatusMap);
         });
     }
 
+    /**
+     * Fetches Event objects from the database and pairs them with
+     * the user's waitlist status. Only includes completed events.
+     *
+     * @param eventIds  List of event IDs to fetch
+     * @param statusMap Mapping from event ID to waitlist status
+     */
     private void loadEventsWithStatus(List<String> eventIds, Map<String, String> statusMap) {
         List<HistoryEventItem> tempList = new ArrayList<>();
         int[] loadedCount = {0};
@@ -137,6 +173,7 @@ public class CompletedEventsFragment extends Fragment {
                     }
                 }
 
+                // Update adapter once all events are loaded
                 if (loadedCount[0] == eventIds.size()) {
                     eventList.clear();
                     eventList.addAll(tempList);
@@ -152,16 +189,22 @@ public class CompletedEventsFragment extends Fragment {
         }
     }
 
+    /**
+     * Determines whether an event is considered completed.
+     * An event is completed if its end date has passed or, if no end date,
+     * its registration has ended.
+     *
+     * @param event The event to check
+     * @return True if the event is completed, false otherwise
+     */
     private boolean isEventCompleted(Event event) {
         long currentTime = System.currentTimeMillis();
 
-        // Event is completed if it has ended
         if (event.getEventEndDate() != null) {
             long eventEndTime = event.getEventEndDate().toDate().getTime();
             return currentTime >= eventEndTime;
         }
 
-        // If no end date but registration ended, consider completed
         if (event.getRegistrationEndDate() != null) {
             long regEndTime = event.getRegistrationEndDate().toDate().getTime();
             return currentTime >= regEndTime;
@@ -170,11 +213,17 @@ public class CompletedEventsFragment extends Fragment {
         return false;
     }
 
+    /**
+     * Shows the empty state view when there are no completed events.
+     */
     private void showEmptyState() {
         emptyTextView.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
     }
 
+    /**
+     * Hides the empty state view and shows the RecyclerView.
+     */
     private void hideEmptyState() {
         emptyTextView.setVisibility(View.GONE);
         recyclerView.setVisibility(View.VISIBLE);

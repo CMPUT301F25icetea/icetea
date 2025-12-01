@@ -10,12 +10,10 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.icetea.R;
 import com.example.icetea.auth.CurrentUser;
@@ -31,17 +29,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Fragment displaying a list of active events that the current user is participating in.
+ * Each event shows the user's waitlist status.
+ */
 public class ActiveEventsFragment extends Fragment {
 
+    /** RecyclerView displaying the list of active events. */
     private RecyclerView recyclerView;
+
+    /** Adapter for binding active event data to the RecyclerView. */
     private HistoryEventAdapter adapter;
+
+    /** List of HistoryEventItems representing active events. */
     private List<HistoryEventItem> eventList;
+
+    /** TextView shown when there are no active events to display. */
     private TextView emptyTextView;
 
+    /**
+     * Default constructor.
+     */
     public ActiveEventsFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Factory method to create a new instance of this fragment.
+     *
+     * @return A new instance of ActiveEventsFragment
+     */
     public static ActiveEventsFragment newInstance() {
         return new ActiveEventsFragment();
     }
@@ -54,6 +71,7 @@ public class ActiveEventsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Inflate the fragment layout
         return inflater.inflate(R.layout.fragment_active_events, container, false);
     }
 
@@ -61,11 +79,13 @@ public class ActiveEventsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Initialize views
         recyclerView = view.findViewById(R.id.recyclerActiveEvents);
         emptyTextView = view.findViewById(R.id.textEmptyActiveEvents);
 
         eventList = new ArrayList<>();
 
+        // Initialize adapter with click listener to open event details
         adapter = new HistoryEventAdapter(eventList, event -> {
             FragmentManager fm = requireActivity().getSupportFragmentManager();
             FragmentTransaction transaction = fm.beginTransaction();
@@ -85,13 +105,17 @@ public class ActiveEventsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
+        // Load all active events for the current user
         loadActiveEvents();
     }
 
+    /**
+     * Loads all waitlist entries for the current user and filters them
+     * to include only active events.
+     */
     private void loadActiveEvents() {
         String userId = CurrentUser.getInstance().getFid();
 
-        // Get all waitlist entries for this user
         WaitlistDB.getInstance().getUserWaitlist(userId, task -> {
             if (!task.isSuccessful() || task.getResult() == null) {
                 showEmptyState();
@@ -104,10 +128,10 @@ public class ActiveEventsFragment extends Fragment {
                 return;
             }
 
-            // Create a map to store waitlist status by eventId
             Map<String, String> eventStatusMap = new HashMap<>();
             List<String> eventIds = new ArrayList<>();
 
+            // Collect event IDs and corresponding waitlist status
             for (DocumentSnapshot doc : waitlistDocs) {
                 Waitlist waitlist = doc.toObject(Waitlist.class);
                 if (waitlist != null) {
@@ -121,11 +145,18 @@ public class ActiveEventsFragment extends Fragment {
                 return;
             }
 
-            // Load events for each waitlist entry
+            // Load Event objects along with their waitlist status
             loadEventsWithStatus(eventIds, eventStatusMap);
         });
     }
 
+    /**
+     * Fetches Event objects from the database and pairs them with
+     * the user's waitlist status. Only includes active events.
+     *
+     * @param eventIds  List of event IDs to fetch
+     * @param statusMap Mapping from event ID to waitlist status
+     */
     private void loadEventsWithStatus(List<String> eventIds, Map<String, String> statusMap) {
         List<HistoryEventItem> tempList = new ArrayList<>();
         int[] loadedCount = {0};
@@ -142,7 +173,7 @@ public class ActiveEventsFragment extends Fragment {
                     }
                 }
 
-                // When all events are loaded, update the UI
+                // Update adapter when all events are loaded
                 if (loadedCount[0] == eventIds.size()) {
                     eventList.clear();
                     eventList.addAll(tempList);
@@ -158,15 +189,19 @@ public class ActiveEventsFragment extends Fragment {
         }
     }
 
+    /**
+     * Determines whether an event is currently active.
+     * An event is active if its registration hasn't ended or if it hasn't ended yet.
+     *
+     * @param event The event to check
+     * @return True if the event is active, false otherwise
+     */
     private boolean isEventActive(Event event) {
-        // Event is active if registration hasn't ended yet OR event hasn't ended yet
         long currentTime = System.currentTimeMillis();
 
         if (event.getRegistrationEndDate() != null) {
             long regEndTime = event.getRegistrationEndDate().toDate().getTime();
-            if (currentTime < regEndTime) {
-                return true;
-            }
+            if (currentTime < regEndTime) return true;
         }
 
         if (event.getEventEndDate() != null) {
@@ -174,7 +209,6 @@ public class ActiveEventsFragment extends Fragment {
             return currentTime < eventEndTime;
         }
 
-        // If event has started but no end date, consider it active
         if (event.getEventStartDate() != null) {
             long eventStartTime = event.getEventStartDate().toDate().getTime();
             return currentTime >= eventStartTime;
@@ -183,11 +217,17 @@ public class ActiveEventsFragment extends Fragment {
         return true; // Default to active if dates are unclear
     }
 
+    /**
+     * Shows the empty state view when there are no active events.
+     */
     private void showEmptyState() {
         emptyTextView.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
     }
 
+    /**
+     * Hides the empty state view and shows the RecyclerView.
+     */
     private void hideEmptyState() {
         emptyTextView.setVisibility(View.GONE);
         recyclerView.setVisibility(View.VISIBLE);

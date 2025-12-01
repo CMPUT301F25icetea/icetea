@@ -12,10 +12,22 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Controller responsible for validating and updating event data.
+ * Provides date parsing helpers, field validation, and Firestore update logic
+ * for editing an existing {@link Event}.
+ */
 public class EditEventController {
 
+    /** Date formatter used for parsing user-entered date/time strings. */
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault());
 
+    /**
+     * Converts a user-entered date/time string into a Firestore {@link Timestamp}.
+     *
+     * @param text The input string (e.g., "2025-01-20 05:00 PM").
+     * @return Parsed {@link Timestamp}, or {@code null} if invalid or empty.
+     */
     public Timestamp textToTimestamp(String text) {
         if (text == null || text.trim().isEmpty()) {
             return null;
@@ -28,6 +40,24 @@ public class EditEventController {
         }
     }
 
+    /**
+     * Updates an existing event in Firestore. All fields provided are validated beforehand
+     * via separate validation methods. Only non-null or non-empty values are written.
+     *
+     * @param event                The event object being updated.
+     * @param name                 Event name.
+     * @param description          Event description.
+     * @param criteria             Entry criteria text.
+     * @param posterBase64         Optional Base64-encoded poster image.
+     * @param regStart             Registration start (string).
+     * @param regEnd               Registration end (string).
+     * @param eventStart           Event start date (string).
+     * @param eventEnd             Event end date (string).
+     * @param location             Event location.
+     * @param maxEntrants          Max entrants allowed (string form).
+     * @param geolocationRequired  Whether geolocation check-in is required.
+     * @param callback             Callback invoked on success or failure.
+     */
     public void updateEvent(
             Event event,
             String name,
@@ -76,15 +106,35 @@ public class EditEventController {
         });
     }
 
-
+    /**
+     * Validates that the event name is not empty.
+     *
+     * @param name The name to validate.
+     * @return Error message, or {@code null} if valid.
+     */
     public String validateName(String name) {
         return (name == null || name.isEmpty()) ? "Name cannot be empty" : null;
     }
 
+    /**
+     * Validates that the description is not empty.
+     *
+     * @param description Event description.
+     * @return Error message, or {@code null} if valid.
+     */
     public String validateDescription(String description) {
         return (description == null || description.isEmpty()) ? "Description cannot be empty" : null;
     }
 
+    /**
+     * Validates that the registration start date is valid and precedes other dates.
+     *
+     * @param regOpen     Registration start.
+     * @param regClose    Registration end.
+     * @param eventStart  Event start.
+     * @param eventEnd    Event end.
+     * @return Error message, or {@code null} if valid.
+     */
     public String validateRegOpen(String regOpen, String regClose, String eventStart, String eventEnd) {
         if (regOpen == null || regOpen.isEmpty()) return null;
 
@@ -123,6 +173,16 @@ public class EditEventController {
         return null;
     }
 
+    /**
+     * Validates that the registration close date is valid and occurs after registration start
+     * but before the event begins or ends.
+     *
+     * @param regOpen    Registration start.
+     * @param regClose   Registration end.
+     * @param eventStart Event start.
+     * @param eventEnd   Event end.
+     * @return Error message, or {@code null} if valid.
+     */
     public String validateRegClose(String regOpen, String regClose, String eventStart, String eventEnd) {
         if (regClose == null || regClose.isEmpty()) {
             return "Registration close date must be set";
@@ -163,6 +223,16 @@ public class EditEventController {
         return null;
     }
 
+    /**
+     * Validates that the event start date is set and falls after registration dates
+     * but before the event end date.
+     *
+     * @param regOpen    Registration start.
+     * @param regClose   Registration close.
+     * @param eventStart Event start.
+     * @param eventEnd   Event end.
+     * @return Error message, or {@code null} if valid.
+     */
     public String validateEventStart(String regOpen, String regClose, String eventStart, String eventEnd) {
         if (eventStart == null || eventStart.isEmpty()) {
             return "Event start date must be set";
@@ -200,6 +270,15 @@ public class EditEventController {
         return null;
     }
 
+    /**
+     * Validates that the event end date is valid and occurs after all other event/registration dates.
+     *
+     * @param regOpen    Registration start.
+     * @param regClose   Registration close.
+     * @param eventStart Event start.
+     * @param eventEnd   Event end.
+     * @return Error message, or {@code null} if valid.
+     */
     public String validateEventEnd(String regOpen, String regClose, String eventStart, String eventEnd) {
         if (eventEnd == null || eventEnd.isEmpty()) return null;
 
@@ -235,6 +314,12 @@ public class EditEventController {
         return null;
     }
 
+    /**
+     * Validates the max entrants field, ensuring the value is a positive integer.
+     *
+     * @param maxEntrants Input string representing the maximum number of entrants.
+     * @return Error message, or {@code null} if valid.
+     */
     public String validateMaxEntrants(String maxEntrants) {
         if (maxEntrants == null || maxEntrants.isEmpty()) return null;
 

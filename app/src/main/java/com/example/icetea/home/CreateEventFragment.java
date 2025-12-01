@@ -33,11 +33,30 @@ import java.util.Locale;
 import com.example.icetea.util.ImageUtil;
 import com.google.android.material.textfield.TextInputLayout;
 
+/**
+ * Fragment responsible for creating a new event. This screen allows the user to
+ * input event metadata, select date/time values, choose a poster image, and
+ * submit the event to the backend via {@link CreateEventController}.
+ *
+ * <p>The fragment validates all fields before submitting and displays input
+ * errors using {@link TextInputLayout}. A poster image can optionally be
+ * selected and will be converted to Base64 before upload.</p>
+ */
 public class CreateEventFragment extends Fragment {
+
+    /** Controller that handles input validation and event creation logic. */
     private CreateEventController controller;
+
+    /** ImageView that displays the event poster preview. */
     private ImageView eventPosterImageView;
+
+    /** URI of the newly selected event poster image, if any. */
     private Uri newPosterUri = null;
 
+    /**
+     * Launcher used for selecting an image from the user's gallery.
+     * Utilizes {@link ActivityResultContracts.GetContent} and returns a content URI.
+     */
     private final ActivityResultLauncher<String> pickPosterLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
                 if (uri != null) {
@@ -46,10 +65,18 @@ public class CreateEventFragment extends Fragment {
                 }
             });
 
+    /**
+     * Required empty public constructor.
+     */
     public CreateEventFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Factory method to create a new instance of this fragment.
+     *
+     * @return a new {@link CreateEventFragment} instance
+     */
     public static CreateEventFragment newInstance() {
         return new CreateEventFragment();
     }
@@ -57,16 +84,28 @@ public class CreateEventFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
+    /**
+     * Inflates the fragment layout.
+     *
+     * @param inflater  LayoutInflater used to inflate the view
+     * @param container Parent view container
+     * @param savedInstanceState Saved state bundle
+     * @return The inflated view hierarchy for this fragment
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_create_event, container, false);
     }
 
+    /**
+     * Initializes UI elements, sets listeners, and prepares validation + creation logic.
+     *
+     * @param view The root view returned from {@link #onCreateView}
+     * @param savedInstanceState Saved state bundle
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -74,7 +113,6 @@ public class CreateEventFragment extends Fragment {
         controller = new CreateEventController();
 
         ImageButton backButton = view.findViewById(R.id.buttonBack);
-
         backButton.setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager().popBackStack()
         );
@@ -84,10 +122,9 @@ public class CreateEventFragment extends Fragment {
         eventPosterImageView = view.findViewById(R.id.imageViewEventPoster);
         MaterialCardView cardEventPoster = view.findViewById(R.id.cardEventPoster);
 
-        cardEventPoster.setOnClickListener(v -> {
-            pickPosterLauncher.launch("image/*");
-        });
+        cardEventPoster.setOnClickListener(v -> pickPosterLauncher.launch("image/*"));
 
+        // TextInputLayouts for displaying field errors
         TextInputLayout inputLayoutEventName = view.findViewById(R.id.inputLayoutEventName);
         TextInputLayout inputLayoutEventDescription = view.findViewById(R.id.inputLayoutEventDescription);
         TextInputLayout inputLayoutEventCriteria = view.findViewById(R.id.inputLayoutEventCriteria);
@@ -98,6 +135,7 @@ public class CreateEventFragment extends Fragment {
         TextInputLayout inputLayoutEventLocation = view.findViewById(R.id.inputLayoutEventLocation);
         TextInputLayout inputLayoutMaxEntrants = view.findViewById(R.id.inputLayoutMaxEntrants);
 
+        // Input fields
         TextInputEditText editTextEventName = view.findViewById(R.id.editTextEventName);
         TextInputEditText editTextEventDescription = view.findViewById(R.id.editTextEventDescription);
         TextInputEditText editTextEventCriteria = view.findViewById(R.id.editTextEventCriteria);
@@ -110,12 +148,18 @@ public class CreateEventFragment extends Fragment {
 
         SwitchMaterial switchGeolocation = view.findViewById(R.id.switchGeolocation);
 
+        // Attach date-time pickers
         editTextRegStart.setOnClickListener(v -> showDateTimePicker(editTextRegStart));
         editTextRegEnd.setOnClickListener(v -> showDateTimePicker(editTextRegEnd));
         editTextEventStart.setOnClickListener(v -> showDateTimePicker(editTextEventStart));
         editTextEventEnd.setOnClickListener(v -> showDateTimePicker(editTextEventEnd));
 
+        /**
+         * Create button handler — validates inputs, converts poster to Base64 if needed,
+         * and invokes {@link CreateEventController#createEvent}.
+         */
         createButton.setOnClickListener(v -> {
+            // Clear previous errors
             inputLayoutEventName.setError(null);
             inputLayoutEventDescription.setError(null);
             inputLayoutRegStart.setError(null);
@@ -124,6 +168,7 @@ public class CreateEventFragment extends Fragment {
             inputLayoutEventEnd.setError(null);
             inputLayoutMaxEntrants.setError(null);
 
+            // Extract inputs safely
             String eventName = editTextEventName.getText() != null ? editTextEventName.getText().toString().trim() : "";
             String eventDescription = editTextEventDescription.getText() != null ? editTextEventDescription.getText().toString().trim() : "";
             String eventCriteria = editTextEventCriteria.getText() != null ? editTextEventCriteria.getText().toString().trim() : "";
@@ -136,6 +181,8 @@ public class CreateEventFragment extends Fragment {
             boolean geolocationRequired = switchGeolocation.isChecked();
 
             boolean hasError = false;
+
+            // Validate inputs through controller
             String eventNameError = controller.validateName(eventName);
             if (eventNameError != null) {
                 inputLayoutEventName.setError(eventNameError);
@@ -177,8 +224,9 @@ public class CreateEventFragment extends Fragment {
                 inputLayoutMaxEntrants.setError(maxEntrantsError);
                 hasError = true;
             }
-            String posterBase64 = null;
 
+            // Convert poster to Base64 if selected
+            String posterBase64 = null;
             if (newPosterUri != null) {
                 try {
                     posterBase64 = ImageUtil.uriToBase64(requireContext(), newPosterUri);
@@ -191,14 +239,13 @@ public class CreateEventFragment extends Fragment {
                 }
             }
 
-            if (hasError) {
-                return;
-            }
+            if (hasError) return;
 
-
-            controller.createEvent(eventName, eventDescription, eventCriteria, posterBase64,
-                    regStartText, regEndText, eventStartText, eventEndText, location, maxEntrantsText,
-                    geolocationRequired, new Callback<Void>() {
+            controller.createEvent(
+                    eventName, eventDescription, eventCriteria, posterBase64,
+                    regStartText, regEndText, eventStartText, eventEndText,
+                    location, maxEntrantsText, geolocationRequired,
+                    new Callback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             requireActivity().getSupportFragmentManager().popBackStack();
@@ -209,10 +256,17 @@ public class CreateEventFragment extends Fragment {
                         public void onFailure(Exception e) {
                             Toast.makeText(getContext(), e.getMessage() + " Error creating event", Toast.LENGTH_SHORT).show();
                         }
-                    });
+                    }
+            );
         });
     }
 
+    /**
+     * Displays a combined date and time picker dialog. After the user selects both
+     * values, the result is formatted and placed into the provided {@link TextInputEditText}.
+     *
+     * @param targetEditText The text field into which the formatted date-time will be placed
+     */
     private void showDateTimePicker(TextInputEditText targetEditText) {
         final Calendar calendar = Calendar.getInstance();
 
@@ -241,5 +295,4 @@ public class CreateEventFragment extends Fragment {
 
         datePicker.show();
     }
-
 }

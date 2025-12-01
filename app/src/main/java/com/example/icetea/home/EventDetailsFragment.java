@@ -41,22 +41,50 @@ import com.google.firebase.Timestamp;
 
 import java.util.Objects;
 
+/**
+ * Fragment responsible for displaying event details, handling waitlist actions,
+ * and managing event-related user interactions such as joining, leaving,
+ * accepting, or declining invitations. Also handles geolocation requirements.
+ */
 public class EventDetailsFragment extends Fragment {
 
+    /** Controller responsible for event-related operations. */
     private EventDetailsController controller;
+
+    /** Argument key for event ID. */
     private static final String ARG_EVENT_ID = "eventId";
+
+    /** Client for accessing the user's device location. */
     private FusedLocationProviderClient fusedLocationClient;
+
+    /** Launcher used to request location permissions from the user. */
     private ActivityResultLauncher<String> locationPermissionLauncher;
+
+    /** The currently loaded event object. */
     private Event event;
+
+    /** Stores pending callback if location permission dialog is shown. */
     private LocationCallback pendingLocationCallback;
+
+    /** ID of the event being displayed. */
     private String eventId;
+
+    /** Current user's entrant status for this event. */
     private String status;
 
-
+    /**
+     * Required empty public constructor.
+     */
     public EventDetailsFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Creates a new instance of this fragment for a given event ID.
+     *
+     * @param eventId The event's unique identifier.
+     * @return A configured EventDetailsFragment instance.
+     */
     public static EventDetailsFragment newInstance(String eventId) {
         EventDetailsFragment fragment = new EventDetailsFragment();
         Bundle args = new Bundle();
@@ -65,6 +93,12 @@ public class EventDetailsFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Called when the fragment is created. Initializes event ID, location client,
+     * and permission request launcher.
+     *
+     * @param savedInstanceState Prior saved state (unused here).
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,13 +127,28 @@ public class EventDetailsFragment extends Fragment {
         );
     }
 
+    /**
+     * Inflates the fragment layout.
+     *
+     * @param inflater Layout inflater.
+     * @param container Parent view group.
+     * @param savedInstanceState Prior saved state.
+     * @return The inflated view.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_event_details, container, false);
     }
 
+    /**
+     * Called after the view is created. Handles UI initialization,
+     * loads event details, updates buttons based on user status,
+     * and attaches all required listeners.
+     *
+     * @param view Root view.
+     * @param savedInstanceState Prior saved state.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -153,7 +202,6 @@ public class EventDetailsFragment extends Fragment {
                 }
 
                 startDate.setText(sb.toString());
-
 
                 geolocation.setText(event.getGeolocationRequirement() ? "Geolocation Required" : "");
 
@@ -394,6 +442,12 @@ public class EventDetailsFragment extends Fragment {
         });
 
     }
+
+    /**
+     * Checks whether fine location permission is granted. If not, requests permission.
+     *
+     * @param callback Callback to execute once location is retrieved or fails.
+     */
     private void checkLocationPermission(LocationCallback callback) {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -403,6 +457,12 @@ public class EventDetailsFragment extends Fragment {
             locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
+
+    /**
+     * Retrieves the user's current location using the fused location provider.
+     *
+     * @param callback Callback receiving either a location result or failure signal.
+     */
     private void getUserLocation(LocationCallback callback) {
         try {
             fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, new CancellationTokenSource().getToken())
@@ -418,6 +478,10 @@ public class EventDetailsFragment extends Fragment {
         }
     }
 
+    /**
+     * Displays a dialog instructing the user to manually enable location permission
+     * from the system settings if they permanently denied it.
+     */
     private void showLocationSettingsDialog() {
         new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                 .setTitle("Location Permission Needed")
