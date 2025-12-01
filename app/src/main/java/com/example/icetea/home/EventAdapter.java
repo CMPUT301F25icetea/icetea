@@ -18,19 +18,39 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * RecyclerView adapter for displaying a list of {@link Event} objects
+ * in a card-style layout. Each item displays event details and a poster image.
+ */
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
+    /** The list of events to display. */
     private final List<Event> events;
 
+    /** Callback for handling click events on list items. */
     private final OnItemClickListener listener;
 
+    /**
+     * Listener interface for handling clicks on an event card.
+     */
     public interface OnItemClickListener {
+        /**
+         * Called when an event item is clicked.
+         *
+         * @param event the clicked event
+         */
         void onItemClick(Event event);
     }
+
+    /**
+     * Constructs a new {@link EventAdapter}.
+     *
+     * @param events   the list of events to display
+     * @param listener callback invoked when an event item is clicked
+     */
     public EventAdapter(List<Event> events, OnItemClickListener listener) {
         this.events = events;
         this.listener = listener;
-
     }
 
     @NonNull
@@ -44,6 +64,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
+
         holder.textEventName.setText(event.getName());
         holder.textEventDescription.setText(event.getDescription());
 
@@ -61,6 +82,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                                     .format(event.getRegistrationEndDate().toDate())
             );
         }
+
         int entrants = event.getCurrentEntrants() != null ? event.getCurrentEntrants() : 0;
         holder.textCurrentEntrants.setText("👤 " + entrants);
 
@@ -70,6 +92,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         } else {
             holder.imageEventPoster.setImageResource(R.drawable.default_poster);
         }
+
         holder.bind(event, listener);
     }
 
@@ -78,10 +101,20 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         return events.size();
     }
 
+    /**
+     * ViewHolder class for representing each event card item.
+     * Holds references to the views within the card layout.
+     */
     public static class EventViewHolder extends RecyclerView.ViewHolder {
+
         ImageView imageEventPoster;
         TextView textEventName, textEventDescription, textEventDate, textEventLocation, textRegEnd, textCurrentEntrants;
 
+        /**
+         * Creates a new ViewHolder instance.
+         *
+         * @param itemView the inflated event card view
+         */
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
             imageEventPoster = itemView.findViewById(R.id.imageEventPoster);
@@ -92,9 +125,14 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             textRegEnd = itemView.findViewById(R.id.textRegEnd);
         }
 
+        /**
+         * Binds an event object to this ViewHolder and attaches a click listener.
+         *
+         * @param event    the event data to bind
+         * @param listener callback for click events
+         */
         public void bind(final Event event, final OnItemClickListener listener) {
             itemView.setOnClickListener(v -> listener.onItemClick(event));
         }
-
     }
 }

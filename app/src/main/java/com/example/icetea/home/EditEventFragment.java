@@ -35,16 +35,39 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 
+/**
+ * Fragment responsible for editing an existing event.
+ * <p>
+ * Loads event data, displays it to the user, validates inputs,
+ * and sends modifications to {@link EventDB}.
+ */
 public class EditEventFragment extends Fragment {
 
+    /** Argument key for receiving an event ID. */
     private static final String ARG_EVENT_ID = "eventId";
+
+    /** The ID of the event being edited. */
     private String eventId;
+
+    /** Controller responsible for event validation and updating. */
     private EditEventController controller;
+
+    /** ImageView displaying the event's poster image. */
     private ImageView eventPosterImageView;
+
+    /** If user selects a new image, its URI is stored here. */
     private Uri newPosterUri = null;
+
+    /** The currently loaded event object. */
     private Event currentEvent;
+
+    /** Formatter for displaying date/time. */
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault());
 
+    /**
+     * Launcher for selecting a new event poster image.
+     * Stores result in {@link #newPosterUri} and updates the ImageView.
+     */
     private final ActivityResultLauncher<String> pickPosterLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
                 if (uri != null) {
@@ -53,11 +76,19 @@ public class EditEventFragment extends Fragment {
                 }
             });
 
-
+    /**
+     * Required empty public constructor.
+     */
     public EditEventFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Creates a new instance of this fragment with the given event ID.
+     *
+     * @param eventId The ID of the event to load and edit.
+     * @return A new instance of EditEventFragment.
+     */
     public static EditEventFragment newInstance(String eventId) {
         EditEventFragment fragment = new EditEventFragment();
         Bundle args = new Bundle();
@@ -66,6 +97,9 @@ public class EditEventFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Reads fragment arguments, including the event ID.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,22 +108,27 @@ public class EditEventFragment extends Fragment {
         }
     }
 
+    /**
+     * Inflates the fragment layout.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_edit_event, container, false);
     }
 
+    /**
+     * Initializes UI components, loads event data from Firestore,
+     * sets up date/time pickers, validation, and the update button.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         controller = new EditEventController();
 
-
         ImageButton backButton = view.findViewById(R.id.buttonBack);
         backButton.setOnClickListener(v -> {
-                    requireActivity().getSupportFragmentManager().popBackStack();
+            requireActivity().getSupportFragmentManager().popBackStack();
         });
 
         String eventId = requireArguments().getString("eventId");
@@ -126,6 +165,7 @@ public class EditEventFragment extends Fragment {
         MaterialCardView cardPoster = view.findViewById(R.id.cardEventPoster);
         cardPoster.setOnClickListener(v -> pickPosterLauncher.launch("image/*"));
 
+        // Load event from Firestore
         EventDB.getInstance().getEvent(eventId, task -> {
             if (!task.isSuccessful() || task.getResult() == null) {
                 Toast.makeText(getContext(), "Failed to load event", Toast.LENGTH_SHORT).show();
@@ -140,6 +180,7 @@ public class EditEventFragment extends Fragment {
                 return;
             }
 
+            // Populate UI
             editName.setText(currentEvent.getName());
             editDesc.setText(currentEvent.getDescription());
             editCriteria.setText(currentEvent.getCriteria());
@@ -170,12 +211,13 @@ public class EditEventFragment extends Fragment {
             switchGeo.setChecked(currentEvent.getGeolocationRequirement());
         });
 
-
+        // Date/time pickers
         editRegStart.setOnClickListener(v -> showDateTimePicker(editRegStart));
         editRegEnd.setOnClickListener(v -> showDateTimePicker(editRegEnd));
         editEventStart.setOnClickListener(v -> showDateTimePicker(editEventStart));
         editEventEnd.setOnClickListener(v -> showDateTimePicker(editEventEnd));
 
+        // Update button logic
         updateButton.setOnClickListener(v -> {
             inputLayoutEventName.setError(null);
             inputLayoutEventDescription.setError(null);
@@ -251,6 +293,12 @@ public class EditEventFragment extends Fragment {
         });
     }
 
+    /**
+     * Opens a date picker and time picker, then writes the selected
+     * date/time into the target text field.
+     *
+     * @param target The {@link TextInputEditText} where the final formatted date/time will be set.
+     */
     private void showDateTimePicker(TextInputEditText target) {
         final Calendar cal = Calendar.getInstance();
 

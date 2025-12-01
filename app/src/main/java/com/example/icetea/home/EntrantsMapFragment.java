@@ -23,31 +23,44 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import org.osmdroid.config.Configuration;
-import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class EntrantsMapFragment extends Fragment {
 
+    /** Argument key used to pass the event ID into the fragment. */
     private static final String ARG_EVENT_ID = "arg_event_id";
 
+    /** ID of the event whose entrants should be mapped. */
     private String eventId;
+
+    /** The OpenStreetMap map view. */
     private MapView mapView;
+
+    /** Firestore database instance. */
     private FirebaseFirestore db;
 
+    /** Permission launcher for requesting location access. */
     private ActivityResultLauncher<String[]> locationPermissionLauncher;
 
+    /**
+     * Required empty public constructor.
+     */
     public EntrantsMapFragment() {
         // Required empty constructor
     }
 
+    /**
+     * Creates a new instance of {@link EntrantsMapFragment}.
+     *
+     * @param eventId the event ID to load entrants for
+     * @return a configured fragment instance
+     */
     public static EntrantsMapFragment newInstance(String eventId) {
         EntrantsMapFragment fragment = new EntrantsMapFragment();
         Bundle args = new Bundle();
@@ -66,8 +79,10 @@ public class EntrantsMapFragment extends Fragment {
             eventId = getArguments().getString(ARG_EVENT_ID);
         }
 
+        // Required for OSM tile downloading
         Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
 
+        // Handle location permission result
         locationPermissionLauncher =
                 registerForActivityResult(
                         new ActivityResultContracts.RequestMultiplePermissions(),
@@ -76,7 +91,7 @@ public class EntrantsMapFragment extends Fragment {
                             Boolean coarse = result.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false);
 
                             if (fine || coarse) {
-                                enableMyLocation(); // Permission granted → turn on location
+                                enableMyLocation();
                             } else {
                                 Toast.makeText(getContext(),
                                         "Location permission denied",
@@ -108,6 +123,7 @@ public class EntrantsMapFragment extends Fragment {
         mapView = view.findViewById(R.id.osmMap);
         mapView.setMultiTouchControls(true);
 
+        // Default map center (Edmonton coordinates)
         mapView.getController().setZoom(10.0);
         mapView.getController().setCenter(new GeoPoint(53.5462, -113.4937));
 
@@ -116,10 +132,18 @@ public class EntrantsMapFragment extends Fragment {
             return;
         }
 
+        // Load markers + enable location display
         loadEntrantsForEvent(eventId);
         enableMyLocation();
     }
 
+    /**
+     * Loads all entrants for the given event ID who have statuses:
+     * waiting, selected, or accepted. Adds a marker for each entrant
+     * on the map if they contain valid latitude/longitude coordinates.
+     *
+     * @param eventId the event ID to query
+     */
     private void loadEntrantsForEvent(String eventId) {
         db.collection("waitlist")
                 .whereEqualTo("eventId", eventId)
@@ -175,9 +199,10 @@ public class EntrantsMapFragment extends Fragment {
                 });
     }
 
-
-
-
+    /**
+     * Enables the device's "my location" overlay on the map if permissions
+     * are granted. If not, it requests fine and coarse location permissions.
+     */
     private void enableMyLocation() {
         boolean fine = ActivityCompat.checkSelfPermission(
                 requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
