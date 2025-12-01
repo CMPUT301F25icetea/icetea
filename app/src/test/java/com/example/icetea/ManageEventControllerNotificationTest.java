@@ -17,11 +17,11 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-/**
- * US 01.04.01
- * Ensures a notification is sent when a user is selected as a winner.
- */
 
+/**
+ * US 01.04.01 & US 01.04.02
+ * Ensures notifications are sent when a user wins OR loses the lottery.
+ */
 public class ManageEventControllerNotificationTest {
 
     private ManageEventController controller;
@@ -38,7 +38,6 @@ public class ManageEventControllerNotificationTest {
         mockUserDB = mock(UserDB.class);
         mockNotificationDB = mock(NotificationDB.class);
 
-        // Replace static getInstance() for both DB singletons
         userDBStatic = Mockito.mockStatic(UserDB.class);
         userDBStatic.when(UserDB::getInstance).thenReturn(mockUserDB);
 
@@ -52,44 +51,20 @@ public class ManageEventControllerNotificationTest {
         notifDBStatic.close();
     }
 
-
+    /**
+     * ✅ US 01.04.01
+     * Entrant receives notification when selected (WIN)
+     */
     @Test
-    public void testNotificationSentWhenUserIsSelected() {
+    public void testWinnerNotificationSent() {
 
-        String userId = "user123";
-        String eventId = "eventABC";
+        String userId = "winnerUser";
+        String eventId = "event123";
         String eventName = "Cool Event";
 
-        Task<DocumentSnapshot> mockUserTask = mock(Task.class);
-        DocumentSnapshot mockUserDoc = mock(DocumentSnapshot.class);
+        mockUserWithNotificationsEnabled(userId);
+        mockNotificationAddSuccess();
 
-        doAnswer(invocation -> {
-            OnCompleteListener<DocumentSnapshot> listener =
-                    (OnCompleteListener<DocumentSnapshot>) invocation.getArgument(1);
-
-            when(mockUserTask.isSuccessful()).thenReturn(true);
-            when(mockUserTask.getResult()).thenReturn(mockUserDoc);
-
-            when(mockUserDoc.exists()).thenReturn(true);
-            when(mockUserDoc.getBoolean("notifications")).thenReturn(true); // Notifications ENABLED ✔
-
-            listener.onComplete(mockUserTask);
-            return null;
-        }).when(mockUserDB).getUser(eq(userId), any());
-
-        // --- Mock NotificationDB.addNotification() ---
-        Task<Void> mockAddNotifTask = mock(Task.class);
-        when(mockAddNotifTask.isSuccessful()).thenReturn(true);
-
-        doAnswer(invocation -> {
-            OnCompleteListener<Void> listener =
-                    (OnCompleteListener<Void>) invocation.getArgument(1);
-
-            listener.onComplete(mockAddNotifTask);
-            return null;
-        }).when(mockNotificationDB).addNotification(any(Notification.class), any());
-
-        // 🔥 Trigger logic directly
         controller.sendNotificationIfEnabled(
                 userId,
                 "You're a winner!",
@@ -97,21 +72,82 @@ public class ManageEventControllerNotificationTest {
                 eventId
         );
 
-        // --- Capture created Notification object ---
-        ArgumentCaptor<Notification> notificationCaptor =
-                ArgumentCaptor.forClass(Notification.class);
-
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
         verify(mockNotificationDB, times(1))
-                .addNotification(notificationCaptor.capture(), any());
+                .addNotification(captor.capture(), any());
 
-        Notification sentNotif = notificationCaptor.getValue();
+        Notification sent = captor.getValue();
 
-        // --- Validate content ---
-        assertEquals(userId, sentNotif.getUserId());
-        assertEquals(eventId, sentNotif.getEventId());
-        assertEquals("You're a winner!", sentNotif.getTitle());
-        assertEquals("You have been selected for the event: " + eventName, sentNotif.getMessage());
+        assertEquals(userId, sent.getUserId());
+        assertEquals(eventId, sent.getEventId());
+        assertEquals("You're a winner!", sent.getTitle());
+        assertEquals("You have been selected for the event: " + eventName, sent.getMessage());
+        assertNotNull(sent.getTimestamp());
+    }
 
-        assertNotNull("Timestamp should be auto-generated", sentNotif.getTimestamp());
+    /**
+     * ✅ US 01.04.02
+     * Entrant receives notification when NOT selected (LOSE)
+     */
+    @Test
+    public void testLoserNotificationSent() {
+
+        String userId = "loserUser";
+        String eventId = "event123";
+        String eventName = "Cool Event";
+
+        mockUserWithNotificationsEnabled(userId);
+        mockNotificationAddSuccess();
+
+        controller.sendNotificationIfEnabled(
+                userId,
+                "Event Results",
+                "You were not selected for the event: " + eventName +
+                        ". However you can still be selected if someone else declines their offer.",
+                eventId
+        );
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(mockNotificationDB, times(1))
+                .addNotification(captor.capture(), any());
+
+        Notification sent = captor.getValue();
+
+        assertEquals(userId, sent.getUserId());
+        assertEquals(eventId, sent.getEventId());
+        assertEquals("Event Results", sent.getTitle());
+        assertTrue(sent.getMessage().contains("not selected"));
+        assertNotNull(sent.getTimestamp());
+    }
+
+
+    private void mockUserWithNotificationsEnabled(String userId) {
+        Task<DocumentSnapshot> mockTask = mock(Task.class);
+        DocumentSnapshot mockDoc = mock(DocumentSnapshot.class);
+
+        doAnswer(invocation -> {
+            OnCompleteListener<DocumentSnapshot> listener =
+                    invocation.getArgument(1);
+
+            when(mockTask.isSuccessful()).thenReturn(true);
+            when(mockTask.getResult()).thenReturn(mockDoc);
+            when(mockDoc.exists()).thenReturn(true);
+            when(mockDoc.getBoolean("notifications")).thenReturn(true);
+
+            listener.onComplete(mockTask);
+            return null;
+        }).when(mockUserDB).getUser(eq(userId), any());
+    }
+
+    private void mockNotificationAddSuccess() {
+        Task<Void> mockTask = mock(Task.class);
+        when(mockTask.isSuccessful()).thenReturn(true);
+
+        doAnswer(invocation -> {
+            OnCompleteListener<Void> listener =
+                    invocation.getArgument(1);
+            listener.onComplete(mockTask);
+            return null;
+        }).when(mockNotificationDB).addNotification(any(Notification.class), any());
     }
 }
