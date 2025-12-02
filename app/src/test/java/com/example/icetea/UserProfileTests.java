@@ -13,6 +13,15 @@ import static org.junit.Assert.*;
  * US 01.02.02 – As an entrant, I want to update information such as
  *               name, email, and contact information on my profile.
  * US 01.02.04 As an entrant, I want to delete my profile if I no longer wish to use the app.
+ *
+ * US 03.03.01 As an administrator, I want to be able to remove images.
+ *
+ * US 03.05.01 As an administrator, I want to be able to browse profiles.
+ *
+ * US 03.02.01 As an administrator, I want to be able to remove profiles.
+ *
+ * US 03.07.01 As an administrator I want to remove organizers that violate app policy.
+ *
  */
 public class UserProfileTests {
 

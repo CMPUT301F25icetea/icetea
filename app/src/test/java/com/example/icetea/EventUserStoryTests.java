@@ -17,6 +17,7 @@ import java.util.*;
  * US 01.01.04 – As an entrant, I want to filter events based on
  *               my interests and availability.
  *
+ * US 03.04.01 As an administrator, I want to be able to browse events.
  */
 public class EventUserStoryTests {
 
